@@ -1,0 +1,1 @@
+Created two hand-assembled bytecode examples: fact_lookup.asm (single fact query, linear success) and two_facts.asm (two clauses with TRY/TRUST, backtracking, prints both answers). Both include hex bytecode, mnemonic annotations, atom tables, and full execution traces.
