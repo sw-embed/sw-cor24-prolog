@@ -1,6 +1,6 @@
 number = 4
 slug = "vm-frame-layouts"
-status = "pending"
+status = "in-progress"
 description = """
 Define the frame layouts for choice points, environments, and trail entries.
 ..."""

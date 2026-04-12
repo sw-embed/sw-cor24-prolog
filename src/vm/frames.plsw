@@ -1,0 +1,44 @@
+; frames.plsw — Frame layout constants for the LAM
+;
+; Choice-point frames, environment frames, and trail entries.
+; See docs/vm-spec.md section 4 for the full specification.
+
+; --- Choice-point frame (14 cells, fixed size) ---
+
+CP_FRAME_SIZE   EQU 14
+
+; Field offsets within a choice-point frame
+CPF_PREV_BP     EQU 0       ; previous choice-point address
+CPF_SAVED_CP    EQU 1       ; saved continuation pointer
+CPF_SAVED_EP    EQU 2       ; saved environment pointer
+CPF_SAVED_HP    EQU 3       ; saved heap pointer
+CPF_SAVED_TR    EQU 4       ; saved trail pointer
+CPF_NEXT_ALT    EQU 5       ; code address of next alternative
+CPF_SAVED_A0    EQU 6       ; saved A0
+CPF_SAVED_A1    EQU 7       ; saved A1
+CPF_SAVED_A2    EQU 8       ; saved A2
+CPF_SAVED_A3    EQU 9       ; saved A3
+CPF_SAVED_A4    EQU 10      ; saved A4
+CPF_SAVED_A5    EQU 11      ; saved A5
+CPF_SAVED_A6    EQU 12      ; saved A6
+CPF_SAVED_A7    EQU 13      ; saved A7
+
+; --- Environment frame (2 + N cells, variable size) ---
+
+; Fixed header size (prev_EP + saved_CP)
+ENV_HEADER_SIZE EQU 2
+
+; Field offsets within an environment frame
+ENV_PREV_EP     EQU 0       ; previous environment pointer
+ENV_SAVED_CP    EQU 1       ; saved continuation pointer
+ENV_Y0          EQU 2       ; first local variable (Y0)
+
+; Local variable Yi is at offset ENV_Y0 + i
+; Total frame size = ENV_HEADER_SIZE + N
+
+; --- Trail entries (1 cell each) ---
+
+; Each trail entry is the heap address of a bound variable.
+; No structure — just a single cell per entry.
+; On unwind: reset mem[addr] to (TAG_REF << TAG_SHIFT) | addr
+TRAIL_ENTRY_SIZE EQU 1

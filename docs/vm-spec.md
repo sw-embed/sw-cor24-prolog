@@ -348,3 +348,159 @@ UNIFY_CONST.
 - **PC advance**: 1-cell instructions advance PC by 1. 2-cell
   instructions advance PC by 2. CALL saves PC+2 to CP (the cell after
   the immediate). PROCEED sets PC = CP.
+
+---
+
+## 4. Frame and Entry Layouts
+
+### 4.1 Choice-Point Frame
+
+Stored on the choice-point stack. Each frame is a **fixed 14-cell
+block**. BP points to the base (offset 0) of the most recent frame.
+
+```
+Offset  Field       Contents
+──────────────────────────────────────────
+ 0      prev_BP     Previous choice-point address (or CP_BASE if none)
+ 1      saved_CP    Continuation pointer at time of TRY
+ 2      saved_EP    Environment pointer at time of TRY
+ 3      saved_HP    Heap pointer at time of TRY
+ 4      saved_TR    Trail pointer at time of TRY
+ 5      next_alt    Code address of next alternative clause
+ 6      saved_A0    Argument register A0
+ 7      saved_A1    Argument register A1
+ 8      saved_A2    Argument register A2
+ 9      saved_A3    Argument register A3
+10      saved_A4    Argument register A4
+11      saved_A5    Argument register A5
+12      saved_A6    Argument register A6
+13      saved_A7    Argument register A7
+──────────────────────────────────────────
+Total: 14 cells
+```
+
+**TRY** creates a frame:
+1. Write all 14 fields at `BP`.
+2. Advance `BP` by 14 (new BP = old BP + `CP_FRAME_SIZE`).
+
+**RETRY** updates the current frame:
+1. Restore A0-A7, HP, TR from the frame at `BP - 14`.
+2. Unwind trail entries from current TR back to `saved_TR`.
+3. Update `next_alt` to the new alternative address.
+4. Resume execution at the alternative.
+
+**TRUST** pops the frame:
+1. Restore A0-A7, HP, TR from the frame at `BP - 14`.
+2. Unwind trail entries.
+3. Set `BP` = `prev_BP` (pop the frame).
+4. Resume execution at `next_alt`.
+
+**Backtracking on FAIL**:
+1. If `BP` == `CP_BASE`, no choice points remain — execution fails.
+2. Otherwise, behave like TRUST on the current frame.
+
+### 4.2 Environment Frame
+
+Stored on the environment stack. Each frame is **2 + N cells**, where
+N is the number of local variables (the operand to ALLOCATE).
+
+```
+Offset  Field       Contents
+──────────────────────────────────────────
+ 0      prev_EP     Previous environment pointer (or ENV_BASE if none)
+ 1      saved_CP    Continuation pointer to restore on DEALLOCATE
+ 2      Y0          Local variable 0
+ 3      Y1          Local variable 1
+ ...    ...         ...
+ 1+N    Y(N-1)      Local variable N-1
+──────────────────────────────────────────
+Total: 2 + N cells
+```
+
+**ALLOCATE n**:
+1. Write `prev_EP` = current EP value, `saved_CP` = current CP value
+   at the address pointed to by EP.
+2. Initialize Y0..Y(N-1) to unbound REF cells (self-referencing, using
+   their heap-independent stack addresses — or left zeroed for lazy init).
+3. Advance EP by `2 + N`.
+
+**DEALLOCATE**:
+1. Read `saved_CP` from the frame at `EP - (2 + N)` and restore CP.
+2. Read `prev_EP` and restore EP.
+
+Note: the frame size N is not stored in the frame itself. The compiler
+knows N for each predicate and emits matching ALLOCATE/DEALLOCATE pairs.
+At runtime, DEALLOCATE can recover the frame base because EP still
+points past the current frame — the previous EP at `prev_EP` gives the
+correct restore point. Implementation may store N at a known offset or
+track it via the compiler's metadata; the simplest approach is to save
+the current EP at ALLOCATE time and restore it at DEALLOCATE:
+
+- ALLOCATE saves `old_EP` into the frame, then sets EP = `old_EP + 2 + N`.
+- DEALLOCATE sets EP = frame base (by reading `prev_EP` would be wrong —
+  we need the frame's own base). The simplest encoding: EP always points
+  to the **base** of the current frame, and a separate pointer or the
+  saved value tracks the next free slot. For this VM, we adopt the
+  convention:
+
+  **EP points to the base of the current environment frame.**
+
+  ALLOCATE: write frame at `next_env` (tracked as EP + frame_size of
+  current frame, or via a running env-top pointer). For simplicity in
+  this first VM, ALLOCATE writes at the current env-top, and EP is set
+  to that address. A separate `ET` (env top) register could track the
+  next free cell, but to keep the register count small, we compute it:
+  `env_top = EP + 2 + N` after ALLOCATE.
+
+  For the initial implementation, the simplest correct approach:
+  - EP points to the **base** of the most recent frame.
+  - The frame stores `prev_EP` so DEALLOCATE can restore it.
+  - The next ALLOCATE writes at `EP + 2 + N` (caller knows N).
+
+### 4.3 Trail Entries
+
+Each trail entry is **1 cell**: the absolute heap address of a variable
+that was bound during forward execution.
+
+```
+Trail stack (grows upward from TRAIL_BASE):
+
+ TR-1  →  heap_addr    ← most recent binding
+ TR-2  →  heap_addr
+ ...
+ TRAIL_BASE → heap_addr ← oldest binding
+```
+
+**Trailing** (during bind):
+1. Store the heap address at `mem[TR]`.
+2. Increment TR by 1.
+
+**Unwinding** (during backtrack to saved_TR):
+1. For each entry from `TR-1` down to `saved_TR`:
+   - Read heap address `H` from the trail entry.
+   - Reset `mem[H]` to `(TAG_REF << TAG_SHIFT) | H` (self-referencing
+     REF — unbinds the variable).
+2. Set `TR` = `saved_TR`.
+
+**Conditional trailing**: a binding only needs to be trailed if the
+variable's heap address is older than the current choice point's
+`saved_HP`. Variables created after the choice point will be reclaimed
+when HP is reset, so trailing them is unnecessary. This optimization is
+deferred to a later milestone — the initial VM trails all bindings
+unconditionally.
+
+### 4.4 Design Notes
+
+- **Why save all 8 argument registers in choice points?** Simplicity.
+  A production WAM saves only the registers actually used by the
+  predicate (determined at compile time). Saving all 8 wastes a few
+  cells per choice point but eliminates a source of compiler bugs in
+  the first milestone.
+- **Why no frame-size field in environment frames?** The compiler
+  emits matched ALLOCATE/DEALLOCATE pairs, so N is always known
+  statically. Storing it would add a cell per frame for no runtime
+  benefit.
+- **Why 1-cell trail entries?** Binding always sets a REF cell to
+  point to another cell. On undo, we just need to know which address
+  to reset to self-referencing. The old value is always "unbound REF
+  at that address" — no need to store it.
