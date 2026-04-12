@@ -1,0 +1,11 @@
+number = 1
+slug = "heap-alloc"
+status = "pending"
+description = """
+Implement heap allocation and PUT_VAR instruction.
+
+Context: Read src/vm/vm_m..."""
+role = "production"
+context_files = []
+created_at = "2026-04-12T14:29:29"
+commits = []
