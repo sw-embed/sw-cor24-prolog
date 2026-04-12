@@ -1,0 +1,11 @@
+number = 3
+slug = "get-const-unify"
+status = "in-progress"
+description = """
+Upgrade GET_CONST to use proper unification with dereference.
+
+Context: Read ..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T14:40:19"
+commits = []

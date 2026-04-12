@@ -1,0 +1,1 @@
+Added DEREF (loop-based REF chain follower), BIND (overwrites heap cell, trail placeholder), IS_UNBOUND (self-ref REF check). Test 4: create var, verify unbound, bind to atom(ann), verify bound, deref to get 4194306. Fixed DCL placement in MAIN (PL/I requires DCLs before statements).

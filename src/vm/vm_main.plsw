@@ -267,18 +267,23 @@ VM_RUN: PROC;
 
             /* GET_CONST Ai, [imm] -- 2-cell
              * Unify Ai with tagged constant from next cell.
-             * Initial version: direct equality check only.
-             * Full unification with REF dereferencing is a
-             * later step. */
+             * Dereferences Ai first: if unbound REF, bind
+             * it to the constant; if bound, compare. */
             WHEN (G_OP = OP_GET_CONST) DO;
                 IMM = MEM(PC + 1);
-                REGVAL = REG_GET(G_OP1);
-                IF (REGVAL = IMM) THEN DO;
+                REGVAL = DEREF(REG_GET(G_OP1));
+                IF (IS_UNBOUND(REGVAL) = 1) THEN DO;
+                    CALL BIND(CELL_PAY(REGVAL), IMM);
                     CALL REG_SET(REG_PC, PC + 2);
                 END;
                 ELSE DO;
-                    CALL UART_PUTS(ADDR(M_FAIL));
-                    G_RUNNING = 0;
+                    IF (REGVAL = IMM) THEN DO;
+                        CALL REG_SET(REG_PC, PC + 2);
+                    END;
+                    ELSE DO;
+                        CALL UART_PUTS(ADDR(M_FAIL));
+                        G_RUNNING = 0;
+                    END;
                 END;
             END;
 
@@ -406,6 +411,31 @@ LOAD_PUT_VAR_TEST: PROC;
 END;
 
 /* --------------------------------------------------------
+ * Unification test: query parent(bob, X) against
+ * clause parent(bob, ann). GET_CONST A1 should bind X
+ * to atom(ann) via DEREF+BIND.
+ *
+ * Expected: A1 derefs to atom(ann) = 4194306 after PROCEED.
+ * -------------------------------------------------------- */
+
+LOAD_UNIFY_TEST: PROC;
+    /* Query: ?- parent(bob, X). */
+    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(2)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1; /* PUT_VAR X0, A1 */
+    MEM(3)  = OP_CALL * OP_MULT;                       /* CALL */
+    MEM(4)  = 7;                                        /* target: addr 7 */
+    MEM(5)  = OP_HALT * OP_MULT;                       /* HALT */
+
+    /* Clause: parent(bob, ann). at addr 7 */
+    MEM(7)  = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
+    MEM(8)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) -- match */
+    MEM(9)  = OP_GET_CONST * OP_MULT + 1 * OP1_MULT;  /* GET_CONST A1 */
+    MEM(10) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) -- binds X */
+    MEM(11) = OP_PROCEED * OP_MULT;                    /* PROCEED */
+END;
+
+/* --------------------------------------------------------
  * Entry point
  * -------------------------------------------------------- */
 
@@ -413,6 +443,7 @@ DCL M_TEST1(20) CHAR INIT('--- fact_lookup ---');
 DCL M_TEST2(20) CHAR INIT('--- fact_fail  ---');
 DCL M_TEST3(20) CHAR INIT('--- put_var    ---');
 DCL M_TEST4(20) CHAR INIT('--- deref_bind ---');
+DCL M_TEST5(20) CHAR INIT('--- unify_var  ---');
 DCL M_A0(5) CHAR    INIT(' A0=');
 DCL M_A1(5) CHAR    INIT(' A1=');
 DCL M_HP(5) CHAR    INIT(' HP=');
@@ -501,6 +532,23 @@ MAIN: PROC;
     /* Deref: follow REF -> get atom(ann) */
     DR = DEREF(VAR_REF);
     CALL UART_PUTS(ADDR(M_DR));
+    CALL PRINT_INT(DR);
+    CALL UART_PUTCHAR(10);
+
+    /* Test 5: GET_CONST with unification
+     * Query parent(bob, X) against clause parent(bob, ann).
+     * GET_CONST A0 matches bob directly.
+     * GET_CONST A1 finds unbound REF, binds to atom(ann).
+     * After PROCEED, deref A1 should give atom(ann) = 4194306.
+     */
+    CALL UART_PUTS(ADDR(M_TEST5));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_UNIFY_TEST;
+    CALL VM_RUN;
+    /* Deref A1 to see the bound value */
+    DR = DEREF(REG_GET(REG_A1));
+    CALL UART_PUTS(ADDR(M_A1));
     CALL PRINT_INT(DR);
     CALL UART_PUTCHAR(10);
 END;

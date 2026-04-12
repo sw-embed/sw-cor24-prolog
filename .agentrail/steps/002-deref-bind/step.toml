@@ -1,6 +1,6 @@
 number = 2
 slug = "deref-bind"
-status = "in-progress"
+status = "completed"
 description = """
 Implement dereference and bind — the core unification primitives.
 
@@ -8,4 +8,5 @@ Context:..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T14:37:57"
-commits = []
+completed_at = "2026-04-12T14:40:19"
+commits = ["b1704c4c878f2ed70f6814ffa1ac258a15e305c9"]
