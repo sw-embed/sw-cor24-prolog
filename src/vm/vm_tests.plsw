@@ -215,5 +215,100 @@ LOAD_ALLOC_TEST: PROC;
     MEM(16) = OP_PROCEED * OP_MULT;
 END;
 
+/* --------------------------------------------------------
+ * Test 11: ancestor/2 with recursion
+ *
+ * parent(bob, ann).
+ * parent(ann, liz).
+ * ancestor(X, Y) :- parent(X, Y).
+ * ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+ * ?- ancestor(bob, liz).
+ *
+ * Should succeed via recursive path:
+ *   ancestor(bob, liz) -> parent(bob, Z) binds Z=ann,
+ *   then ancestor(ann, liz) -> parent(ann, liz) succeeds.
+ *
+ * Layout:
+ *   0-1: PUT_CONST A0, bob          query
+ *   2-3: PUT_CONST A1, liz
+ *   4-5: CALL 8                     call ancestor
+ *   6:   HALT
+ *
+ *   8-9: TRY 12                     ancestor entry, alt=clause2
+ *   10-11: EXECUTE 24               clause1: tail call parent
+ *
+ *   12:  TRUST                      clause2 entry
+ *   13:  ALLOCATE 1                 Y0 = saved Y
+ *   14:  GET_Y_VAR Y0, A1           save Y into Y0
+ *   15:  PUT_VAR X0, A1             create Z in A1
+ *   16-17: CALL 24                  parent(X, Z)
+ *   18:  GET_VAR X2, A1             X2 = Z ref (from A1)
+ *   19:  PUT_Y_VAL Y0, A1           A1 = Y (from Y0)
+ *   20:  PUT_VAL X2, A0             A0 = Z
+ *   21:  DEALLOCATE
+ *   22-23: EXECUTE 8                tail call ancestor(Z, Y)
+ *
+ *   24-25: TRY 31                   parent entry, alt=clause2
+ *   26-27: GET_CONST A0, bob        parent(bob, ann)
+ *   28-29: GET_CONST A1, ann
+ *   30:  PROCEED
+ *   31:  TRUST                      parent clause2
+ *   32-33: GET_CONST A0, ann        parent(ann, liz)
+ *   34-35: GET_CONST A1, liz
+ *   36:  PROCEED
+ * -------------------------------------------------------- */
+
+LOAD_ANCESTOR_TEST: PROC;
+    /* Query: ?- ancestor(bob, liz). */
+    MEM(0)  = OP_PUT_CONST * OP_MULT;
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* bob */
+    MEM(2)  = OP_PUT_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(3)  = TAG_ATOM * TAG_MULT + 4;                 /* liz */
+    MEM(4)  = OP_CALL * OP_MULT;
+    MEM(5)  = 8;                                        /* ancestor entry */
+    MEM(6)  = OP_HALT * OP_MULT;
+
+    /* ancestor/2 entry */
+    MEM(8)  = OP_TRY * OP_MULT;
+    MEM(9)  = 12;                                       /* alt: clause2 */
+
+    /* clause1: ancestor(X,Y) :- parent(X,Y). */
+    MEM(10) = OP_EXECUTE * OP_MULT;
+    MEM(11) = 24;                                       /* tail call parent */
+
+    /* clause2: ancestor(X,Y) :- parent(X,Z), ancestor(Z,Y). */
+    MEM(12) = OP_TRUST * OP_MULT;
+    MEM(13) = OP_ALLOCATE * OP_MULT + 1 * OP1_MULT;   /* ALLOCATE 1 */
+    MEM(14) = OP_GET_Y_VAR * OP_MULT + 0 * OP1_MULT + REG_A1; /* GET_Y_VAR Y0, A1 */
+    MEM(15) = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1; /* PUT_VAR X0, A1 */
+    MEM(16) = OP_CALL * OP_MULT;
+    MEM(17) = 24;                                       /* call parent */
+    MEM(18) = OP_GET_VAR * OP_MULT + REG_X2 * OP1_MULT + REG_A1; /* GET_VAR X2, A1 */
+    MEM(19) = OP_PUT_Y_VAL * OP_MULT + 0 * OP1_MULT + REG_A1; /* PUT_Y_VAL Y0, A1 */
+    MEM(20) = OP_PUT_VAL * OP_MULT + REG_X2 * OP1_MULT + REG_A0; /* PUT_VAL X2, A0 */
+    MEM(21) = OP_DEALLOCATE * OP_MULT;
+    MEM(22) = OP_EXECUTE * OP_MULT;
+    MEM(23) = 8;                                        /* tail call ancestor */
+
+    /* parent/2 entry */
+    MEM(24) = OP_TRY * OP_MULT;
+    MEM(25) = 31;                                       /* alt: clause2 */
+
+    /* parent(bob, ann). */
+    MEM(26) = OP_GET_CONST * OP_MULT;
+    MEM(27) = TAG_ATOM * TAG_MULT + 1;                 /* bob */
+    MEM(28) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(29) = TAG_ATOM * TAG_MULT + 2;                 /* ann */
+    MEM(30) = OP_PROCEED * OP_MULT;
+
+    /* parent(ann, liz). */
+    MEM(31) = OP_TRUST * OP_MULT;
+    MEM(32) = OP_GET_CONST * OP_MULT;
+    MEM(33) = TAG_ATOM * TAG_MULT + 2;                 /* ann */
+    MEM(34) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(35) = TAG_ATOM * TAG_MULT + 4;                 /* liz */
+    MEM(36) = OP_PROCEED * OP_MULT;
+END;
+
 MAIN: PROC;
 END;

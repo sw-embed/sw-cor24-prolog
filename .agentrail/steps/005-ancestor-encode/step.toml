@@ -1,0 +1,11 @@
+number = 5
+slug = "ancestor-encode"
+status = "in-progress"
+description = """
+Hand-assemble the ancestor/2 example as LAM bytecode.
+
+Context: Read src/vm/v..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T15:43:20"
+commits = []

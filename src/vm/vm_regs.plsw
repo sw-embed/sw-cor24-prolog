@@ -5,6 +5,7 @@
 %DEFINE LIBRARY;
 
 %INCLUDE memory;
+%INCLUDE frames;
 %INCLUDE vmglob;
 
 REG_GET: PROC(OFF INT) RETURNS(INT);
@@ -13,6 +14,17 @@ END;
 
 REG_SET: PROC(OFF INT, VAL INT);
     MEM(REG_BASE + OFF) = VAL;
+END;
+
+/* Y-register access: local variables in environment frame.
+ * Y[i] is at MEM(EP + ENV_Y0 + i). */
+
+Y_GET: PROC(I INT) RETURNS(INT);
+    RETURN(MEM(REG_GET(REG_EP) + ENV_Y0 + I));
+END;
+
+Y_SET: PROC(I INT, VAL INT);
+    MEM(REG_GET(REG_EP) + ENV_Y0 + I) = VAL;
 END;
 
 MAIN: PROC;

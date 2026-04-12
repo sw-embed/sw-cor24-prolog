@@ -101,9 +101,23 @@ VM_RUN: PROC;
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
+            /* PUT_Y_VAL Yi, Ai -- 1-cell
+             * Copy Y[op1] from environment frame to Ai. */
+            WHEN (G_OP = OP_PUT_Y_VAL) DO;
+                CALL REG_SET(G_OP2, Y_GET(G_OP1));
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
             /* GET_VAR Xn, Ai -- 1-cell */
             WHEN (G_OP = OP_GET_VAR) DO;
                 CALL REG_SET(G_OP1, REG_GET(G_OP2));
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
+            /* GET_Y_VAR Yi, Ai -- 1-cell
+             * Copy Ai to Y[op1] in environment frame. */
+            WHEN (G_OP = OP_GET_Y_VAR) DO;
+                CALL Y_SET(G_OP1, REG_GET(G_OP2));
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
@@ -134,6 +148,12 @@ VM_RUN: PROC;
             /* CALL [imm] -- 2-cell */
             WHEN (G_OP = OP_CALL) DO;
                 CALL REG_SET(REG_CP, PC + 2);
+                IMM = MEM(PC + 1);
+                CALL REG_SET(REG_PC, IMM);
+            END;
+
+            /* EXECUTE [imm] -- 2-cell (tail call, no CP save) */
+            WHEN (G_OP = OP_EXECUTE) DO;
                 IMM = MEM(PC + 1);
                 CALL REG_SET(REG_PC, IMM);
             END;
@@ -265,6 +285,7 @@ DCL M_TEST7(20) CHAR INIT('--- try/trust  ---');
 DCL M_TEST8(20) CHAR INIT('--- backtrack  ---');
 DCL M_TEST9(20) CHAR INIT('--- two_facts  ---');
 DCL M_TESTA(20) CHAR INIT('--- alloc/dealloc-');
+DCL M_TESTB(20) CHAR INIT('--- ancestor    ---');
 DCL M_BP(5) CHAR    INIT(' BP=');
 DCL M_TR(5) CHAR    INIT(' TR=');
 DCL M_A0(5) CHAR    INIT(' A0=');
@@ -438,6 +459,19 @@ MAIN: PROC;
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
     CALL LOAD_ALLOC_TEST;
+    CALL VM_RUN;
+    CALL UART_PUTCHAR(10);
+
+    /* Test 11: ancestor/2 with recursion
+     * ancestor(bob, liz) via parent(bob,ann) + parent(ann,liz).
+     * Exercises: TRY/TRUST, EXECUTE (tail call), ALLOCATE/DEALLOCATE,
+     * GET_Y_VAR/PUT_Y_VAL (Y registers), recursion.
+     * Should print HALT on success.
+     */
+    CALL UART_PUTS(ADDR(M_TESTB));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_ANCESTOR_TEST;
     CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 END;

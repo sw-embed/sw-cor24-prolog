@@ -1,0 +1,1 @@
+Added PUT_VAL Xn Ai (opcode 11): copies Xn to Ai. Complement of PUT_VAR for passing existing values between goals. 15 opcodes total now.
