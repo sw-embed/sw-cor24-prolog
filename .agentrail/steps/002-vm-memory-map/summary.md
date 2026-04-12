@@ -1,0 +1,1 @@
+Added memory map section to vm-spec.md with 8-region layout (code, atoms, functors, registers, heap, trail, env stack, choice-point stack), register file layout (24 slots: A0-A7, X0-X7, 8 special), initial state, and design notes. Created memory.plsw with all base/size/offset constants.

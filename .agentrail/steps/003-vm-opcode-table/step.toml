@@ -1,0 +1,11 @@
+number = 3
+slug = "vm-opcode-table"
+status = "in-progress"
+description = """
+Define the initial opcode encoding for the LAM virtual machine.
+
+Context: Rea..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T13:02:31"
+commits = []

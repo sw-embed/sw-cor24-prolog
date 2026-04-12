@@ -207,3 +207,144 @@ On VM reset:
   the pointer against `BASE + SIZE`.
 - **Total footprint**: ~7.7K cells. At 24 bits per cell, that is
   ~23 KB — well within COR24's reach.
+
+---
+
+## 3. Instruction Encoding
+
+### 3.1 Instruction Format
+
+Every instruction occupies **1 or 2 cells** in the code area.
+
+**Cell 1** (always present):
+
+```
+  23          16  15           8  7            0
+ +-------------+---------------+--------------+
+ |  opcode (8) |  operand1 (8) | operand2 (8) |
+ +-------------+---------------+--------------+
+```
+
+- **opcode** (bits 23-16): instruction number (0-255).
+- **operand1** (bits 15-8): first operand — typically a register index.
+- **operand2** (bits 7-0): second operand — typically a register index
+  or small literal.
+
+**Cell 2** (present only for 2-cell instructions):
+
+```
+  23                                           0
+ +---------------------------------------------+
+ |           immediate (24 bits)                |
+ +---------------------------------------------+
+```
+
+Used for code addresses (CALL/EXECUTE targets, TRY/RETRY alternatives)
+and constant values (PUT_CONST/GET_CONST atoms or integers passed as
+full tagged cells).
+
+### 3.2 Operand Conventions
+
+Register operands use the register file offset from section 2.3:
+- `0-7` = A0-A7, `8-15` = X0-X7.
+
+When an instruction uses fewer than two operand fields, unused fields
+are set to 0.
+
+### 3.3 Opcode Table
+
+#### Control
+
+| # | Mnemonic  | Op1    | Op2    | Width | Description                              |
+|---|-----------|--------|--------|-------|------------------------------------------|
+| 0 | NOP       | —      | —      | 1     | No operation                             |
+| 1 | HALT      | —      | —      | 1     | Stop execution                           |
+| 2 | CALL      | —      | —      | 2     | Call predicate at [imm]; save PC+2 to CP |
+| 3 | EXECUTE   | —      | —      | 2     | Tail-call predicate at [imm]; no CP save |
+| 4 | PROCEED   | —      | —      | 1     | Return to CP                             |
+| 5 | FAIL      | —      | —      | 1     | Force backtracking                       |
+
+#### Choice
+
+| #  | Mnemonic | Op1 | Op2 | Width | Description                                   |
+|----|----------|-----|-----|-------|-----------------------------------------------|
+| 6  | TRY      | —   | —   | 2     | Push choice point; alt = [imm]                |
+| 7  | RETRY    | —   | —   | 2     | Update choice point alt to [imm]; retry       |
+| 8  | TRUST    | —   | —   | 1     | Pop choice point; last alternative            |
+
+#### Data — PUT (set up call arguments)
+
+| #  | Mnemonic  | Op1  | Op2  | Width | Description                              |
+|----|-----------|------|------|-------|------------------------------------------|
+| 10 | PUT_VAR   | Xn   | Ai   | 1     | Create new var on heap; ref in Xn and Ai |
+| 11 | PUT_VAL   | Xn   | Ai   | 1     | Copy Xn to Ai                            |
+| 12 | PUT_CONST | Ai   | —    | 2     | Load tagged constant [imm] into Ai       |
+
+#### Data — GET (match head arguments)
+
+| #  | Mnemonic   | Op1  | Op2  | Width | Description                              |
+|----|------------|------|------|-------|------------------------------------------|
+| 16 | GET_VAR    | Xn   | Ai   | 1     | Copy Ai to Xn (first occurrence)         |
+| 17 | GET_VAL    | Xn   | Ai   | 1     | Unify Xn with Ai                         |
+| 18 | GET_CONST  | Ai   | —    | 2     | Unify Ai with tagged constant [imm]      |
+| 19 | GET_STRUCT | Ai   | —    | 2     | Unify Ai with structure; functor in [imm]|
+
+#### Unification Stream
+
+| #  | Mnemonic    | Op1  | Op2 | Width | Description                              |
+|----|-------------|------|-----|-------|------------------------------------------|
+| 22 | UNIFY_VAR   | Xn   | —   | 1     | Unify next heap arg with var Xn          |
+| 23 | UNIFY_VAL   | Xn   | —   | 1     | Unify next heap arg with value in Xn     |
+| 24 | UNIFY_CONST | —    | —   | 2     | Unify next heap arg with constant [imm]  |
+
+#### Frame Management
+
+| #  | Mnemonic    | Op1  | Op2 | Width | Description                              |
+|----|-------------|------|-----|-------|------------------------------------------|
+| 28 | ALLOCATE    | n    | —   | 1     | Allocate env frame with n local slots    |
+| 29 | DEALLOCATE  | —    | —   | 1     | Pop env frame; restore CP from frame     |
+
+#### Builtins
+
+| #  | Mnemonic | Op1  | Op2 | Width | Description                              |
+|----|----------|------|-----|-------|------------------------------------------|
+| 32 | B_WRITE  | Ai   | —   | 1     | Print term in Ai                         |
+| 33 | B_NL     | —    | —   | 1     | Print newline                            |
+
+### 3.4 Opcode Numbering
+
+Opcodes are grouped with gaps between categories to allow future
+expansion without renumbering:
+
+- 0-5: control
+- 6-9: choice
+- 10-15: PUT family
+- 16-21: GET family
+- 22-27: UNIFY family
+- 28-31: frame management
+- 32-63: builtins
+
+### 3.5 Instruction Width Summary
+
+**1-cell** (opcode + register operands only):
+NOP, HALT, PROCEED, FAIL, TRUST, PUT_VAR, PUT_VAL, GET_VAR, GET_VAL,
+UNIFY_VAR, UNIFY_VAL, ALLOCATE, DEALLOCATE, B_WRITE, B_NL.
+
+**2-cell** (opcode + immediate in cell 2):
+CALL, EXECUTE, TRY, RETRY, PUT_CONST, GET_CONST, GET_STRUCT,
+UNIFY_CONST.
+
+### 3.6 Design Notes
+
+- **Why 8-bit opcode?** 256 slots is far more than needed, but the
+  uniform 8-bit field keeps decoding trivial: `opcode = cell >> 16`.
+  No variable-length opcode decoding.
+- **Why gaps in numbering?** Adding a `PUT_STRUCT` (13) or `PUT_LIST`
+  (14) later doesn't force renumbering existing code.
+- **Why full tagged cell for constants?** PUT_CONST and GET_CONST pass
+  complete tagged cells as immediates. This means the assembler doesn't
+  need separate "load atom" vs "load integer" opcodes — the tag in the
+  immediate distinguishes them.
+- **PC advance**: 1-cell instructions advance PC by 1. 2-cell
+  instructions advance PC by 2. CALL saves PC+2 to CP (the cell after
+  the immediate). PROCEED sets PC = CP.

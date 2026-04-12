@@ -1,6 +1,6 @@
 number = 2
 slug = "vm-memory-map"
-status = "in-progress"
+status = "completed"
 description = """
 Define the memory map for the LAM virtual machine.
 
@@ -8,4 +8,5 @@ Context: Read docs/vm-spe..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T13:00:43"
-commits = []
+completed_at = "2026-04-12T13:02:31"
+commits = ["0db453e29bbfc9f55c42bae6774ac82f2d728c00"]
