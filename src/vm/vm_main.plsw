@@ -112,7 +112,7 @@ END;
  * REF_ADDR is the heap address of the unbound REF cell.
  * Overwrites MEM(REF_ADDR) with VAL. */
 BIND: PROC(REF_ADDR INT, VAL INT);
-    /* TODO: CALL TRAIL_PUSH(REF_ADDR) here once trail is implemented */
+    CALL TRAIL_PUSH(REF_ADDR);
     MEM(REF_ADDR) = VAL;
 END;
 
@@ -128,6 +128,38 @@ IS_UNBOUND: PROC(CELL INT) RETURNS(INT);
     IF (MEM(PAY) = CELL) THEN
         RETURN(1);
     RETURN(0);
+END;
+
+/* --------------------------------------------------------
+ * Trail -- undo log for variable bindings
+ * -------------------------------------------------------- */
+
+/* Record a heap address on the trail so it can be unbound
+ * during backtracking. */
+TRAIL_PUSH: PROC(HEAP_ADDR INT);
+    DCL TR INT;
+    TR = REG_GET(REG_TR);
+    IF (TR >= TRAIL_BASE + TRAIL_SIZE) THEN DO;
+        CALL UART_PUTS(ADDR(M_TRLOV));
+        G_RUNNING = 0;
+        RETURN;
+    END;
+    MEM(TR) = HEAP_ADDR;
+    CALL REG_SET(REG_TR, TR + 1);
+END;
+
+/* Unwind trail from current TR back to SAVED_TR.
+ * Resets each trailed variable to an unbound self-ref REF. */
+TRAIL_UNWIND: PROC(SAVED_TR INT);
+    DCL TR INT;
+    DCL H INT;
+    TR = REG_GET(REG_TR);
+    DO WHILE (TR > SAVED_TR);
+        TR = TR - 1;
+        H = MEM(TR);
+        MEM(H) = MAKE_CELL(TAG_REF, H);
+    END;
+    CALL REG_SET(REG_TR, SAVED_TR);
 END;
 
 /* --------------------------------------------------------
@@ -330,6 +362,7 @@ DCL M_FAIL(7) CHAR  INIT('FAIL  ');
 DCL M_BADOP(12) CHAR  INIT('Bad opcode ');
 DCL M_OK(10) CHAR    INIT('Success  ');
 DCL M_HEAPOV(15) CHAR INIT('Heap overflow ');
+DCL M_TRLOV(16) CHAR INIT('Trail overflow ');
 
 /* --------------------------------------------------------
  * Entry point
@@ -444,6 +477,8 @@ DCL M_TEST2(20) CHAR INIT('--- fact_fail  ---');
 DCL M_TEST3(20) CHAR INIT('--- put_var    ---');
 DCL M_TEST4(20) CHAR INIT('--- deref_bind ---');
 DCL M_TEST5(20) CHAR INIT('--- unify_var  ---');
+DCL M_TEST6(20) CHAR INIT('--- trail      ---');
+DCL M_TR(5) CHAR    INIT(' TR=');
 DCL M_A0(5) CHAR    INIT(' A0=');
 DCL M_A1(5) CHAR    INIT(' A1=');
 DCL M_HP(5) CHAR    INIT(' HP=');
@@ -457,6 +492,11 @@ MAIN: PROC;
     DCL ATOM_ANN INT;
     DCL UB INT;
     DCL DR INT;
+    DCL V1_ADDR INT;
+    DCL V1_REF INT;
+    DCL V2_ADDR INT;
+    DCL V2_REF INT;
+    DCL SAVED_TR INT;
 
     CALL UART_PUTS(ADDR(M_INIT));
     CALL UART_PUTCHAR(10);
@@ -550,5 +590,52 @@ MAIN: PROC;
     DR = DEREF(REG_GET(REG_A1));
     CALL UART_PUTS(ADDR(M_A1));
     CALL PRINT_INT(DR);
+    CALL UART_PUTCHAR(10);
+
+    /* Test 6: Trail push and unwind
+     * Create two vars, bind both, verify bound, unwind, verify unbound.
+     *
+     * Expected:
+     *   TR before bind = 4632 (TRAIL_BASE)
+     *   After 2 binds: TR = 4634, both deref to atoms
+     *   After unwind:  TR = 4632, both IS_UNBOUND = 1
+     */
+    CALL UART_PUTS(ADDR(M_TEST6));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+
+    SAVED_TR = REG_GET(REG_TR);
+
+    /* Create two unbound vars */
+    V1_ADDR = HEAP_ALLOC;
+    V1_REF = MAKE_CELL(TAG_REF, V1_ADDR);
+    MEM(V1_ADDR) = V1_REF;
+
+    V2_ADDR = HEAP_ALLOC;
+    V2_REF = MAKE_CELL(TAG_REF, V2_ADDR);
+    MEM(V2_ADDR) = V2_REF;
+
+    /* Bind both to atoms */
+    CALL BIND(V1_ADDR, MAKE_CELL(TAG_ATOM, 1));
+    CALL BIND(V2_ADDR, MAKE_CELL(TAG_ATOM, 2));
+
+    /* Show: TR after bind, both derefs */
+    CALL UART_PUTS(ADDR(M_TR));
+    CALL PRINT_INT(REG_GET(REG_TR));
+    CALL UART_PUTS(ADDR(M_DR));
+    CALL PRINT_INT(DEREF(V1_REF));
+    CALL UART_PUTS(ADDR(M_DR));
+    CALL PRINT_INT(DEREF(V2_REF));
+
+    /* Unwind trail */
+    CALL TRAIL_UNWIND(SAVED_TR);
+
+    /* Show: TR after unwind, both unbound */
+    CALL UART_PUTS(ADDR(M_TR));
+    CALL PRINT_INT(REG_GET(REG_TR));
+    CALL UART_PUTS(ADDR(M_UB));
+    CALL PRINT_INT(IS_UNBOUND(V1_REF));
+    CALL UART_PUTS(ADDR(M_UB));
+    CALL PRINT_INT(IS_UNBOUND(V2_REF));
     CALL UART_PUTCHAR(10);
 END;

@@ -1,0 +1,1 @@
+Upgraded GET_CONST to use DEREF+BIND for proper unification. Unbound REFs get bound to the constant; bound values get equality-compared. Test 5: query parent(bob, X) against clause parent(bob, ann), GET_CONST binds X to ann, deref(A1)=4194306 after PROCEED.

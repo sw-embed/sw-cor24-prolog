@@ -1,6 +1,6 @@
 number = 3
 slug = "get-const-unify"
-status = "in-progress"
+status = "completed"
 description = """
 Upgrade GET_CONST to use proper unification with dereference.
 
@@ -8,4 +8,5 @@ Context: Read ..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T14:40:19"
-commits = []
+completed_at = "2026-04-12T14:44:46"
+commits = ["6c331aa36bfd11b63f3ad646f4c6f21ee94f01ad"]

@@ -1,0 +1,11 @@
+number = 4
+slug = "trail-unwind"
+status = "in-progress"
+description = """
+Implement trail push and trail unwind.
+
+Context: Read src/vm/vm_main.plsw —..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T14:44:46"
+commits = []
