@@ -1,0 +1,11 @@
+number = 5
+slug = "hand-bytecode-examples"
+status = "in-progress"
+description = """
+Hand-assemble 2-3 tiny bytecode programs using the VM spec.
+
+Context: Read do..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T13:52:56"
+commits = []

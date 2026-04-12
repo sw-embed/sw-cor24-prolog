@@ -1,0 +1,1 @@
+Added frame layouts section to vm-spec.md: 14-cell choice-point frames, 2+N environment frames, 1-cell trail entries with TRY/RETRY/TRUST/FAIL semantics and unconditional trailing. Created frames.plsw with all offset and size constants.

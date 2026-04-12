@@ -1,10 +1,11 @@
 number = 4
 slug = "vm-frame-layouts"
-status = "in-progress"
+status = "completed"
 description = """
 Define the frame layouts for choice points, environments, and trail entries.
 ..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T13:09:15"
-commits = []
+completed_at = "2026-04-12T13:52:56"
+commits = ["6dad46f6b6b003ae20e83d28296daaa6527da98e"]
