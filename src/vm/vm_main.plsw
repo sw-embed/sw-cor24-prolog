@@ -257,6 +257,56 @@ CP_POP: PROC RETURNS(INT);
 END;
 
 /* --------------------------------------------------------
+ * Atom table
+ * -------------------------------------------------------- */
+
+/* Store a string into atom table slot ID.
+ * STR_ADDR is the address of a null-terminated CHAR array.
+ * Copies up to ATOM_SLOT_SIZE-1 chars, null-terminates. */
+ATOM_STORE: PROC(ID INT, C0 INT, C1 INT, C2 INT, C3 INT,
+                  C4 INT, C5 INT, C6 INT);
+    DCL BASE INT;
+    BASE = ATOM_BASE + ID * ATOM_SLOT_SIZE;
+    MEM(BASE)     = C0;
+    MEM(BASE + 1) = C1;
+    MEM(BASE + 2) = C2;
+    MEM(BASE + 3) = C3;
+    MEM(BASE + 4) = C4;
+    MEM(BASE + 5) = C5;
+    MEM(BASE + 6) = C6;
+    MEM(BASE + 7) = 0;
+END;
+
+/* Initialize the atom table with known atoms. */
+ATOM_INIT: PROC;
+    /* 0: []       */  CALL ATOM_STORE(0, 91, 93, 0, 0, 0, 0, 0);
+    /* 1: bob      */  CALL ATOM_STORE(1, 98, 111, 98, 0, 0, 0, 0);
+    /* 2: ann      */  CALL ATOM_STORE(2, 97, 110, 110, 0, 0, 0, 0);
+    /* 3: joe      */  CALL ATOM_STORE(3, 106, 111, 101, 0, 0, 0, 0);
+    /* 4: liz      */  CALL ATOM_STORE(4, 108, 105, 122, 0, 0, 0, 0);
+    /* 5: parent   */  CALL ATOM_STORE(5, 112, 97, 114, 101, 110, 116, 0);
+    /* 6: ancestor */  CALL ATOM_STORE(6, 97, 110, 99, 101, 115, 116, 111);
+    /* Note: "ancestor" is 8 chars, truncated to 7 + null.
+     * PLSW-ISSUE: ATOM_SLOT_SIZE of 8 is tight for longer names.
+     * Could increase to 12 or use variable-length encoding later. */
+END;
+
+/* Print an atom name by ID from the atom table. */
+ATOM_PRINT: PROC(ID INT);
+    DCL BASE INT;
+    DCL I INT;
+    DCL CH INT;
+    BASE = ATOM_BASE + ID * ATOM_SLOT_SIZE;
+    I = 0;
+    CH = MEM(BASE);
+    DO WHILE (CH != 0 AND I < ATOM_SLOT_SIZE);
+        CALL UART_PUTCHAR(CH);
+        I = I + 1;
+        CH = MEM(BASE + I);
+    END;
+END;
+
+/* --------------------------------------------------------
  * VM initialization
  * -------------------------------------------------------- */
 
@@ -267,6 +317,9 @@ VM_INIT: PROC;
     DO I = 0 TO 7703;
         MEM(I) = 0;
     END;
+
+    /* Populate atom table */
+    CALL ATOM_INIT;
 
     /* Set initial register values */
     CALL REG_SET(REG_PC, CODE_BASE);
@@ -475,11 +528,32 @@ VM_RUN: PROC;
             END;
 
             /* B_WRITE Ai -- 1-cell
-             * Print the dereferenced value of Ai as integer.
-             * Full atom-name lookup from atom table is a
-             * future enhancement. */
+             * Print the dereferenced value of Ai.
+             * Dispatches on tag: atom->name, int->decimal,
+             * ref->_Vaddr, other->raw int. */
             WHEN (G_OP = OP_B_WRITE) DO;
-                CALL PRINT_INT(DEREF(REG_GET(G_OP1)));
+                DCL WVAL INT;
+                DCL WTAG INT;
+                DCL WPAY INT;
+                WVAL = DEREF(REG_GET(G_OP1));
+                WTAG = CELL_TAG(WVAL);
+                WPAY = CELL_PAY(WVAL);
+                SELECT;
+                    WHEN (WTAG = TAG_ATOM) DO;
+                        CALL ATOM_PRINT(WPAY);
+                    END;
+                    WHEN (WTAG = TAG_INT) DO;
+                        CALL PRINT_INT(WPAY);
+                    END;
+                    WHEN (WTAG = TAG_REF) DO;
+                        CALL UART_PUTCHAR(95);  /* _ */
+                        CALL UART_PUTCHAR(86);  /* V */
+                        CALL PRINT_INT(WPAY);
+                    END;
+                    OTHERWISE DO;
+                        CALL PRINT_INT(WVAL);
+                    END;
+                END;
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 

@@ -19,6 +19,10 @@
 /* Region sizes (cells) */
 %DEFINE CODE_SIZE  256;
 %DEFINE ATOM_SIZE  128;
+
+/* Atom table: fixed-size slots, one ASCII char per cell,
+ * null-terminated. 128 cells / 8 per slot = 16 atoms max. */
+%DEFINE ATOM_SLOT_SIZE 8;
 %DEFINE FUNC_SIZE  128;
 %DEFINE REG_SIZE   24;
 %DEFINE HEAP_SIZE  4096;

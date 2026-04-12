@@ -1,6 +1,6 @@
 number = 1
 slug = "atom-table"
-status = "pending"
+status = "in-progress"
 description = """
 Populate the atom table and make B_WRITE print atom names.
 
