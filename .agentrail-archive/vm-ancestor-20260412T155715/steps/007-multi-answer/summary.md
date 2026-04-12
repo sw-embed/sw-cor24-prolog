@@ -1,0 +1,1 @@
+Added LOAD_ANCESTOR_ALL: ancestor(bob, X) with write/nl/fail loop. Same clause bytecode as LOAD_ANCESTOR_TEST, query uses PUT_VAR for X. Test 12 finds both answers (ann via direct parent, liz via recursion) then FAIL on exhaustion. Full recursive multi-answer milestone.

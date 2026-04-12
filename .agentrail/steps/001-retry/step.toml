@@ -1,0 +1,11 @@
+number = 1
+slug = "retry"
+status = "pending"
+description = """
+Add RETRY opcode handler for predicates with 3+ clauses.
+
+Context: Read src/v..."""
+role = "production"
+context_files = []
+created_at = "2026-04-12T15:58:06"
+commits = []

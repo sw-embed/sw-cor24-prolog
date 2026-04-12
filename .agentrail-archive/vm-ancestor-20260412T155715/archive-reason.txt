@@ -1,0 +1,1 @@
+vm-ancestor complete: atom table, modularized into 6 PL/SW files, env frames, Y registers, EXECUTE, ancestor/2 recursive multi-answer. 18 opcodes, 12 tests.

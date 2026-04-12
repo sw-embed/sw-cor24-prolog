@@ -1,13 +1,13 @@
-Build toward the ancestor example: atom table for readable output, environment frames for recursion, modular PL/SW source, and the ancestor/2 predicate running end-to-end.
+Fill practical gaps in the VM: RETRY for 3+ clause predicates, arithmetic builtins, a text-format assembler, and the first PL/SW compile test.
 
-Builds on vm-runtime: 13 opcodes, heap/unification/trail/choice-points/backtracking all working. B_WRITE prints raw tagged ints.
+Builds on vm-ancestor: 18 opcodes, 6 modules, recursive ancestor working. Missing RETRY (only TRY/TRUST for 2-clause predicates), arithmetic, and no way to load programs except hand-encoding in PL/SW.
 
 Steps:
-1. atom-table — Populate the atom table region with atom names. Add ATOM_LOOKUP PROC that maps atom ID to a string address. Update B_WRITE to print atom names instead of raw integers.
-2. modularize — Split vm_main.plsw into modules: vm_main.plsw (MAIN + dispatch), vm_heap.plsw (heap/deref/bind/trail), vm_choice.plsw (CP push/restore/pop), vm_trace.plsw (trace output, PRINT_INT). Update build command. Move test loaders to a separate test module.
-3. env-frames — Implement ALLOCATE n (push environment frame with n local slots) and DEALLOCATE (pop frame, restore CP). Needed for non-tail predicate calls (recursion).
-4. put-val — Implement PUT_VAL Xn, Ai (copy Xn to Ai). Needed for passing variables between goals in a rule body.
-5. ancestor-encode — Hand-assemble the ancestor/2 example: ancestor(X,Y) :- parent(X,Y). ancestor(X,Y) :- parent(X,Z), ancestor(Z,Y). Encode as LAM bytecode using ALLOCATE/DEALLOCATE for the recursive clause.
-6. ancestor-test — Load and run ancestor(bob, liz) against parent(bob,ann), parent(ann,liz). Should succeed via recursion. Print the trace.
-7. multi-answer — Run ancestor(bob, X) to find all answers (ann and liz) via backtracking. Verify both printed.
-8. compile-test — Attempt to compile vm_main.plsw with the PL/SW compiler (pipeline.sh). Document any compiler issues found as PLSW-ISSUE. This is the first real dogfooding test.
+1. retry — Add RETRY opcode handler. RETRY updates the choice point's next_alt to a new address and retries. Needed for predicates with 3+ clauses. Test with a 3-fact predicate.
+2. arithmetic — Add B_IS_ADD and B_IS_SUB builtins (A0 = A1 op A2 as integer payloads). Add B_LT and B_GT comparison builtins that succeed or fail. Test with simple integer programs.
+3. cut — Add CUT opcode. Removes choice points back to the one before the current predicate call. Test: predicate with cut after first clause match.
+4. asm-format — Design a simple text assembler format (.lam files). Labels, opcode mnemonics, atom declarations, comments. Write a spec in docs/asm-spec.md.
+5. asm-tool — Implement the assembler as a host-side tool (Python or Rust script) that reads .lam text and outputs the MEM() initialization PL/SW code (or raw cell values). This replaces hand-encoding.
+6. asm-examples — Re-encode ancestor and two_facts as .lam assembler text. Verify the assembler output matches the hand-encoded versions.
+7. compile-test — Attempt to compile the VM modules with the PL/SW compiler (pipeline.sh). Document every compiler issue found as PLSW-ISSUE. This is the key dogfooding test.
+8. list-examples — Encode member/2 and append/3 as hand-assembled bytecode (or .lam if assembler works). These use LIST tag and require GET_STRUCT/UNIFY_* or a simpler list-specific approach. May be deferred if structures are needed first.
