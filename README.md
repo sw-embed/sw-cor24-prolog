@@ -41,23 +41,34 @@ src/vm/             PL/SW modules (multi-module build)
 docs/
   vm-spec.md        bit-level VM specification
   demos.md          hand-assembled bytecode descriptions
+  asm-spec.md       .lam assembler text format specification
+tools/
+  lam_asm.py        LAM assembler (Python 3, reads .lam, outputs cells)
 examples/
-  ancestor/         fact_lookup.asm, two_facts.asm
+  ancestor/         .asm hex listings, .lam assembler text, traces
 ```
 
 ## Status
 
-VM implementation in PL/SW (`src/vm/vm_main.plsw`):
+VM implementation in PL/SW (6 modules in `src/vm/`):
 - Fetch/decode/dispatch loop with trace output
-- 11 opcodes: NOP, HALT, PUT_CONST, PUT_VAR, GET_VAR, GET_CONST,
-  CALL, PROCEED, FAIL, TRY, TRUST
-- Heap allocation, dereference, bind, trail push/unwind
-- Choice-point save/restore with backtracking on failure
-- Runs fact_lookup (direct match) and backtracking tests
+- 24 opcodes: NOP, HALT, CALL, EXECUTE, PROCEED, FAIL, CUT,
+  TRY, RETRY, TRUST, PUT_CONST, PUT_VAR, PUT_VAL, PUT_Y_VAL,
+  GET_VAR, GET_Y_VAR, GET_CONST, ALLOCATE, DEALLOCATE,
+  B_WRITE, B_NL, B_IS_ADD, B_IS_SUB, B_LT, B_GT
+- Heap, unification (deref/bind), trail, choice points, env frames
+- Y-register local variables for recursion
+- Atom table with name lookup for B_WRITE
+- Recursive ancestor/2 with multi-answer backtracking
+- 15 tests covering all features
 - Dogfooding the PL/SW compiler (sw-cor24-plsw)
+
+LAM assembler (`tools/lam_asm.py`):
+- Reads .lam text format, outputs PL/SW MEM() or hex
+- All 24 opcodes, labels, atom declarations
 
 VM specification complete (`docs/vm-spec.md`):
 - Tagged cell encoding (3-bit tag, 21-bit payload)
 - Memory map (8 regions, 24-slot register file)
-- Instruction encoding (22 opcodes, 1/2-cell format)
+- Instruction encoding (24 opcodes, 1/2-cell format)
 - Frame layouts (choice points, environments, trail)

@@ -1,6 +1,6 @@
 number = 5
 slug = "asm-tool"
-status = "in-progress"
+status = "completed"
 description = """
 Implement the LAM assembler as a Python script.
 
@@ -8,4 +8,5 @@ Context: Read docs/asm-spec...."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T16:14:38"
-commits = []
+completed_at = "2026-04-12T16:26:11"
+commits = ["9970e8976701130dc7ab9cf00659f2708f05f00b"]

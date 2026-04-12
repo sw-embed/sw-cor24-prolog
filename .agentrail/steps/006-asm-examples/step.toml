@@ -1,0 +1,11 @@
+number = 6
+slug = "asm-examples"
+status = "pending"
+description = """
+Re-encode two_facts and the retry test as .lam files and verify.
+
+Context: to..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T16:26:11"
+commits = []

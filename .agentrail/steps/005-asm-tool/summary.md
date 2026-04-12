@@ -1,0 +1,1 @@
+Implemented tools/lam_asm.py: two-pass Python assembler for .lam files. Supports .atom directives, labels, all 24 opcodes, --plsw/--raw/--hex output. Created examples/ancestor/ancestor.lam. All encodings verified against hand-coded values -- perfect match on all 18 instruction types.
