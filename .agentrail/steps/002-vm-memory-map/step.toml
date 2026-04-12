@@ -1,0 +1,11 @@
+number = 2
+slug = "vm-memory-map"
+status = "in-progress"
+description = """
+Define the memory map for the LAM virtual machine.
+
+Context: Read docs/vm-spe..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T13:00:43"
+commits = []

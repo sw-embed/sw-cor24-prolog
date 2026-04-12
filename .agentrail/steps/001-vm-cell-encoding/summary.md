@@ -1,0 +1,1 @@
+Created docs/vm-spec.md with 24-bit tagged cell encoding (3-bit tag, 21-bit payload) covering REF/INT/ATOM/STR/LIST/FUN tags, masks, shifts, functor sub-fields, and worked examples. Created src/vm/cell.plsw with matching PL/SW constants.

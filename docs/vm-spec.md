@@ -98,3 +98,112 @@ For FUN payload:
 - **Why FUN on heap only?** Keeping functor headers out of registers
   simplifies the register-level invariant: a register always holds a
   term you can unify against, never internal metadata.
+
+---
+
+## 2. Memory Map
+
+The LAM divides its address space into eight contiguous regions. All
+regions are measured in **cells** (24-bit words), not bytes. Addresses
+in this document are cell indices.
+
+### 2.1 Region Layout
+
+```
+Address (cell)   Size     Region
+─────────────────────────────────────────────────
+0x0000           256      Code area
+0x0100           128      Atom table
+0x0180           128      Functor table
+0x0200            24      Register file
+0x0218          4096      Heap
+0x1218          1024      Trail
+0x1618          1024      Environment stack
+0x1A18          1024      Choice-point stack
+─────────────────────────────────────────────────
+0x1E18                    (end — total 7704 cells)
+```
+
+All sizes are defaults and defined as named constants so they can be
+tuned without changing any other part of the spec.
+
+### 2.2 Region Definitions
+
+| Region             | Purpose                                                |
+|--------------------|--------------------------------------------------------|
+| Code area          | Compiled/assembled bytecode. Read-only at runtime.     |
+| Atom table         | Maps atom ID -> name string (or hash). Entry 0 = `[]`. |
+| Functor table      | Maps functor ID -> (atom_id, arity).                   |
+| Register file      | A0-A7, X0-X7, special registers (see 2.3).             |
+| Heap               | Term allocation. Grows upward from base. HP tracks top.|
+| Trail              | Undo log for variable bindings. Grows upward. TR tracks top.|
+| Environment stack  | Call frames for non-tail predicates. Grows upward. EP tracks top.|
+| Choice-point stack | Backtracking state snapshots. Grows upward. BP tracks top.|
+
+### 2.3 Register File Layout
+
+The register file occupies 24 consecutive cells starting at `REG_BASE`
+(0x0200). Each register is one cell-width slot.
+
+```
+Offset  Register   Role
+──────────────────────────────────
+ 0      A0         Argument 0
+ 1      A1         Argument 1
+ 2      A2         Argument 2
+ 3      A3         Argument 3
+ 4      A4         Argument 4
+ 5      A5         Argument 5
+ 6      A6         Argument 6
+ 7      A7         Argument 7
+ 8      X0         Temporary 0
+ 9      X1         Temporary 1
+10      X2         Temporary 2
+11      X3         Temporary 3
+12      X4         Temporary 4
+13      X5         Temporary 5
+14      X6         Temporary 6
+15      X7         Temporary 7
+16      PC         Program counter
+17      CP         Continuation pointer
+18      HP         Heap pointer (next free cell)
+19      TR         Trail pointer (next free entry)
+20      EP         Environment pointer
+21      BP         Choice-point pointer
+22      MODE       Unification mode (0=read, 1=write)
+23      UP         Unification stream pointer
+──────────────────────────────────
+```
+
+Register access: `mem[REG_BASE + offset]`.
+
+Argument register `Ai` is at offset `i` (0-7).
+Temporary register `Xi` is at offset `8 + i` (8-15).
+Special registers start at offset 16.
+
+### 2.4 Initial State
+
+On VM reset:
+- All registers zeroed.
+- `HP` set to `HEAP_BASE` (0x0218).
+- `TR` set to `TRAIL_BASE` (0x1218).
+- `EP` set to `ENV_BASE` (0x1618).
+- `BP` set to `CP_BASE` (0x1A18).
+- `PC` set to 0 (start of code area).
+- `MODE` set to 0 (read mode).
+- Heap, trail, environment, and choice-point regions zeroed.
+
+### 2.5 Design Notes
+
+- **Why cell-addressed, not byte-addressed?** COR24 is a 24-bit word
+  machine. Byte addressing would waste tag bits on alignment. Cell
+  addressing keeps pointers compact within 21-bit payloads.
+- **Why fixed-base regions?** Simplicity. No dynamic allocation of
+  regions, no segment registers. A production system might use a more
+  flexible layout, but for an educational VM, fixed bases make
+  debugging and tracing straightforward.
+- **Growth direction**: All dynamic regions (heap, trail, env stack,
+  choice-point stack) grow upward. Overflow is detected by comparing
+  the pointer against `BASE + SIZE`.
+- **Total footprint**: ~7.7K cells. At 24 bits per cell, that is
+  ~23 KB — well within COR24's reach.
