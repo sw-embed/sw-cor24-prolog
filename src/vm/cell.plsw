@@ -1,0 +1,50 @@
+; cell.plsw — Tagged cell constants for the LAM
+;
+; Every value in the LAM is a 24-bit tagged cell:
+;
+;   [23..21] tag  (3 bits)  — term type
+;   [20.. 0] payload (21 bits) — address, integer, or packed field
+;
+; See docs/vm-spec.md for the full specification.
+
+; --- Tag values (top 3 bits) ---
+
+TAG_REF     EQU 0           ; variable reference (heap address)
+TAG_INT     EQU 1           ; small signed integer (21-bit two's complement)
+TAG_ATOM    EQU 2           ; interned atom ID
+TAG_STR     EQU 3           ; structure pointer (heap address of FUN header)
+TAG_LIST    EQU 4           ; list cons-cell pointer (heap address)
+TAG_FUN     EQU 5           ; functor header (atom_id << 5 | arity)
+;           EQU 6           ; (reserved)
+;           EQU 7           ; (reserved)
+
+; --- Masks and shifts ---
+
+TAG_SHIFT       EQU 21
+TAG_MASK        EQU 0x700000   ; bits 23-21
+PAYLOAD_MASK    EQU 0x1FFFFF   ; bits 20-0
+
+; Functor payload sub-fields
+FUN_ARITY_BITS  EQU 5
+FUN_ARITY_MASK  EQU 0x1F       ; bits 4-0 of payload
+FUN_ATOM_SHIFT  EQU 5          ; atom ID starts at bit 5 of payload
+
+; --- Cell construction ---
+;
+; To build a cell:      (tag << TAG_SHIFT) | (payload & PAYLOAD_MASK)
+; To extract tag:       (cell >> TAG_SHIFT) & 0x7
+; To extract payload:   cell & PAYLOAD_MASK
+;
+; Functor payload:
+;   Build:   (atom_id << FUN_ATOM_SHIFT) | arity
+;   Arity:   payload & FUN_ARITY_MASK
+;   Atom ID: (payload >> FUN_ATOM_SHIFT) & 0xFFFF
+
+; --- Unbound variable convention ---
+;
+; An unbound variable at heap address H is stored as:
+;   (TAG_REF << TAG_SHIFT) | H
+;
+; i.e., a REF cell that points to itself. Dereferencing follows
+; REF chains until it reaches a self-referencing REF (unbound)
+; or a non-REF cell (bound value).
