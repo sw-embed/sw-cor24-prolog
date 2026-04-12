@@ -285,22 +285,54 @@ LOAD_FACT_LOOKUP: PROC;
 END;
 
 /* --------------------------------------------------------
+ * Negative test: query parent(bob, joe) against
+ * clause parent(bob, ann). Should FAIL at GET_CONST A1.
+ *
+ * Atoms: 1=bob, 2=ann, 3=joe
+ * -------------------------------------------------------- */
+
+LOAD_FACT_FAIL: PROC;
+    /* Query: ?- parent(bob, joe). */
+    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(2)  = OP_PUT_CONST * OP_MULT + 1 * OP1_MULT;  /* PUT_CONST A1 */
+    MEM(3)  = TAG_ATOM * TAG_MULT + 3;                 /* atom(joe) <-- different */
+    MEM(4)  = OP_CALL * OP_MULT;                       /* CALL */
+    MEM(5)  = 8;                                        /* target: addr 8 */
+    MEM(6)  = OP_HALT * OP_MULT;                       /* HALT */
+
+    /* Clause: parent(bob, ann). at addr 8 */
+    MEM(8)  = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
+    MEM(9)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(10) = OP_GET_CONST * OP_MULT + 1 * OP1_MULT;  /* GET_CONST A1 */
+    MEM(11) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
+    MEM(12) = OP_PROCEED * OP_MULT;                    /* PROCEED */
+END;
+
+/* --------------------------------------------------------
  * Entry point
  * -------------------------------------------------------- */
+
+DCL M_TEST1(20) CHAR INIT('--- fact_lookup ---');
+DCL M_TEST2(20) CHAR INIT('--- fact_fail  ---');
 
 MAIN: PROC;
     CALL UART_PUTS(ADDR(M_INIT));
     CALL UART_PUTCHAR(10);
 
+    /* Test 1: positive case -- should succeed */
+    CALL UART_PUTS(ADDR(M_TEST1));
+    CALL UART_PUTCHAR(10);
     CALL VM_INIT;
     CALL LOAD_FACT_LOOKUP;
     CALL VM_RUN;
+    CALL UART_PUTCHAR(10);
 
-    /* Show final register state */
-    CALL UART_PUTS(ADDR(M_OK));
-    CALL UART_PUTS(ADDR(T_MSG));
-    CALL PRINT_INT(REG_GET(REG_PC));
-    CALL UART_PUTS(ADDR(T_SEP));
-    CALL PRINT_INT(REG_GET(REG_A0));
+    /* Test 2: negative case -- should fail at GET_CONST A1 */
+    CALL UART_PUTS(ADDR(M_TEST2));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_FACT_FAIL;
+    CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 END;

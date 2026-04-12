@@ -1,6 +1,6 @@
 number = 8
 slug = "vm-smoke-test"
-status = "pending"
+status = "in-progress"
 description = "Smoke-test the VM by tracing the fact_lookup execution and verifying correctn..."
 role = "legacy"
 context_files = []

@@ -1,0 +1,64 @@
+fact_lookup_trace.txt -- Manual execution trace for fact_lookup.asm
+====================================================================
+
+Prolog: parent(bob, ann).  ?- parent(bob, ann).
+Atoms:  0=[], 1=bob, 2=ann
+
+Encoding verified: all 13 MEM() values match fact_lookup.asm hex.
+
+Initial state:
+  PC=0  CP=0  HP=536  A0=0  A1=0
+
+Step 1: PC=0  INST=786432  decode: op=12 op1=0 op2=0
+  PUT_CONST A0
+  IMM = MEM(1) = 4194305 = atom(bob)
+  A0 := 4194305
+  PC := 2
+
+Step 2: PC=2  INST=786688  decode: op=12 op1=1 op2=0
+  PUT_CONST A1
+  IMM = MEM(3) = 4194306 = atom(ann)
+  A1 := 4194306
+  PC := 4
+
+Step 3: PC=4  INST=131072  decode: op=2 op1=0 op2=0
+  CALL
+  CP := PC+2 = 6
+  IMM = MEM(5) = 8
+  PC := 8
+
+Step 4: PC=8  INST=1179648  decode: op=18 op1=0 op2=0
+  GET_CONST A0
+  IMM = MEM(9) = 4194305 = atom(bob)
+  A0 = 4194305 = IMM -> MATCH
+  PC := 10
+
+Step 5: PC=10  INST=1179904  decode: op=18 op1=1 op2=0
+  GET_CONST A1
+  IMM = MEM(11) = 4194306 = atom(ann)
+  A1 = 4194306 = IMM -> MATCH
+  PC := 12
+
+Step 6: PC=12  INST=262144  decode: op=4 op1=0 op2=0
+  PROCEED
+  PC := CP = 6
+
+Step 7: PC=6  INST=65536  decode: op=1 op1=0 op2=0
+  HALT
+  G_RUNNING := 0
+
+Final state:
+  PC=6  CP=6  HP=536  A0=4194305(bob)  A1=4194306(ann)
+  Result: SUCCESS
+
+Expected VM output:
+  LAM v0.1
+  PC=0 op=12
+  PC=2 op=12
+  PC=4 op=2
+  PC=8 op=18
+  PC=10 op=18
+  PC=12 op=4
+  PC=6 op=1
+  HALT
+  Success  PC=6 op=4194305
