@@ -1,0 +1,1 @@
+Initial spike complete: VM spec (cells, memory, opcodes, frames), hand-assembled examples, PL/SW VM with 7 opcodes, macro-based decode. All 8 steps done.

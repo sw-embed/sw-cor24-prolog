@@ -1,0 +1,1 @@
+Verified all 13 bytecode cell encodings match fact_lookup.asm. Traced 7 execution steps manually, documented in fact_lookup_trace.txt. Added LOAD_FACT_FAIL negative test (parent(bob,joe) vs parent(bob,ann) -- fails at GET_CONST A1 mismatch). MAIN runs both tests sequentially. No issues found in spec or code. Initial spike complete.
