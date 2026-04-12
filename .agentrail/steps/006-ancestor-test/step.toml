@@ -1,6 +1,6 @@
 number = 6
 slug = "ancestor-test"
-status = "in-progress"
+status = "completed"
 description = """
 Run ancestor(bob, liz) and verify the recursive execution trace.
 
@@ -8,4 +8,5 @@ This step i..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T15:49:03"
-commits = []
+completed_at = "2026-04-12T15:52:14"
+commits = ["4f75ecaf72dbe298d1bbe1d589ca34c2bb6c5b31"]

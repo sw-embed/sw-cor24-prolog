@@ -1,0 +1,1 @@
+Found and fixed critical CP_PUSH bug: BP was left pointing to frame base instead of advancing past it, causing second TRY to overwrite the first frame. Fixed to BP-as-next-free-slot convention matching vm-spec.md. CP_RESTORE now reads from BP-CP_FRAME_SIZE. Wrote full 36-step ancestor trace verifying recursive path through nested TRY/TRUST with correct choice-point stacking.

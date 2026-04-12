@@ -310,5 +310,66 @@ LOAD_ANCESTOR_TEST: PROC;
     MEM(36) = OP_PROCEED * OP_MULT;
 END;
 
+/* --------------------------------------------------------
+ * Test 12: ancestor(bob, X) -- find all answers
+ *
+ * Same clauses as LOAD_ANCESTOR_TEST, but query uses
+ * PUT_VAR for X and a write/nl/fail loop.
+ *
+ * Expected output:
+ *   ann   (ancestor clause 1 -> parent(bob, ann))
+ *   liz   (ancestor clause 2 -> parent(bob,ann), ancestor(ann,liz))
+ *   FAIL  (no more choice points)
+ * -------------------------------------------------------- */
+
+LOAD_ANCESTOR_ALL: PROC;
+    /* Query: ?- ancestor(bob, X), write(X), nl, fail. */
+    MEM(0)  = OP_PUT_CONST * OP_MULT;
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* bob */
+    MEM(2)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1; /* PUT_VAR X0, A1 */
+    MEM(3)  = OP_CALL * OP_MULT;
+    MEM(4)  = 8;                                        /* ancestor entry */
+    MEM(5)  = OP_B_WRITE * OP_MULT + REG_A1 * OP1_MULT; /* B_WRITE A1 */
+    MEM(6)  = OP_B_NL * OP_MULT;
+    MEM(7)  = OP_FAIL * OP_MULT;
+
+    /* ancestor/2 entry (same as LOAD_ANCESTOR_TEST) */
+    MEM(8)  = OP_TRY * OP_MULT;
+    MEM(9)  = 12;
+
+    MEM(10) = OP_EXECUTE * OP_MULT;
+    MEM(11) = 24;
+
+    MEM(12) = OP_TRUST * OP_MULT;
+    MEM(13) = OP_ALLOCATE * OP_MULT + 1 * OP1_MULT;
+    MEM(14) = OP_GET_Y_VAR * OP_MULT + 0 * OP1_MULT + REG_A1;
+    MEM(15) = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1;
+    MEM(16) = OP_CALL * OP_MULT;
+    MEM(17) = 24;
+    MEM(18) = OP_GET_VAR * OP_MULT + REG_X2 * OP1_MULT + REG_A1;
+    MEM(19) = OP_PUT_Y_VAL * OP_MULT + 0 * OP1_MULT + REG_A1;
+    MEM(20) = OP_PUT_VAL * OP_MULT + REG_X2 * OP1_MULT + REG_A0;
+    MEM(21) = OP_DEALLOCATE * OP_MULT;
+    MEM(22) = OP_EXECUTE * OP_MULT;
+    MEM(23) = 8;
+
+    /* parent/2 entry */
+    MEM(24) = OP_TRY * OP_MULT;
+    MEM(25) = 31;
+
+    MEM(26) = OP_GET_CONST * OP_MULT;
+    MEM(27) = TAG_ATOM * TAG_MULT + 1;
+    MEM(28) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(29) = TAG_ATOM * TAG_MULT + 2;
+    MEM(30) = OP_PROCEED * OP_MULT;
+
+    MEM(31) = OP_TRUST * OP_MULT;
+    MEM(32) = OP_GET_CONST * OP_MULT;
+    MEM(33) = TAG_ATOM * TAG_MULT + 2;
+    MEM(34) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(35) = TAG_ATOM * TAG_MULT + 4;
+    MEM(36) = OP_PROCEED * OP_MULT;
+END;
+
 MAIN: PROC;
 END;

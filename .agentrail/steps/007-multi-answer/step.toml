@@ -1,0 +1,11 @@
+number = 7
+slug = "multi-answer"
+status = "in-progress"
+description = """
+Run ancestor(bob, X) to find all answers via backtracking.
+
+Context: The ance..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T15:52:14"
+commits = []
