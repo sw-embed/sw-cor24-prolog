@@ -43,6 +43,7 @@ VM_INIT: PROC;
     CALL REG_SET(REG_HP, HEAP_BASE);
     CALL REG_SET(REG_TR, TRAIL_BASE);
     CALL REG_SET(REG_EP, ENV_BASE);
+    G_ET = ENV_BASE;
     CALL REG_SET(REG_BP, CP_BASE);
     CALL REG_SET(REG_MODE, 0);
 END;
@@ -149,6 +150,34 @@ VM_RUN: PROC;
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
+            /* ALLOCATE n -- 1-cell (op1 = n local slots)
+             * Push environment frame: save EP and CP,
+             * reserve n slots for local variables Y0..Yn-1. */
+            WHEN (G_OP = OP_ALLOCATE) DO;
+                IF (G_ET + ENV_HDR_SIZE + G_OP1 > ENV_BASE + ENV_SIZE) THEN DO;
+                    CALL UART_PUTS(ADDR(M_ENVOV));
+                    G_RUNNING = 0;
+                END;
+                ELSE DO;
+                    MEM(G_ET + ENV_PREV_EP) = REG_GET(REG_EP);
+                    MEM(G_ET + ENV_SAVED_CP) = REG_GET(REG_CP);
+                    CALL REG_SET(REG_EP, G_ET);
+                    G_ET = G_ET + ENV_HDR_SIZE + G_OP1;
+                    CALL REG_SET(REG_PC, PC + 1);
+                END;
+            END;
+
+            /* DEALLOCATE -- 1-cell
+             * Pop environment frame: restore CP and EP. */
+            WHEN (G_OP = OP_DEALLOCATE) DO;
+                DCL D_EP INT;
+                D_EP = REG_GET(REG_EP);
+                CALL REG_SET(REG_CP, MEM(D_EP + ENV_SAVED_CP));
+                G_ET = D_EP;
+                CALL REG_SET(REG_EP, MEM(D_EP + ENV_PREV_EP));
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
             /* FAIL -- 1-cell */
             WHEN (G_OP = OP_FAIL) DO;
                 IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
@@ -212,7 +241,8 @@ END;
 DCL M_INIT(12) CHAR INIT('LAM v0.2   ');
 DCL M_HALT(7) CHAR  INIT('HALT  ');
 DCL M_FAIL(7) CHAR  INIT('FAIL  ');
-DCL M_BADOP(12) CHAR INIT('Bad opcode ');
+DCL M_BADOP(12) CHAR  INIT('Bad opcode ');
+DCL M_ENVOV(15) CHAR INIT('Env overflow  ');
 
 /* --------------------------------------------------------
  * Test labels and display helpers
@@ -227,6 +257,7 @@ DCL M_TEST6(20) CHAR INIT('--- trail      ---');
 DCL M_TEST7(20) CHAR INIT('--- try/trust  ---');
 DCL M_TEST8(20) CHAR INIT('--- backtrack  ---');
 DCL M_TEST9(20) CHAR INIT('--- two_facts  ---');
+DCL M_TESTA(20) CHAR INIT('--- alloc/dealloc-');
 DCL M_BP(5) CHAR    INIT(' BP=');
 DCL M_TR(5) CHAR    INIT(' TR=');
 DCL M_A0(5) CHAR    INIT(' A0=');
@@ -387,6 +418,19 @@ MAIN: PROC;
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
     CALL LOAD_TWO_FACTS;
+    CALL VM_RUN;
+    CALL UART_PUTCHAR(10);
+
+    /* Test 10: allocate/deallocate
+     * wrap(X) :- parent(X, Y). with parent(bob, ann).
+     * Query: ?- wrap(bob).
+     * ALLOCATE saves CP, CALL parent succeeds,
+     * DEALLOCATE restores CP, PROCEED returns to HALT.
+     */
+    CALL UART_PUTS(ADDR(M_TESTA));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_ALLOC_TEST;
     CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 END;

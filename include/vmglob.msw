@@ -21,5 +21,10 @@ DCL G_TMP INT;
 DCL G_TAG INT;
 DCL G_PAY INT;
 
+/* Environment stack top (next free cell).
+ * EP points to the base of the current frame.
+ * G_ET tracks where the next ALLOCATE writes. */
+DCL G_ET INT;
+
 /* VM run flag (1 = running, 0 = halted) */
 DCL G_RUNNING INT;

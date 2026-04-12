@@ -1,6 +1,6 @@
 number = 3
 slug = "env-frames"
-status = "pending"
+status = "in-progress"
 description = """
 Implement ALLOCATE and DEALLOCATE environment frame instructions.
 

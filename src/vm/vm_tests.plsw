@@ -168,5 +168,52 @@ LOAD_TWO_FACTS: PROC;
     MEM(24) = OP_PROCEED * OP_MULT;
 END;
 
+/* --------------------------------------------------------
+ * Test 10: allocate/deallocate
+ * wrap(X) :- parent(X, Y).
+ * parent(bob, ann). (single fact)
+ * ?- wrap(bob).
+ *
+ * wrap/1 uses ALLOCATE 0 (no locals, but saves CP) then
+ * calls parent/2, then DEALLOCATE + PROCEED.
+ *
+ * Layout:
+ *   0-1: PUT_CONST A0, bob       query
+ *   2-3: CALL 6                  call wrap/1
+ *   4:   HALT
+ *   6:   ALLOCATE 0              wrap/1 entry
+ *   7:   PUT_VAR X0, A1          create Y
+ *   8-9: CALL 12                 call parent/2
+ *   10:  DEALLOCATE              restore CP
+ *   11:  PROCEED                 return from wrap
+ *   12-13: GET_CONST A0, bob     parent(bob, ann)
+ *   14-15: GET_CONST A1, ann
+ *   16:  PROCEED
+ * -------------------------------------------------------- */
+
+LOAD_ALLOC_TEST: PROC;
+    /* Query: ?- wrap(bob). */
+    MEM(0)  = OP_PUT_CONST * OP_MULT;
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(2)  = OP_CALL * OP_MULT;
+    MEM(3)  = 6;
+    MEM(4)  = OP_HALT * OP_MULT;
+
+    /* wrap/1: wrap(X) :- parent(X, Y). */
+    MEM(6)  = OP_ALLOCATE * OP_MULT;
+    MEM(7)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1;
+    MEM(8)  = OP_CALL * OP_MULT;
+    MEM(9)  = 12;
+    MEM(10) = OP_DEALLOCATE * OP_MULT;
+    MEM(11) = OP_PROCEED * OP_MULT;
+
+    /* parent(bob, ann). */
+    MEM(12) = OP_GET_CONST * OP_MULT;
+    MEM(13) = TAG_ATOM * TAG_MULT + 1;
+    MEM(14) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(15) = TAG_ATOM * TAG_MULT + 2;
+    MEM(16) = OP_PROCEED * OP_MULT;
+END;
+
 MAIN: PROC;
 END;
