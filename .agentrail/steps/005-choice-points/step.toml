@@ -1,0 +1,11 @@
+number = 5
+slug = "choice-points"
+status = "in-progress"
+description = """
+Implement TRY and TRUST choice-point instructions.
+
+Context: Read src/vm/vm_m..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T14:46:58"
+commits = []

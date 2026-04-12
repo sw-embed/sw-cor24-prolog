@@ -1,0 +1,1 @@
+Added TRAIL_PUSH (with overflow guard) and TRAIL_UNWIND (walk backwards, reset each cell to self-ref REF). Updated BIND to call TRAIL_PUSH before overwriting. Test 6: create 2 vars, bind both, verify TR+2 and deref to atoms, unwind to saved_TR, verify both IS_UNBOUND=1.

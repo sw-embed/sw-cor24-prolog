@@ -1,6 +1,6 @@
 number = 4
 slug = "trail-unwind"
-status = "in-progress"
+status = "completed"
 description = """
 Implement trail push and trail unwind.
 
@@ -8,4 +8,5 @@ Context: Read src/vm/vm_main.plsw —..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T14:44:46"
-commits = []
+completed_at = "2026-04-12T14:46:58"
+commits = ["cd5bfa97867416749b0fe60054bde051ddd863db"]
