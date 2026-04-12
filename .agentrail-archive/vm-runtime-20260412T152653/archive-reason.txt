@@ -1,0 +1,1 @@
+vm-runtime complete: heap, unification, trail, choice points, backtracking. two_facts runs end-to-end with multiple answers. 13 opcodes implemented.

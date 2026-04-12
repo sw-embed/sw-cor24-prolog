@@ -1,6 +1,6 @@
 number = 8
 slug = "two-facts-test"
-status = "in-progress"
+status = "completed"
 description = """
 Load and run the two_facts example end-to-end.
 
@@ -8,4 +8,5 @@ Context: Read src/vm/vm_main...."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T15:15:13"
-commits = []
+completed_at = "2026-04-12T15:25:54"
+commits = ["2998b0687c8d6269f3a1858f4a71f950a704cad7"]
