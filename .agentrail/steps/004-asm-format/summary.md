@@ -1,0 +1,1 @@
+Created docs/asm-spec.md defining the .lam assembler text format: .atom directives, labels, 24 instruction mnemonics with register/constant operand syntax, encoding rules, and a complete ancestor example. One-page spec ready for tool implementation.
