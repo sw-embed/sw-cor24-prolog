@@ -94,6 +94,13 @@ VM_RUN: PROC;
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
+            /* PUT_VAL Xn, Ai -- 1-cell
+             * Copy Xn to Ai (pass existing value to next goal). */
+            WHEN (G_OP = OP_PUT_VAL) DO;
+                CALL REG_SET(G_OP2, REG_GET(G_OP1));
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
             /* GET_VAR Xn, Ai -- 1-cell */
             WHEN (G_OP = OP_GET_VAR) DO;
                 CALL REG_SET(G_OP1, REG_GET(G_OP2));

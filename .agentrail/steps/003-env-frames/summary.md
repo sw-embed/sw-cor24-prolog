@@ -1,0 +1,1 @@
+Added ALLOCATE n (push env frame with saved EP/CP, advance G_ET by 2+n) and DEALLOCATE (restore CP from frame, pop frame). Added G_ET env stack top to vmglob.msw. Test 10: wrap(X):-parent(X,Y) with parent(bob,ann), query wrap(bob) — ALLOCATE saves CP before inner CALL, DEALLOCATE restores it, PROCEED returns correctly.

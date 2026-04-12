@@ -1,6 +1,6 @@
 number = 3
 slug = "env-frames"
-status = "in-progress"
+status = "completed"
 description = """
 Implement ALLOCATE and DEALLOCATE environment frame instructions.
 
@@ -8,4 +8,5 @@ Context: R..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T15:36:17"
-commits = []
+completed_at = "2026-04-12T15:40:32"
+commits = ["38524d6b61f9f3c4dc6745b74880fcbc3c8ae1d8"]
