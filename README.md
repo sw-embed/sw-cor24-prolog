@@ -22,12 +22,34 @@ The goal is educational clarity first, then practical experimentation.
 - `docs/design.md`
 - `docs/plan.md`
 
+## Project Structure
+
+```
+include/          .msw headers (%DEFINE constants, shared DCL)
+  cell.msw        tag values, shift factors
+  memory.msw      region bases, sizes, register offsets
+  opcodes.msw     opcode numbers, decode factors
+  frames.msw      choice-point, environment, trail layouts
+  vmglob.msw      shared MEM array and global declarations
+src/vm/
+  vm_main.plsw    VM entry point: init, dispatch loop, fact_lookup test
+docs/
+  vm-spec.md      bit-level VM specification (cells, memory, opcodes, frames)
+  demos.md        hand-assembled bytecode example descriptions
+examples/
+  ancestor/       fact_lookup.asm, two_facts.asm (hand-assembled bytecode)
+```
+
 ## Status
 
-VM specification in progress (`docs/vm-spec.md`):
-- Tagged cell encoding (3-bit tag, 21-bit payload)
-- Memory map (8 regions, register file layout)
-- Instruction encoding (22 opcodes, 1/2-cell format)
+VM implementation in PL/SW (`src/vm/vm_main.plsw`):
+- Fetch/decode/dispatch loop with trace output
+- Opcodes: NOP, HALT, PUT_CONST, GET_CONST, CALL, PROCEED, FAIL
+- Runs the fact_lookup example (parent(bob, ann) query)
+- Dogfooding the PL/SW compiler (sw-cor24-plsw)
 
-PL/SW constants defined in `src/vm/`: `cell.plsw`, `memory.plsw`,
-`opcodes.plsw`.
+VM specification complete (`docs/vm-spec.md`):
+- Tagged cell encoding (3-bit tag, 21-bit payload)
+- Memory map (8 regions, 24-slot register file)
+- Instruction encoding (22 opcodes, 1/2-cell format)
+- Frame layouts (choice points, environments, trail)

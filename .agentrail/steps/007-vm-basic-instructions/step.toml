@@ -1,8 +1,9 @@
 number = 7
 slug = "vm-basic-instructions"
-status = "in-progress"
+status = "completed"
 description = "Add CALL, PROCEED, FAIL, PUT_CONST, and GET_CONST instruction handlers to the..."
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T14:16:11"
-commits = []
+completed_at = "2026-04-12T14:18:51"
+commits = ["111a457c990663d53f736f3b017088a80f2c311b"]

@@ -1,0 +1,1 @@
+Added five opcode handlers to VM_RUN: PUT_CONST, GET_CONST (equality check), CALL, PROCEED, FAIL (halt-on-fail). Updated MAIN to load and run the fact_lookup example (parent(bob,ann) query). Program encoding uses PL/SW constants and arithmetic.

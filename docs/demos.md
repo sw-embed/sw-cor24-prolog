@@ -1,9 +1,9 @@
 # Demos
 
-Hand-assembled bytecode examples for the LAM virtual machine. These
-are static listings — no VM runtime exists yet to execute them. Each
-file contains hex-encoded bytecode with mnemonic annotations and a
-step-by-step execution trace showing what the VM *would* do.
+Hand-assembled bytecode examples for the LAM virtual machine. The VM
+(`src/vm/vm_main.plsw`) can now run fact_lookup end-to-end. Each file
+contains hex-encoded bytecode with mnemonic annotations and a
+step-by-step execution trace.
 
 ## examples/ancestor/fact_lookup.asm
 
