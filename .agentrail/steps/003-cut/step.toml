@@ -1,6 +1,6 @@
 number = 3
 slug = "cut"
-status = "in-progress"
+status = "completed"
 description = """
 Add CUT opcode.
 
@@ -8,4 +8,5 @@ Context: Read src/vm/vm_main.plsw (VM_RUN dispatch), src/vm/..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T16:08:11"
-commits = []
+completed_at = "2026-04-12T16:12:34"
+commits = ["bf08cfe67d744572502283d2f0af36859317563d"]

@@ -1,0 +1,1 @@
+Added CUT opcode (9): blunt version that sets BP=CP_BASE, removing all choice points. Limitation noted: proper WAM CUT would restore to predicate-entry BP. Test 15: first(X):-color(X),!. prints only red then FAIL (CUT removed color's choice points). 24 opcodes total.
