@@ -1,0 +1,213 @@
+/* vm_main.plsw -- LAM Virtual Machine
+ *
+ * Entry point for the Logic Abstract Machine. Initializes VM
+ * state, loads a test program, and runs the fetch/decode/dispatch
+ * loop.
+ *
+ * Build:
+ *   pipeline.sh include/cell.msw include/memory.msw \
+ *     include/opcodes.msw include/frames.msw \
+ *     include/vmglob.msw src/vm/vm_main.plsw
+ */
+
+%INCLUDE cell;
+%INCLUDE memory;
+%INCLUDE opcodes;
+%INCLUDE frames;
+%INCLUDE vmglob;
+
+/* --------------------------------------------------------
+ * Cell helpers
+ *
+ * These use integer division by powers of 2. COR24 has no
+ * hardware divide, so these go through software divide.
+ *
+ * PLSW-ISSUE: shift intrinsics (SHL, SHR) or a shift
+ * operator would let us replace division with srl/sll
+ * and eliminate the software divide overhead for all
+ * tag/payload extraction.
+ * -------------------------------------------------------- */
+
+/* Extract tag from a 24-bit tagged cell */
+CELL_TAG: PROC(C INT) RETURNS(INT);
+    RETURN(C / TAG_MULT);
+END;
+
+/* Extract payload from a 24-bit tagged cell */
+CELL_PAY: PROC(C INT) RETURNS(INT);
+    DCL T INT;
+    T = C / TAG_MULT;
+    RETURN(C - T * TAG_MULT);
+END;
+
+/* Build a tagged cell from tag and payload */
+MAKE_CELL: PROC(TAG INT, PAY INT) RETURNS(INT);
+    RETURN(TAG * TAG_MULT + PAY);
+END;
+
+/* --------------------------------------------------------
+ * Register access
+ * -------------------------------------------------------- */
+
+REG_GET: PROC(OFF INT) RETURNS(INT);
+    RETURN(MEM(REG_BASE + OFF));
+END;
+
+REG_SET: PROC(OFF INT, VAL INT);
+    MEM(REG_BASE + OFF) = VAL;
+END;
+
+/* --------------------------------------------------------
+ * VM initialization
+ * -------------------------------------------------------- */
+
+VM_INIT: PROC;
+    DCL I INT;
+
+    /* Zero all memory */
+    DO I = 0 TO 7703;
+        MEM(I) = 0;
+    END;
+
+    /* Set initial register values */
+    CALL REG_SET(REG_PC, CODE_BASE);
+    CALL REG_SET(REG_HP, HEAP_BASE);
+    CALL REG_SET(REG_TR, TRAIL_BASE);
+    CALL REG_SET(REG_EP, ENV_BASE);
+    CALL REG_SET(REG_BP, CP_BASE);
+    CALL REG_SET(REG_MODE, 0);
+END;
+
+/* --------------------------------------------------------
+ * Instruction decode
+ *
+ * Splits a 24-bit instruction cell into opcode, op1, op2.
+ * Results stored in globals G_OP, G_OP1, G_OP2.
+ * -------------------------------------------------------- */
+
+DECODE: PROC(INST INT);
+    DCL REM INT;
+    G_OP = INST / OP_MULT;
+    REM = INST - G_OP * OP_MULT;
+    G_OP1 = REM / OP1_MULT;
+    G_OP2 = REM - G_OP1 * OP1_MULT;
+END;
+
+/* --------------------------------------------------------
+ * Trace output
+ *
+ * Prints PC and opcode before each instruction.
+ * -------------------------------------------------------- */
+
+DCL T_MSG(4) CHAR INIT('PC=');
+DCL T_SEP(5) CHAR INIT(' op=');
+
+PRINT_INT: PROC(N INT);
+    DCL D INT;
+    DCL R INT;
+    DCL BUF(8) CHAR;
+    DCL POS INT;
+    DCL NEG INT;
+
+    IF (N = 0) THEN DO;
+        CALL UART_PUTCHAR(48);
+        RETURN;
+    END;
+
+    NEG = 0;
+    IF (N < 0) THEN DO;
+        NEG = 1;
+        N = 0 - N;
+    END;
+
+    POS = 7;
+    BUF(POS) = 0;
+    DO WHILE (N > 0);
+        POS = POS - 1;
+        D = N / 10;
+        R = N - D * 10;
+        BUF(POS) = R + 48;
+        N = D;
+    END;
+
+    IF (NEG = 1) THEN DO;
+        POS = POS - 1;
+        BUF(POS) = 45;
+    END;
+
+    CALL UART_PUTS(ADDR(BUF) + POS);
+END;
+
+VM_TRACE: PROC(PC INT, OP INT);
+    CALL UART_PUTS(ADDR(T_MSG));
+    CALL PRINT_INT(PC);
+    CALL UART_PUTS(ADDR(T_SEP));
+    CALL PRINT_INT(OP);
+    CALL UART_PUTCHAR(10);
+END;
+
+/* --------------------------------------------------------
+ * Fetch / decode / dispatch loop
+ *
+ * Currently handles NOP and HALT. Additional opcodes are
+ * added in separate modules (vm_ctrl.plsw, vm_data.plsw,
+ * etc.) as the VM grows.
+ * -------------------------------------------------------- */
+
+VM_RUN: PROC;
+    DCL PC INT;
+    DCL INST INT;
+
+    G_RUNNING = 1;
+
+    DO WHILE (G_RUNNING = 1);
+        PC = REG_GET(REG_PC);
+        INST = MEM(PC);
+        CALL DECODE(INST);
+        CALL VM_TRACE(PC, G_OP);
+
+        SELECT;
+            WHEN (G_OP = OP_NOP) DO;
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
+            WHEN (G_OP = OP_HALT) DO;
+                CALL UART_PUTS(ADDR(M_HALT));
+                G_RUNNING = 0;
+            END;
+
+            OTHERWISE DO;
+                CALL UART_PUTS(ADDR(M_BADOP));
+                CALL PRINT_INT(G_OP);
+                CALL UART_PUTCHAR(10);
+                G_RUNNING = 0;
+            END;
+        END;
+    END;
+END;
+
+/* --------------------------------------------------------
+ * Messages
+ * -------------------------------------------------------- */
+
+DCL M_INIT(12) CHAR INIT('LAM v0.1   ');
+DCL M_HALT(7) CHAR  INIT('HALT  ');
+DCL M_BADOP(12) CHAR INIT('Bad opcode ');
+
+/* --------------------------------------------------------
+ * Entry point
+ * -------------------------------------------------------- */
+
+MAIN: PROC;
+    CALL UART_PUTS(ADDR(M_INIT));
+    CALL UART_PUTCHAR(10);
+
+    CALL VM_INIT;
+
+    /* Load a minimal test: NOP, NOP, HALT */
+    MEM(CODE_BASE)     = OP_NOP * OP_MULT;
+    MEM(CODE_BASE + 1) = OP_NOP * OP_MULT;
+    MEM(CODE_BASE + 2) = OP_HALT * OP_MULT;
+
+    CALL VM_RUN;
+END;

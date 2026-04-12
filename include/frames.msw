@@ -1,0 +1,32 @@
+/* frames.msw -- Frame layout constants for the LAM
+ *
+ * Choice-point frames, environment frames, and trail entries.
+ * See docs/vm-spec.md section 4.
+ */
+
+/* Choice-point frame: 14 cells, fixed size */
+%DEFINE CP_FRAME_SIZE 14;
+
+%DEFINE CPF_PREV_BP  0;
+%DEFINE CPF_SAVED_CP 1;
+%DEFINE CPF_SAVED_EP 2;
+%DEFINE CPF_SAVED_HP 3;
+%DEFINE CPF_SAVED_TR 4;
+%DEFINE CPF_NEXT_ALT 5;
+%DEFINE CPF_SAVED_A0 6;
+%DEFINE CPF_SAVED_A1 7;
+%DEFINE CPF_SAVED_A2 8;
+%DEFINE CPF_SAVED_A3 9;
+%DEFINE CPF_SAVED_A4 10;
+%DEFINE CPF_SAVED_A5 11;
+%DEFINE CPF_SAVED_A6 12;
+%DEFINE CPF_SAVED_A7 13;
+
+/* Environment frame: 2 + N cells, variable size */
+%DEFINE ENV_HDR_SIZE 2;
+%DEFINE ENV_PREV_EP  0;
+%DEFINE ENV_SAVED_CP 1;
+%DEFINE ENV_Y0       2;
+
+/* Trail entries: 1 cell each (heap address of bound var) */
+%DEFINE TRAIL_ENTRY_SIZE 1;

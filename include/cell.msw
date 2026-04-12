@@ -1,0 +1,39 @@
+/* cell.msw -- Tagged cell constants for the LAM
+ *
+ * Every value in the LAM is a 24-bit tagged cell:
+ *   bits 23-21: tag     (3 bits)  -- term type
+ *   bits 20- 0: payload (21 bits) -- address, integer, or packed field
+ *
+ * See docs/vm-spec.md section 1.
+ */
+
+/* Tag values (top 3 bits) */
+%DEFINE TAG_REF  0;
+%DEFINE TAG_INT  1;
+%DEFINE TAG_ATOM 2;
+%DEFINE TAG_STR  3;
+%DEFINE TAG_LIST 4;
+%DEFINE TAG_FUN  5;
+
+/* Shift factor: 2^21 = 2097152
+ * tag     = cell / TAG_MULT
+ * payload = cell - tag * TAG_MULT
+ * cell    = tag * TAG_MULT + payload
+ *
+ * COR24 has no divide instruction. These use software divide
+ * until the PL/SW compiler can optimize power-of-2 divides
+ * to shifts. See PLSW-ISSUE: srl/sll intrinsics or shift
+ * operator would eliminate the software divide overhead.
+ */
+%DEFINE TAG_MULT 2097152;
+
+/* Maximum payload value: 2^21 - 1 */
+%DEFINE PAYLOAD_MAX 2097151;
+
+/* Functor payload sub-fields:
+ *   atom_id = payload / FUN_ATOM_MULT
+ *   arity   = payload - atom_id * FUN_ATOM_MULT
+ *   payload = atom_id * FUN_ATOM_MULT + arity
+ */
+%DEFINE FUN_ATOM_MULT 32;
+%DEFINE FUN_ARITY_MAX 31;

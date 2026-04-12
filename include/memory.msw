@@ -1,0 +1,62 @@
+/* memory.msw -- Memory map constants for the LAM
+ *
+ * The LAM address space is divided into fixed-base contiguous
+ * regions. All addresses and sizes are in cells (24-bit words).
+ *
+ * See docs/vm-spec.md section 2.
+ */
+
+/* Region base addresses */
+%DEFINE CODE_BASE  0;
+%DEFINE ATOM_BASE  256;
+%DEFINE FUNC_BASE  384;
+%DEFINE REG_BASE   512;
+%DEFINE HEAP_BASE  536;
+%DEFINE TRAIL_BASE 4632;
+%DEFINE ENV_BASE   5656;
+%DEFINE CP_BASE    6680;
+
+/* Region sizes (cells) */
+%DEFINE CODE_SIZE  256;
+%DEFINE ATOM_SIZE  128;
+%DEFINE FUNC_SIZE  128;
+%DEFINE REG_SIZE   24;
+%DEFINE HEAP_SIZE  4096;
+%DEFINE TRAIL_SIZE 1024;
+%DEFINE ENV_SIZE   1024;
+%DEFINE CP_STKSZ   1024;
+
+/* Total cells */
+%DEFINE MEM_TOTAL  7704;
+
+/* Register file offsets (relative to REG_BASE) */
+
+/* Argument registers A0-A7 */
+%DEFINE REG_A0 0;
+%DEFINE REG_A1 1;
+%DEFINE REG_A2 2;
+%DEFINE REG_A3 3;
+%DEFINE REG_A4 4;
+%DEFINE REG_A5 5;
+%DEFINE REG_A6 6;
+%DEFINE REG_A7 7;
+
+/* Temporary registers X0-X7 */
+%DEFINE REG_X0  8;
+%DEFINE REG_X1  9;
+%DEFINE REG_X2 10;
+%DEFINE REG_X3 11;
+%DEFINE REG_X4 12;
+%DEFINE REG_X5 13;
+%DEFINE REG_X6 14;
+%DEFINE REG_X7 15;
+
+/* Special registers */
+%DEFINE REG_PC   16;
+%DEFINE REG_CP   17;
+%DEFINE REG_HP   18;
+%DEFINE REG_TR   19;
+%DEFINE REG_EP   20;
+%DEFINE REG_BP   21;
+%DEFINE REG_MODE 22;
+%DEFINE REG_UP   23;

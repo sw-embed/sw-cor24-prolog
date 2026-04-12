@@ -1,6 +1,6 @@
 number = 6
 slug = "vm-state-init"
-status = "pending"
+status = "in-progress"
 description = """
 Implement VM state initialization in PL/SW.
 

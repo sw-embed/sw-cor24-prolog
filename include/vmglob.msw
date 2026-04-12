@@ -1,0 +1,17 @@
+/* vmglob.msw -- Shared VM global declarations
+ *
+ * Included by all VM modules. Declares the flat memory
+ * array and shared working variables.
+ */
+
+/* The entire VM address space: 7704 cells of 24-bit words */
+DCL MEM(7704) INT;
+
+/* Decoded instruction fields (set by DECODE, read by handlers) */
+DCL G_OP INT;
+DCL G_OP1 INT;
+DCL G_OP2 INT;
+DCL G_IMM INT;
+
+/* VM run flag (1 = running, 0 = halted) */
+DCL G_RUNNING INT;

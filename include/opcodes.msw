@@ -1,0 +1,53 @@
+/* opcodes.msw -- Opcode constants for the LAM
+ *
+ * Each instruction is 1 or 2 cells wide.
+ * Cell 1: bits 23-16 = opcode, 15-8 = op1, 7-0 = op2
+ * Cell 2 (if present): 24-bit immediate
+ *
+ * See docs/vm-spec.md section 3.
+ */
+
+/* Control (0-5) */
+%DEFINE OP_NOP      0;
+%DEFINE OP_HALT     1;
+%DEFINE OP_CALL     2;
+%DEFINE OP_EXECUTE  3;
+%DEFINE OP_PROCEED  4;
+%DEFINE OP_FAIL     5;
+
+/* Choice (6-9) */
+%DEFINE OP_TRY      6;
+%DEFINE OP_RETRY    7;
+%DEFINE OP_TRUST    8;
+
+/* PUT family (10-15) */
+%DEFINE OP_PUT_VAR   10;
+%DEFINE OP_PUT_VAL   11;
+%DEFINE OP_PUT_CONST 12;
+
+/* GET family (16-21) */
+%DEFINE OP_GET_VAR    16;
+%DEFINE OP_GET_VAL    17;
+%DEFINE OP_GET_CONST  18;
+%DEFINE OP_GET_STRUCT 19;
+
+/* UNIFY family (22-27) */
+%DEFINE OP_UNIFY_VAR   22;
+%DEFINE OP_UNIFY_VAL   23;
+%DEFINE OP_UNIFY_CONST 24;
+
+/* Frame management (28-31) */
+%DEFINE OP_ALLOCATE   28;
+%DEFINE OP_DEALLOCATE 29;
+
+/* Builtins (32-63) */
+%DEFINE OP_B_WRITE 32;
+%DEFINE OP_B_NL    33;
+
+/* Decode shift factors:
+ *   opcode = cell / OP_MULT
+ *   op1    = (cell - opcode * OP_MULT) / OP1_MULT
+ *   op2    = cell - opcode * OP_MULT - op1 * OP1_MULT
+ */
+%DEFINE OP_MULT  65536;
+%DEFINE OP1_MULT 256;
