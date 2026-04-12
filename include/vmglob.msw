@@ -7,11 +7,19 @@
 /* The entire VM address space: 7704 cells of 24-bit words */
 DCL MEM(7704) INT;
 
-/* Decoded instruction fields (set by DECODE, read by handlers) */
+/* Current instruction word (input to ?INST_DECODE) */
+DCL G_INST INT;
+
+/* Decoded instruction fields (set by ?INST_DECODE, read by handlers) */
 DCL G_OP INT;
 DCL G_OP1 INT;
 DCL G_OP2 INT;
 DCL G_IMM INT;
+
+/* Scratch globals for macro parameters */
+DCL G_TMP INT;
+DCL G_TAG INT;
+DCL G_PAY INT;
 
 /* VM run flag (1 = running, 0 = halted) */
 DCL G_RUNNING INT;

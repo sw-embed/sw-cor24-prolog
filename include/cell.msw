@@ -15,25 +15,59 @@
 %DEFINE TAG_LIST 4;
 %DEFINE TAG_FUN  5;
 
-/* Shift factor: 2^21 = 2097152
- * tag     = cell / TAG_MULT
- * payload = cell - tag * TAG_MULT
- * cell    = tag * TAG_MULT + payload
- *
- * COR24 has no divide instruction. These use software divide
- * until the PL/SW compiler can optimize power-of-2 divides
- * to shifts. See PLSW-ISSUE: srl/sll intrinsics or shift
- * operator would eliminate the software divide overhead.
- */
+/* Arithmetic shift factors (kept for PROC-level fallback) */
 %DEFINE TAG_MULT 2097152;
-
-/* Maximum payload value: 2^21 - 1 */
 %DEFINE PAYLOAD_MAX 2097151;
-
-/* Functor payload sub-fields:
- *   atom_id = payload / FUN_ATOM_MULT
- *   arity   = payload - atom_id * FUN_ATOM_MULT
- *   payload = atom_id * FUN_ATOM_MULT + arity
- */
 %DEFINE FUN_ATOM_MULT 32;
 %DEFINE FUN_ARITY_MAX 31;
+
+/* --------------------------------------------------------
+ * Cell macros -- COR24 assembly via srl/sll/and/or
+ *
+ * These avoid software divide entirely by generating
+ * shift and mask instructions inline.
+ *
+ * Parameters are (expr) for source addresses and
+ * (lvalue) for destination addresses. Call with ADDR():
+ *   ?CELL_GET_TAG(SRC(ADDR(myvar)), DST(ADDR(result)));
+ * -------------------------------------------------------- */
+
+/* Extract tag: dst = src >> 21 */
+MACRODEF CELL_GET_TAG;
+    REQUIRED SRC(expr); REQUIRED DST(lvalue);
+    GEN DO;
+        'la r0,{SRC}';
+        'lw r0,0(r0)';
+        'srl r0,r0,21';
+        'la r1,{DST}';
+        'sw r0,0(r1)';
+    END;
+END;
+
+/* Extract payload: dst = src & 2097151 */
+MACRODEF CELL_GET_PAY;
+    REQUIRED SRC(expr); REQUIRED DST(lvalue);
+    GEN DO;
+        'la r0,{SRC}';
+        'lw r0,0(r0)';
+        'la r1,2097151';
+        'and r0,r0,r1';
+        'la r1,{DST}';
+        'sw r0,0(r1)';
+    END;
+END;
+
+/* Build cell: dst = (tag << 21) | payload */
+MACRODEF CELL_MAKE;
+    REQUIRED TAG(expr); REQUIRED PAY(expr); REQUIRED DST(lvalue);
+    GEN DO;
+        'la r0,{TAG}';
+        'lw r0,0(r0)';
+        'sll r0,r0,21';
+        'la r1,{PAY}';
+        'lw r1,0(r1)';
+        'or r0,r0,r1';
+        'la r1,{DST}';
+        'sw r0,0(r1)';
+    END;
+END;
