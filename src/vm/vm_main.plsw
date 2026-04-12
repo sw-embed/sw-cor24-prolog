@@ -391,6 +391,13 @@ VM_RUN: PROC;
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
+            /* GET_VAR Xn, Ai -- 1-cell
+             * Copy Ai to Xn (first occurrence in head). */
+            WHEN (G_OP = OP_GET_VAR) DO;
+                CALL REG_SET(G_OP1, REG_GET(G_OP2));
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
             /* GET_CONST Ai, [imm] -- 2-cell
              * Unify Ai with tagged constant from next cell.
              * Dereferences Ai first: if unbound REF, bind

@@ -1,0 +1,1 @@
+Split CP_POP into CP_RESTORE (restore without pop, for FAIL) and CP_POP (restore + pop, for TRUST). FAIL now backtracks via choice points: checks BP != CP_BASE, calls CP_RESTORE, jumps to next_alt. GET_CONST mismatch also triggers backtracking. Test 8: pred(ann) against pred(bob)/pred(ann), clause1 fails, backtracks to clause2 which matches — first successful backtracking.
