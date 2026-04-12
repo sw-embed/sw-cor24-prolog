@@ -170,6 +170,20 @@ VM_RUN: PROC;
                 CALL REG_SET(REG_PC, PC + 2);
             END;
 
+            /* RETRY [imm] -- 2-cell
+             * Middle alternative: restore from choice point,
+             * update next_alt to [imm], fall through. */
+            WHEN (G_OP = OP_RETRY) DO;
+                DCL RT_DUMMY INT;
+                DCL RT_FB INT;
+                RT_DUMMY = CP_RESTORE;
+                /* Update next_alt in the current frame */
+                RT_FB = REG_GET(REG_BP) - CP_FRAME_SIZE;
+                IMM = MEM(PC + 1);
+                CALL CP_WRITE(RT_FB, CPF_NEXT_ALT, IMM);
+                CALL REG_SET(REG_PC, PC + 2);
+            END;
+
             /* TRUST -- 1-cell */
             WHEN (G_OP = OP_TRUST) DO;
                 DCL TR_DUMMY INT;
@@ -287,6 +301,7 @@ DCL M_TEST9(20) CHAR INIT('--- two_facts  ---');
 DCL M_TESTA(20) CHAR INIT('--- alloc/dealloc-');
 DCL M_TESTB(20) CHAR INIT('--- ancestor    ---');
 DCL M_TESTC(20) CHAR INIT('--- ancestor X  ---');
+DCL M_TESTD(20) CHAR INIT('--- retry 3cls  ---');
 DCL M_BP(5) CHAR    INIT(' BP=');
 DCL M_TR(5) CHAR    INIT(' TR=');
 DCL M_A0(5) CHAR    INIT(' A0=');
@@ -486,6 +501,18 @@ MAIN: PROC;
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
     CALL LOAD_ANCESTOR_ALL;
+    CALL VM_RUN;
+    CALL UART_PUTCHAR(10);
+
+    /* Test 13: RETRY -- 3-clause predicate
+     * color(red). color(green). color(blue).
+     * ?- color(X), write(X), nl, fail.
+     * Expected: red green blue FAIL
+     */
+    CALL UART_PUTS(ADDR(M_TESTD));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_RETRY_TEST;
     CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 END;

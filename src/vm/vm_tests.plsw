@@ -371,5 +371,71 @@ LOAD_ANCESTOR_ALL: PROC;
     MEM(36) = OP_PROCEED * OP_MULT;
 END;
 
+/* --------------------------------------------------------
+ * Test 13: RETRY -- 3-clause predicate
+ *
+ * color(red). color(green). color(blue).
+ * ?- color(X), write(X), nl, fail.
+ *
+ * Uses TRY/RETRY/TRUST chain for 3 clauses.
+ * Expected output: red green blue FAIL
+ *
+ * Layout:
+ *   0:   PUT_VAR X0, A0         query: X = unbound
+ *   1-2: CALL 5                 call color/1
+ *   3:   B_WRITE A0
+ *   4:   B_NL
+ *   5:   FAIL                   -- wait, FAIL is at 5 but CALL target is also 5
+ *
+ * Let me re-layout:
+ *   0:   PUT_VAR X0, A0
+ *   1-2: CALL 6                 call color/1 at addr 6
+ *   3:   B_WRITE A0
+ *   4:   B_NL
+ *   5:   FAIL
+ *
+ *   6-7: TRY 12                 color entry, alt=clause2
+ *   8-9: GET_CONST A0, red      clause1
+ *   10:  PROCEED
+ *   12-13: RETRY 18             clause2 entry, alt=clause3
+ *   14-15: GET_CONST A0, green
+ *   16:  PROCEED
+ *   18:  TRUST                  clause3 entry
+ *   19-20: GET_CONST A0, blue
+ *   21:  PROCEED
+ * -------------------------------------------------------- */
+
+LOAD_RETRY_TEST: PROC;
+    /* Query */
+    MEM(0)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A0;
+    MEM(1)  = OP_CALL * OP_MULT;
+    MEM(2)  = 6;
+    MEM(3)  = OP_B_WRITE * OP_MULT + REG_A0 * OP1_MULT;
+    MEM(4)  = OP_B_NL * OP_MULT;
+    MEM(5)  = OP_FAIL * OP_MULT;
+
+    /* color/1 entry: TRY/RETRY/TRUST */
+    MEM(6)  = OP_TRY * OP_MULT;
+    MEM(7)  = 12;                                       /* alt: clause2 */
+
+    /* clause1: color(red). */
+    MEM(8)  = OP_GET_CONST * OP_MULT;
+    MEM(9)  = TAG_ATOM * TAG_MULT + 7;                 /* red */
+    MEM(10) = OP_PROCEED * OP_MULT;
+
+    /* clause2: color(green). */
+    MEM(12) = OP_RETRY * OP_MULT;
+    MEM(13) = 18;                                       /* alt: clause3 */
+    MEM(14) = OP_GET_CONST * OP_MULT;
+    MEM(15) = TAG_ATOM * TAG_MULT + 8;                 /* green */
+    MEM(16) = OP_PROCEED * OP_MULT;
+
+    /* clause3: color(blue). */
+    MEM(18) = OP_TRUST * OP_MULT;
+    MEM(19) = OP_GET_CONST * OP_MULT;
+    MEM(20) = TAG_ATOM * TAG_MULT + 9;                 /* blue */
+    MEM(21) = OP_PROCEED * OP_MULT;
+END;
+
 MAIN: PROC;
 END;

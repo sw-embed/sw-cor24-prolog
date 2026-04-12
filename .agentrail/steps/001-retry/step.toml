@@ -1,6 +1,6 @@
 number = 1
 slug = "retry"
-status = "pending"
+status = "in-progress"
 description = """
 Add RETRY opcode handler for predicates with 3+ clauses.
 

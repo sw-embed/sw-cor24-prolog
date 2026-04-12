@@ -84,6 +84,9 @@ ATOM_INIT: PROC;
     /* 4: liz      */  CALL ATOM_STORE(4, 108, 105, 122, 0, 0, 0, 0);
     /* 5: parent   */  CALL ATOM_STORE(5, 112, 97, 114, 101, 110, 116, 0);
     /* 6: ancestor */  CALL ATOM_STORE(6, 97, 110, 99, 101, 115, 116, 111);
+    /* 7: red      */  CALL ATOM_STORE(7, 114, 101, 100, 0, 0, 0, 0);
+    /* 8: green    */  CALL ATOM_STORE(8, 103, 114, 101, 101, 110, 0, 0);
+    /* 9: blue     */  CALL ATOM_STORE(9, 98, 108, 117, 101, 0, 0, 0);
 END;
 
 ATOM_PRINT: PROC(ID INT);
