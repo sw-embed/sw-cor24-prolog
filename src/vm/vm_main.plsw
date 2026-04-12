@@ -216,14 +216,17 @@ END;
  * Unwinds trail, resets HP, restores A0-A7 and CP/EP.
  * Pops the frame by setting BP = prev_BP.
  * Returns the next_alt address so the caller can jump there. */
-CP_POP: PROC RETURNS(INT);
+/* Restore state from the current choice-point frame WITHOUT
+ * popping it. Used by FAIL to jump to the alternative.
+ * Unwinds trail, resets HP, restores A0-A7 and CP/EP.
+ * Returns the next_alt address. BP is unchanged. */
+CP_RESTORE: PROC RETURNS(INT);
     DCL FB INT;
-    DCL ALT INT;
     DCL SAVED_TR INT;
     DCL SAVED_HP INT;
     FB = REG_GET(REG_BP);
 
-    /* Unwind trail and reset heap first */
+    /* Unwind trail and reset heap */
     SAVED_TR = CP_READ(FB, CPF_SAVED_TR);
     SAVED_HP = CP_READ(FB, CPF_SAVED_HP);
     CALL TRAIL_UNWIND(SAVED_TR);
@@ -241,9 +244,15 @@ CP_POP: PROC RETURNS(INT);
     CALL REG_SET(REG_A6, CP_READ(FB, CPF_SAVED_A6));
     CALL REG_SET(REG_A7, CP_READ(FB, CPF_SAVED_A7));
 
-    /* Get alt and pop */
-    ALT = CP_READ(FB, CPF_NEXT_ALT);
-    CALL REG_SET(REG_BP, CP_READ(FB, CPF_PREV_BP));
+    RETURN(CP_READ(FB, CPF_NEXT_ALT));
+END;
+
+/* Restore state AND pop the choice-point frame.
+ * Used by TRUST (last alternative). */
+CP_POP: PROC RETURNS(INT);
+    DCL ALT INT;
+    ALT = CP_RESTORE;
+    CALL REG_SET(REG_BP, CP_READ(REG_GET(REG_BP), CPF_PREV_BP));
     RETURN(ALT);
 END;
 
@@ -398,8 +407,14 @@ VM_RUN: PROC;
                         CALL REG_SET(REG_PC, PC + 2);
                     END;
                     ELSE DO;
-                        CALL UART_PUTS(ADDR(M_FAIL));
-                        G_RUNNING = 0;
+                        /* Mismatch -- trigger backtracking */
+                        IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
+                            CALL UART_PUTS(ADDR(M_FAIL));
+                            G_RUNNING = 0;
+                        END;
+                        ELSE DO;
+                            CALL REG_SET(REG_PC, CP_RESTORE);
+                        END;
                     END;
                 END;
             END;
@@ -438,11 +453,18 @@ VM_RUN: PROC;
             END;
 
             /* FAIL -- 1-cell
-             * Force backtracking. No choice points yet,
-             * so just halt with failure. */
+             * Backtrack: restore from choice point and jump
+             * to next_alt. If no choice points, halt. */
             WHEN (G_OP = OP_FAIL) DO;
-                CALL UART_PUTS(ADDR(M_FAIL));
-                G_RUNNING = 0;
+                IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
+                    CALL UART_PUTS(ADDR(M_FAIL));
+                    G_RUNNING = 0;
+                END;
+                ELSE DO;
+                    DCL ALT_ADDR INT;
+                    ALT_ADDR = CP_RESTORE;
+                    CALL REG_SET(REG_PC, ALT_ADDR);
+                END;
             END;
 
             OTHERWISE DO;
@@ -619,6 +641,38 @@ LOAD_TRY_TEST: PROC;
 END;
 
 /* --------------------------------------------------------
+ * Backtracking test: query pred(ann) against pred(bob)/pred(ann).
+ * Clause1 fails at GET_CONST (bob != ann), backtracks to
+ * clause2 via TRUST, which matches. Should succeed.
+ *
+ * Same code layout as LOAD_TRY_TEST but query uses atom(ann).
+ * -------------------------------------------------------- */
+
+LOAD_BACKTRACK_TEST: PROC;
+    /* Query: ?- pred(ann). */
+    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
+    MEM(1)  = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
+    MEM(2)  = OP_CALL * OP_MULT;                       /* CALL */
+    MEM(3)  = 6;                                        /* target: pred/1 */
+    MEM(4)  = OP_HALT * OP_MULT;                       /* HALT */
+
+    /* pred/1 dispatch */
+    MEM(6)  = OP_TRY * OP_MULT;                        /* TRY */
+    MEM(7)  = 12;                                       /* alt: clause2 */
+
+    /* clause1: pred(bob). -- will fail */
+    MEM(8)  = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
+    MEM(9)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(10) = OP_PROCEED * OP_MULT;                    /* PROCEED */
+
+    /* clause2: pred(ann). -- will match */
+    MEM(12) = OP_TRUST * OP_MULT;                      /* TRUST */
+    MEM(13) = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
+    MEM(14) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
+    MEM(15) = OP_PROCEED * OP_MULT;                    /* PROCEED */
+END;
+
+/* --------------------------------------------------------
  * Entry point
  * -------------------------------------------------------- */
 
@@ -629,6 +683,7 @@ DCL M_TEST4(20) CHAR INIT('--- deref_bind ---');
 DCL M_TEST5(20) CHAR INIT('--- unify_var  ---');
 DCL M_TEST6(20) CHAR INIT('--- trail      ---');
 DCL M_TEST7(20) CHAR INIT('--- try/trust  ---');
+DCL M_TEST8(20) CHAR INIT('--- backtrack  ---');
 DCL M_BP(5) CHAR    INIT(' BP=');
 DCL M_TR(5) CHAR    INIT(' TR=');
 DCL M_A0(5) CHAR    INIT(' A0=');
@@ -805,6 +860,24 @@ MAIN: PROC;
     CALL VM_RUN;
     CALL UART_PUTS(ADDR(M_BP));
     CALL PRINT_INT(REG_GET(REG_BP));
+    CALL UART_PUTS(ADDR(M_A0));
+    CALL PRINT_INT(REG_GET(REG_A0));
+    CALL UART_PUTCHAR(10);
+
+    /* Test 8: Backtracking via FAIL
+     * Query pred(ann) against pred(bob) / pred(ann).
+     * Clause1 fails (bob != ann), backtracks to clause2.
+     * TRUST pops choice point, GET_CONST matches ann, PROCEED.
+     *
+     * Trace should show:
+     *   TRY -> GET_CONST A0 bob (fail, backtrack) ->
+     *   TRUST -> GET_CONST A0 ann (match) -> PROCEED -> HALT
+     */
+    CALL UART_PUTS(ADDR(M_TEST8));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_BACKTRACK_TEST;
+    CALL VM_RUN;
     CALL UART_PUTS(ADDR(M_A0));
     CALL PRINT_INT(REG_GET(REG_A0));
     CALL UART_PUTCHAR(10);
