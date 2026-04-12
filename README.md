@@ -25,19 +25,24 @@ The goal is educational clarity first, then practical experimentation.
 ## Project Structure
 
 ```
-include/          .msw headers (%DEFINE constants, shared DCL)
-  cell.msw        tag values, shift factors
-  memory.msw      region bases, sizes, register offsets
-  opcodes.msw     opcode numbers, decode factors
-  frames.msw      choice-point, environment, trail layouts
-  vmglob.msw      shared MEM array and global declarations
-src/vm/
-  vm_main.plsw    VM entry point: init, dispatch loop, fact_lookup test
+include/            .msw headers (%DEFINE constants, shared DCL)
+  cell.msw          tag values, shift factors, MACRODEF cell ops
+  memory.msw        region bases, sizes, register offsets
+  opcodes.msw       opcode numbers, decode factors, MACRODEF decode
+  frames.msw        choice-point, environment, trail layouts
+  vmglob.msw        shared MEM array and global declarations
+src/vm/             PL/SW modules (multi-module build)
+  vm_main.plsw      entry point: VM_INIT, VM_RUN dispatch, MAIN
+  vm_regs.plsw      REG_GET, REG_SET
+  vm_heap.plsw      cell helpers, heap alloc, deref, bind, trail
+  vm_choice.plsw    choice-point push/restore/pop
+  vm_io.plsw        PRINT_INT, VM_TRACE, atom table
+  vm_tests.plsw     test program loaders
 docs/
-  vm-spec.md      bit-level VM specification (cells, memory, opcodes, frames)
-  demos.md        hand-assembled bytecode example descriptions
+  vm-spec.md        bit-level VM specification
+  demos.md          hand-assembled bytecode descriptions
 examples/
-  ancestor/       fact_lookup.asm, two_facts.asm (hand-assembled bytecode)
+  ancestor/         fact_lookup.asm, two_facts.asm
 ```
 
 ## Status

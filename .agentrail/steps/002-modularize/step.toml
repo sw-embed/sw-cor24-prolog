@@ -1,6 +1,6 @@
 number = 2
 slug = "modularize"
-status = "in-progress"
+status = "completed"
 description = """
 Split vm_main.plsw into modular PL/SW files.
 
@@ -8,4 +8,5 @@ Context: vm_main.plsw is now ~1..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T15:29:42"
-commits = []
+completed_at = "2026-04-12T15:36:17"
+commits = ["569f8a2ef8349d49a0b8ba06402fec583954f745"]
