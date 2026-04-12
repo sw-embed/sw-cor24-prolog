@@ -1,7 +1,13 @@
 /* vm_choice.plsw -- Choice-point frame operations
  *
- * CP_PUSH, CP_RESTORE, CP_POP for save/restore/pop of
- * choice-point frames during TRY/TRUST/FAIL.
+ * BP convention: BP points to the NEXT FREE SLOT on the
+ * choice-point stack (like HP for the heap). The most recent
+ * frame is at BP - CP_FRAME_SIZE. BP == CP_BASE means no
+ * choice points exist.
+ *
+ * prev_BP in each frame stores the BP value BEFORE the push
+ * (i.e., the frame's own base address). Pop restores BP to
+ * prev_BP, which removes the frame.
  */
 %DEFINE LIBRARY;
 
@@ -17,40 +23,42 @@ CP_WRITE: PROC(BASE INT, OFF INT, VAL INT);
     MEM(BASE + OFF) = VAL;
 END;
 
+/* Push a choice-point frame at current BP, advance BP.
+ * ALT = code address of next alternative clause. */
 CP_PUSH: PROC(ALT INT);
-    DCL OLD_BP INT;
-    DCL NEW_BP INT;
-    OLD_BP = REG_GET(REG_BP);
-    NEW_BP = OLD_BP;
-    IF (OLD_BP != CP_BASE) THEN
-        NEW_BP = OLD_BP + CP_FRAME_SIZE;
-    IF (NEW_BP + CP_FRAME_SIZE > CP_BASE + CP_STKSZ) THEN DO;
+    DCL FB INT;
+    FB = REG_GET(REG_BP);
+    IF (FB + CP_FRAME_SIZE > CP_BASE + CP_STKSZ) THEN DO;
         CALL UART_PUTS(ADDR(M_CPOV));
         G_RUNNING = 0;
         RETURN;
     END;
-    CALL CP_WRITE(NEW_BP, CPF_PREV_BP,  OLD_BP);
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_CP, REG_GET(REG_CP));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_EP, REG_GET(REG_EP));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_HP, REG_GET(REG_HP));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_TR, REG_GET(REG_TR));
-    CALL CP_WRITE(NEW_BP, CPF_NEXT_ALT, ALT);
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A0, REG_GET(REG_A0));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A1, REG_GET(REG_A1));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A2, REG_GET(REG_A2));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A3, REG_GET(REG_A3));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A4, REG_GET(REG_A4));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A5, REG_GET(REG_A5));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A6, REG_GET(REG_A6));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A7, REG_GET(REG_A7));
-    CALL REG_SET(REG_BP, NEW_BP);
+    CALL CP_WRITE(FB, CPF_PREV_BP,  FB);
+    CALL CP_WRITE(FB, CPF_SAVED_CP, REG_GET(REG_CP));
+    CALL CP_WRITE(FB, CPF_SAVED_EP, REG_GET(REG_EP));
+    CALL CP_WRITE(FB, CPF_SAVED_HP, REG_GET(REG_HP));
+    CALL CP_WRITE(FB, CPF_SAVED_TR, REG_GET(REG_TR));
+    CALL CP_WRITE(FB, CPF_NEXT_ALT, ALT);
+    CALL CP_WRITE(FB, CPF_SAVED_A0, REG_GET(REG_A0));
+    CALL CP_WRITE(FB, CPF_SAVED_A1, REG_GET(REG_A1));
+    CALL CP_WRITE(FB, CPF_SAVED_A2, REG_GET(REG_A2));
+    CALL CP_WRITE(FB, CPF_SAVED_A3, REG_GET(REG_A3));
+    CALL CP_WRITE(FB, CPF_SAVED_A4, REG_GET(REG_A4));
+    CALL CP_WRITE(FB, CPF_SAVED_A5, REG_GET(REG_A5));
+    CALL CP_WRITE(FB, CPF_SAVED_A6, REG_GET(REG_A6));
+    CALL CP_WRITE(FB, CPF_SAVED_A7, REG_GET(REG_A7));
+    CALL REG_SET(REG_BP, FB + CP_FRAME_SIZE);
 END;
 
+/* Restore state from most recent frame WITHOUT popping.
+ * Used by FAIL to jump to the alternative.
+ * Unwinds trail, resets HP, restores A0-A7 and CP/EP.
+ * Returns the next_alt address. BP unchanged. */
 CP_RESTORE: PROC RETURNS(INT);
     DCL FB INT;
     DCL SAVED_TR INT;
     DCL SAVED_HP INT;
-    FB = REG_GET(REG_BP);
+    FB = REG_GET(REG_BP) - CP_FRAME_SIZE;
 
     SAVED_TR = CP_READ(FB, CPF_SAVED_TR);
     SAVED_HP = CP_READ(FB, CPF_SAVED_HP);
@@ -71,10 +79,13 @@ CP_RESTORE: PROC RETURNS(INT);
     RETURN(CP_READ(FB, CPF_NEXT_ALT));
 END;
 
+/* Restore state AND pop the frame. Used by TRUST. */
 CP_POP: PROC RETURNS(INT);
     DCL ALT INT;
+    DCL FB INT;
     ALT = CP_RESTORE;
-    CALL REG_SET(REG_BP, CP_READ(REG_GET(REG_BP), CPF_PREV_BP));
+    FB = REG_GET(REG_BP) - CP_FRAME_SIZE;
+    CALL REG_SET(REG_BP, CP_READ(FB, CPF_PREV_BP));
     RETURN(ALT);
 END;
 

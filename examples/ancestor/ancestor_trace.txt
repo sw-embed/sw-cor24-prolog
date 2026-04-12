@@ -1,0 +1,101 @@
+ancestor_trace.txt -- Execution trace for ancestor(bob, liz)
+================================================================
+
+Prolog:
+  parent(bob, ann). parent(ann, liz).
+  ancestor(X, Y) :- parent(X, Y).
+  ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+  ?- ancestor(bob, liz).
+
+Atoms: 1=bob(4194305) 2=ann(4194306) 4=liz(4194308)
+
+Initial: PC=0 CP=0 HP=536 TR=4632 EP=5656 BP=6680(=CP_BASE)
+
+--- Phase 1: Query setup ---
+
+PC=0  PUT_CONST A0, bob       A0=4194305, PC=2
+PC=2  PUT_CONST A1, liz       A1=4194308, PC=4
+PC=4  CALL 8                  CP=6, PC=8
+
+--- Phase 2: ancestor clause 1 (tail call parent) ---
+
+PC=8  TRY 12                  Push CP#1 at 6680: saves CP=6, A0=bob, A1=liz
+                               BP = 6694
+PC=10 EXECUTE 24              PC=24 (tail call parent, CP still 6)
+
+--- Phase 3: parent tries to match (bob, liz) ---
+
+PC=24 TRY 31                  Push CP#2 at 6694: saves CP=6, A0=bob, A1=liz
+                               BP = 6708
+PC=26 GET_CONST A0, bob       A0=bob=bob, MATCH. PC=28
+PC=28 GET_CONST A1, ann       A1=liz(4194308) != ann(4194306), FAIL
+                               Backtrack: CP_RESTORE from CP#2 (at 6694)
+                               Restore A0=bob, A1=liz, unwind trail. PC=31
+
+PC=31 TRUST                   CP_POP: restore + pop CP#2. BP=6694. PC=32
+PC=32 GET_CONST A0, ann       DEREF(A0)=bob != ann. FAIL
+                               Backtrack: CP_RESTORE from CP#1 (at 6680)
+                               Restore A0=bob, A1=liz, CP=6. PC=12
+
+--- Phase 4: ancestor clause 2 (recursive) ---
+
+PC=12 TRUST                   CP_POP: restore + pop CP#1. BP=6680(=CP_BASE). PC=13
+PC=13 ALLOCATE 1              Env frame at 5656: prev_EP=5656, saved_CP=6
+                               EP=5656, G_ET=5659. PC=14
+PC=14 GET_Y_VAR Y0, A1        Y0 = A1 = liz(4194308). PC=15
+PC=15 PUT_VAR X0, A1          Heap[536] = REF(536). X0=A1=536. HP=537. PC=16
+PC=16 CALL 24                 CP=18, PC=24
+
+--- Phase 5: parent(bob, Z) where Z=REF(536) ---
+
+PC=24 TRY 31                  Push CP#3 at 6680: saves CP=18, A0=bob, A1=536
+                               BP=6694
+PC=26 GET_CONST A0, bob       DEREF(A0)=bob=bob, MATCH. PC=28
+PC=28 GET_CONST A1, ann       DEREF(A1)=DEREF(536)=536 (self-ref, unbound)
+                               IS_UNBOUND -> BIND heap[536]=ann(4194306)
+                               Trail: TR records 536. TR=4633. PC=30
+PC=30 PROCEED                 PC=CP=18
+
+--- Phase 6: Back in ancestor clause 2, set up recursive call ---
+
+PC=18 GET_VAR X2, A1          X2 = A1 = 536 (Z ref, now bound to ann). PC=19
+PC=19 PUT_Y_VAL Y0, A1        A1 = Y0 = liz(4194308). PC=20
+PC=20 PUT_VAL X2, A0          A0 = X2 = 536 (Z ref -> ann). PC=21
+PC=21 DEALLOCATE              CP = saved_CP = 6. G_ET=5656. EP=5656. PC=22
+PC=22 EXECUTE 8               PC=8 (tail call ancestor(Z, liz), CP=6)
+
+--- Phase 7: ancestor(ann, liz) -- clause 1 tail calls parent ---
+
+PC=8  TRY 12                  Push CP#4 at 6694: saves CP=6, A0=536(->ann), A1=liz
+                               BP=6708
+PC=10 EXECUTE 24              PC=24 (tail call parent, CP=6)
+
+--- Phase 8: parent tries to match (ann, liz) ---
+
+PC=24 TRY 31                  Push CP#5 at 6708: saves CP=6, A0=536(->ann), A1=liz
+                               BP=6722
+PC=26 GET_CONST A0, bob       DEREF(A0)=DEREF(536)=ann. ann != bob. FAIL
+                               Backtrack: CP_RESTORE from CP#5 (at 6708)
+                               Restore A0=536(->ann), A1=liz. PC=31
+
+PC=31 TRUST                   CP_POP: pop CP#5. BP=6708. PC=32
+PC=32 GET_CONST A0, ann       DEREF(A0)=ann=ann, MATCH. PC=34
+PC=34 GET_CONST A1, liz       A1=liz=liz, MATCH. PC=36
+PC=36 PROCEED                 PC=CP=6
+
+--- Phase 9: SUCCESS ---
+
+PC=6  HALT                    Done!
+
+Final state: A0=536(->ann), A1=liz(4194308)
+Result: SUCCESS -- ancestor(bob, liz) proved via recursion.
+
+Resolution path:
+  ancestor(bob, liz)
+    clause2: parent(bob, Z) -> Z=ann
+    ancestor(ann, liz)
+      clause1: parent(ann, liz) -> match!
+
+Note: CP#3 and CP#4 are left on the choice-point stack (orphaned).
+This is normal WAM behavior -- they would be used if FAIL were
+called to find additional proofs.

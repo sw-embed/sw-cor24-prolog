@@ -1,0 +1,1 @@
+Added EXECUTE (tail call), GET_Y_VAR (copy Ai to Y[i]), PUT_Y_VAL (copy Y[i] to Ai), Y_GET/Y_SET helpers. Encoded full ancestor/2 program (37 cells): two parent facts, two ancestor clauses with TRY/TRUST, ALLOCATE/DEALLOCATE for recursive clause, Y0 for saving Y across CALL. Test 11: ancestor(bob,liz) should succeed via parent(bob,ann)+parent(ann,liz). 18 opcodes total.

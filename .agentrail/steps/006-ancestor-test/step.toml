@@ -1,0 +1,11 @@
+number = 6
+slug = "ancestor-test"
+status = "in-progress"
+description = """
+Run ancestor(bob, liz) and verify the recursive execution trace.
+
+This step i..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T15:49:03"
+commits = []
