@@ -1,0 +1,1 @@
+Created three .lam assembler examples: two_facts.lam (TRY/TRUST write loop), ancestor_all.lam (recursive multi-answer), retry.lam (TRY/RETRY/TRUST 3-clause). All assemble correctly with verified hex output. Assembler handles gap-free address layout automatically.
