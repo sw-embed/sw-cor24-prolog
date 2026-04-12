@@ -83,6 +83,54 @@ HEAP_PUSH: PROC(VAL INT) RETURNS(INT);
 END;
 
 /* --------------------------------------------------------
+ * Dereference and bind -- core unification primitives
+ * -------------------------------------------------------- */
+
+/* Follow REF chains to the end.
+ * Returns either an unbound REF (self-referencing) or a
+ * non-REF cell (the bound value).
+ * Uses a loop -- no recursion. */
+DEREF: PROC(CELL INT) RETURNS(INT);
+    DCL TAG INT;
+    DCL PAY INT;
+    DCL NEXT INT;
+
+    DO WHILE (1 = 1);
+        TAG = CELL_TAG(CELL);
+        IF (TAG != TAG_REF) THEN
+            RETURN(CELL);
+        PAY = CELL_PAY(CELL);
+        NEXT = MEM(PAY);
+        IF (NEXT = CELL) THEN
+            RETURN(CELL);
+        CELL = NEXT;
+    END;
+    RETURN(CELL);
+END;
+
+/* Bind an unbound REF to a value.
+ * REF_ADDR is the heap address of the unbound REF cell.
+ * Overwrites MEM(REF_ADDR) with VAL. */
+BIND: PROC(REF_ADDR INT, VAL INT);
+    /* TODO: CALL TRAIL_PUSH(REF_ADDR) here once trail is implemented */
+    MEM(REF_ADDR) = VAL;
+END;
+
+/* Test whether CELL is an unbound variable.
+ * Returns 1 if self-referencing REF, 0 otherwise. */
+IS_UNBOUND: PROC(CELL INT) RETURNS(INT);
+    DCL TAG INT;
+    DCL PAY INT;
+    TAG = CELL_TAG(CELL);
+    IF (TAG != TAG_REF) THEN
+        RETURN(0);
+    PAY = CELL_PAY(CELL);
+    IF (MEM(PAY) = CELL) THEN
+        RETURN(1);
+    RETURN(0);
+END;
+
+/* --------------------------------------------------------
  * VM initialization
  * -------------------------------------------------------- */
 
@@ -364,12 +412,21 @@ END;
 DCL M_TEST1(20) CHAR INIT('--- fact_lookup ---');
 DCL M_TEST2(20) CHAR INIT('--- fact_fail  ---');
 DCL M_TEST3(20) CHAR INIT('--- put_var    ---');
+DCL M_TEST4(20) CHAR INIT('--- deref_bind ---');
 DCL M_A0(5) CHAR    INIT(' A0=');
 DCL M_A1(5) CHAR    INIT(' A1=');
 DCL M_HP(5) CHAR    INIT(' HP=');
 DCL M_HEAP(8) CHAR  INIT(' H[0]=');
+DCL M_UB(5) CHAR    INIT(' ub=');
+DCL M_DR(5) CHAR    INIT(' dr=');
 
 MAIN: PROC;
+    DCL VAR_ADDR INT;
+    DCL VAR_REF INT;
+    DCL ATOM_ANN INT;
+    DCL UB INT;
+    DCL DR INT;
+
     CALL UART_PUTS(ADDR(M_INIT));
     CALL UART_PUTCHAR(10);
 
@@ -404,5 +461,46 @@ MAIN: PROC;
     CALL PRINT_INT(REG_GET(REG_HP));
     CALL UART_PUTS(ADDR(M_HEAP));
     CALL PRINT_INT(MEM(HEAP_BASE));
+    CALL UART_PUTCHAR(10);
+
+    /* Test 4: DEREF and BIND
+     * Create var via PUT_VAR, verify unbound, bind to atom,
+     * deref through the ref, verify bound value.
+     *
+     * Steps (done manually, not via VM_RUN):
+     *   1. VM_INIT (HP=536)
+     *   2. Allocate var at heap[536] = REF(536)
+     *   3. IS_UNBOUND -> 1
+     *   4. BIND heap[536] to atom(ann)
+     *   5. IS_UNBOUND -> 0
+     *   6. DEREF(REF(536)) -> atom(ann) = 4194306
+     */
+    CALL UART_PUTS(ADDR(M_TEST4));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+
+    /* Create unbound var */
+    VAR_ADDR = HEAP_ALLOC;
+    VAR_REF = MAKE_CELL(TAG_REF, VAR_ADDR);
+    MEM(VAR_ADDR) = VAR_REF;
+
+    /* Check: should be unbound */
+    UB = IS_UNBOUND(VAR_REF);
+    CALL UART_PUTS(ADDR(M_UB));
+    CALL PRINT_INT(UB);
+
+    /* Bind to atom(ann) */
+    ATOM_ANN = MAKE_CELL(TAG_ATOM, 2);
+    CALL BIND(VAR_ADDR, ATOM_ANN);
+
+    /* Check: should be bound now */
+    UB = IS_UNBOUND(VAR_REF);
+    CALL UART_PUTS(ADDR(M_UB));
+    CALL PRINT_INT(UB);
+
+    /* Deref: follow REF -> get atom(ann) */
+    DR = DEREF(VAR_REF);
+    CALL UART_PUTS(ADDR(M_DR));
+    CALL PRINT_INT(DR);
     CALL UART_PUTCHAR(10);
 END;

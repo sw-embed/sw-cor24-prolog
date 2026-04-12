@@ -1,6 +1,6 @@
 number = 1
 slug = "heap-alloc"
-status = "in-progress"
+status = "completed"
 description = """
 Implement heap allocation and PUT_VAR instruction.
 
@@ -8,4 +8,5 @@ Context: Read src/vm/vm_m..."""
 role = "production"
 context_files = []
 created_at = "2026-04-12T14:29:29"
-commits = []
+completed_at = "2026-04-12T14:37:57"
+commits = ["d40818381c990c70bdce539ece134b8ae34ca77a"]

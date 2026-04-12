@@ -1,0 +1,1 @@
+Added HEAP_ALLOC (with overflow guard), HEAP_PUSH, and PUT_VAR opcode handler. PUT_VAR creates a self-referencing REF on the heap and stores it in Xn and Ai. Added test 3 showing A0=atom(bob), A1=ref(536), HP=537, heap[0]=536. Encoding verified against two_facts.asm (0x0A0801).
