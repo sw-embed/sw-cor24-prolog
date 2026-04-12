@@ -1,0 +1,51 @@
+; ancestor_all.lam -- find all ancestors of bob
+;
+; parent(bob, ann). parent(ann, liz).
+; ancestor(X, Y) :- parent(X, Y).
+; ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+; ?- ancestor(bob, X), write(X), nl, fail.
+;
+; Expected output: ann liz FAIL
+
+.atom 1 bob
+.atom 2 ann
+.atom 4 liz
+
+; Query
+query:
+    PUT_CONST A0, atom(bob)
+    PUT_VAR X0, A1
+    CALL ancestor
+    B_WRITE A1
+    B_NL
+    FAIL
+
+; ancestor/2
+ancestor:
+    TRY ancestor_c2
+    EXECUTE parent
+
+ancestor_c2:
+    TRUST
+    ALLOCATE 1
+    GET_Y_VAR Y0, A1
+    PUT_VAR X0, A1
+    CALL parent
+    GET_VAR X2, A1
+    PUT_Y_VAL Y0, A1
+    PUT_VAL X2, A0
+    DEALLOCATE
+    EXECUTE ancestor
+
+; parent/2
+parent:
+    TRY parent_c2
+    GET_CONST A0, atom(bob)
+    GET_CONST A1, atom(ann)
+    PROCEED
+
+parent_c2:
+    TRUST
+    GET_CONST A0, atom(ann)
+    GET_CONST A1, atom(liz)
+    PROCEED

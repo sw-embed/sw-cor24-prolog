@@ -1,0 +1,34 @@
+; retry.lam -- 3-clause predicate with TRY/RETRY/TRUST
+;
+; color(red). color(green). color(blue).
+; ?- color(X), write(X), nl, fail.
+;
+; Expected output: red green blue FAIL
+
+.atom 7 red
+.atom 8 green
+.atom 9 blue
+
+; Query
+query:
+    PUT_VAR X0, A0
+    CALL color
+    B_WRITE A0
+    B_NL
+    FAIL
+
+; color/1
+color:
+    TRY color_c2
+    GET_CONST A0, atom(red)
+    PROCEED
+
+color_c2:
+    RETRY color_c3
+    GET_CONST A0, atom(green)
+    PROCEED
+
+color_c3:
+    TRUST
+    GET_CONST A0, atom(blue)
+    PROCEED

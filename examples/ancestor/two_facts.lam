@@ -1,0 +1,32 @@
+; two_facts.lam -- find all parents of bob
+;
+; parent(bob, ann). parent(bob, joe).
+; ?- parent(bob, X), write(X), nl, fail.
+;
+; Expected output: ann joe FAIL
+
+.atom 1 bob
+.atom 2 ann
+.atom 3 joe
+
+; Query
+query:
+    PUT_CONST A0, atom(bob)
+    PUT_VAR X0, A1
+    CALL parent
+    B_WRITE A1
+    B_NL
+    FAIL
+
+; parent/2
+parent:
+    TRY parent_c2
+    GET_CONST A0, atom(bob)
+    GET_CONST A1, atom(ann)
+    PROCEED
+
+parent_c2:
+    TRUST
+    GET_CONST A0, atom(bob)
+    GET_CONST A1, atom(joe)
+    PROCEED

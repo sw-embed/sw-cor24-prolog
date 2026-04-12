@@ -1,6 +1,6 @@
 number = 6
 slug = "asm-examples"
-status = "pending"
+status = "in-progress"
 description = """
 Re-encode two_facts and the retry test as .lam files and verify.
 
