@@ -56,6 +56,33 @@ REG_SET: PROC(OFF INT, VAL INT);
 END;
 
 /* --------------------------------------------------------
+ * Heap allocation
+ * -------------------------------------------------------- */
+
+/* Allocate one heap cell. Returns the address (absolute).
+ * Increments HP. Halts on overflow. */
+HEAP_ALLOC: PROC RETURNS(INT);
+    DCL HP INT;
+    HP = REG_GET(REG_HP);
+    IF (HP >= HEAP_BASE + HEAP_SIZE) THEN DO;
+        CALL UART_PUTS(ADDR(M_HEAPOV));
+        G_RUNNING = 0;
+        RETURN(0);
+    END;
+    CALL REG_SET(REG_HP, HP + 1);
+    RETURN(HP);
+END;
+
+/* Allocate one heap cell and store VAL in it.
+ * Returns the address. */
+HEAP_PUSH: PROC(VAL INT) RETURNS(INT);
+    DCL A INT;
+    A = HEAP_ALLOC;
+    MEM(A) = VAL;
+    RETURN(A);
+END;
+
+/* --------------------------------------------------------
  * VM initialization
  * -------------------------------------------------------- */
 
@@ -176,6 +203,20 @@ VM_RUN: PROC;
                 CALL REG_SET(REG_PC, PC + 2);
             END;
 
+            /* PUT_VAR Xn, Ai -- 1-cell
+             * Create unbound variable on heap (self-ref REF).
+             * Store the REF in both Xn (op1) and Ai (op2). */
+            WHEN (G_OP = OP_PUT_VAR) DO;
+                DCL ADDR INT;
+                DCL REF INT;
+                ADDR = HEAP_ALLOC;
+                REF = MAKE_CELL(TAG_REF, ADDR);
+                MEM(ADDR) = REF;
+                CALL REG_SET(G_OP1, REF);
+                CALL REG_SET(G_OP2, REF);
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
             /* GET_CONST Ai, [imm] -- 2-cell
              * Unify Ai with tagged constant from next cell.
              * Initial version: direct equality check only.
@@ -233,8 +274,9 @@ END;
 DCL M_INIT(12) CHAR INIT('LAM v0.1   ');
 DCL M_HALT(7) CHAR  INIT('HALT  ');
 DCL M_FAIL(7) CHAR  INIT('FAIL  ');
-DCL M_BADOP(12) CHAR INIT('Bad opcode ');
-DCL M_OK(10) CHAR   INIT('Success  ');
+DCL M_BADOP(12) CHAR  INIT('Bad opcode ');
+DCL M_OK(10) CHAR    INIT('Success  ');
+DCL M_HEAPOV(15) CHAR INIT('Heap overflow ');
 
 /* --------------------------------------------------------
  * Entry point
@@ -300,11 +342,32 @@ LOAD_FACT_FAIL: PROC;
 END;
 
 /* --------------------------------------------------------
+ * PUT_VAR test: PUT_CONST A0 bob, PUT_VAR X0 A1, HALT
+ *
+ * Expected: A0 = atom(bob) = 4194305
+ *           A1 = REF(536)  = 536 (self-ref, TAG_REF=0)
+ *           HP = 537 (one cell allocated)
+ *           MEM(536) = 536 (self-referencing REF on heap)
+ * -------------------------------------------------------- */
+
+LOAD_PUT_VAR_TEST: PROC;
+    MEM(0) = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
+    MEM(1) = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(2) = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1; /* PUT_VAR X0, A1 */
+    MEM(3) = OP_HALT * OP_MULT;                       /* HALT */
+END;
+
+/* --------------------------------------------------------
  * Entry point
  * -------------------------------------------------------- */
 
 DCL M_TEST1(20) CHAR INIT('--- fact_lookup ---');
 DCL M_TEST2(20) CHAR INIT('--- fact_fail  ---');
+DCL M_TEST3(20) CHAR INIT('--- put_var    ---');
+DCL M_A0(5) CHAR    INIT(' A0=');
+DCL M_A1(5) CHAR    INIT(' A1=');
+DCL M_HP(5) CHAR    INIT(' HP=');
+DCL M_HEAP(8) CHAR  INIT(' H[0]=');
 
 MAIN: PROC;
     CALL UART_PUTS(ADDR(M_INIT));
@@ -324,5 +387,22 @@ MAIN: PROC;
     CALL VM_INIT;
     CALL LOAD_FACT_FAIL;
     CALL VM_RUN;
+    CALL UART_PUTCHAR(10);
+
+    /* Test 3: PUT_VAR -- creates unbound var on heap */
+    CALL UART_PUTS(ADDR(M_TEST3));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_PUT_VAR_TEST;
+    CALL VM_RUN;
+    /* Show A0, A1, HP, heap[0] */
+    CALL UART_PUTS(ADDR(M_A0));
+    CALL PRINT_INT(REG_GET(REG_A0));
+    CALL UART_PUTS(ADDR(M_A1));
+    CALL PRINT_INT(REG_GET(REG_A1));
+    CALL UART_PUTS(ADDR(M_HP));
+    CALL PRINT_INT(REG_GET(REG_HP));
+    CALL UART_PUTS(ADDR(M_HEAP));
+    CALL PRINT_INT(MEM(HEAP_BASE));
     CALL UART_PUTCHAR(10);
 END;

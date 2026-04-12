@@ -1,6 +1,6 @@
 number = 1
 slug = "heap-alloc"
-status = "pending"
+status = "in-progress"
 description = """
 Implement heap allocation and PUT_VAR instruction.
 
