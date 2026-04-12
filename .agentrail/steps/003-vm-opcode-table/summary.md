@@ -1,0 +1,1 @@
+Added instruction encoding section to vm-spec.md: 1/2-cell format with 8-bit opcode and two 8-bit operand fields, 22 opcodes across control/choice/put/get/unify/frame/builtin categories with gapped numbering. Created opcodes.plsw with all constants.
