@@ -1,6 +1,6 @@
 number = 1
 slug = "retry"
-status = "in-progress"
+status = "completed"
 description = """
 Add RETRY opcode handler for predicates with 3+ clauses.
 
@@ -8,4 +8,5 @@ Context: Read src/v..."""
 role = "production"
 context_files = []
 created_at = "2026-04-12T15:58:06"
-commits = []
+completed_at = "2026-04-12T16:01:32"
+commits = ["1eb63389fb086a2e4dc70e3fb82cb1e512faf0d8"]

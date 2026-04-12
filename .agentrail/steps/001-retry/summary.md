@@ -1,0 +1,1 @@
+Added RETRY opcode (7, 2-cell): restores from choice point, updates next_alt to new address, falls through. Enables TRY/RETRY/TRUST chains for 3+ clause predicates. Added atoms red/green/blue. Test 13: color(red)/color(green)/color(blue) with write/nl/fail loop prints all three then FAIL. 19 opcodes total.

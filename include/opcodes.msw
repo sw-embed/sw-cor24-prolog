@@ -43,8 +43,12 @@
 %DEFINE OP_DEALLOCATE 29;
 
 /* Builtins (32-63) */
-%DEFINE OP_B_WRITE 32;
-%DEFINE OP_B_NL    33;
+%DEFINE OP_B_WRITE  32;
+%DEFINE OP_B_NL     33;
+%DEFINE OP_B_IS_ADD 34;
+%DEFINE OP_B_IS_SUB 35;
+%DEFINE OP_B_LT     36;
+%DEFINE OP_B_GT     37;
 
 /* Arithmetic decode factors (kept for PROC-level fallback) */
 %DEFINE OP_MULT  65536;

@@ -265,6 +265,70 @@ VM_RUN: PROC;
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
+            /* B_IS_ADD -- 1-cell
+             * A0 = A1 + A2 (INT payloads). */
+            WHEN (G_OP = OP_B_IS_ADD) DO;
+                DCL ADD_L INT;
+                DCL ADD_R INT;
+                ADD_L = CELL_PAY(DEREF(REG_GET(REG_A1)));
+                ADD_R = CELL_PAY(DEREF(REG_GET(REG_A2)));
+                CALL REG_SET(REG_A0, MAKE_CELL(TAG_INT, ADD_L + ADD_R));
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
+            /* B_IS_SUB -- 1-cell
+             * A0 = A1 - A2 (INT payloads). */
+            WHEN (G_OP = OP_B_IS_SUB) DO;
+                DCL SUB_L INT;
+                DCL SUB_R INT;
+                SUB_L = CELL_PAY(DEREF(REG_GET(REG_A1)));
+                SUB_R = CELL_PAY(DEREF(REG_GET(REG_A2)));
+                CALL REG_SET(REG_A0, MAKE_CELL(TAG_INT, SUB_L - SUB_R));
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
+            /* B_LT -- 1-cell
+             * Succeed if A0 < A1 (INT payloads). Fail otherwise. */
+            WHEN (G_OP = OP_B_LT) DO;
+                DCL LT_L INT;
+                DCL LT_R INT;
+                LT_L = CELL_PAY(DEREF(REG_GET(REG_A0)));
+                LT_R = CELL_PAY(DEREF(REG_GET(REG_A1)));
+                IF (LT_L < LT_R) THEN DO;
+                    CALL REG_SET(REG_PC, PC + 1);
+                END;
+                ELSE DO;
+                    IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
+                        CALL UART_PUTS(ADDR(M_FAIL));
+                        G_RUNNING = 0;
+                    END;
+                    ELSE DO;
+                        CALL REG_SET(REG_PC, CP_RESTORE);
+                    END;
+                END;
+            END;
+
+            /* B_GT -- 1-cell
+             * Succeed if A0 > A1 (INT payloads). Fail otherwise. */
+            WHEN (G_OP = OP_B_GT) DO;
+                DCL GT_L INT;
+                DCL GT_R INT;
+                GT_L = CELL_PAY(DEREF(REG_GET(REG_A0)));
+                GT_R = CELL_PAY(DEREF(REG_GET(REG_A1)));
+                IF (GT_L > GT_R) THEN DO;
+                    CALL REG_SET(REG_PC, PC + 1);
+                END;
+                ELSE DO;
+                    IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
+                        CALL UART_PUTS(ADDR(M_FAIL));
+                        G_RUNNING = 0;
+                    END;
+                    ELSE DO;
+                        CALL REG_SET(REG_PC, CP_RESTORE);
+                    END;
+                END;
+            END;
+
             OTHERWISE DO;
                 CALL UART_PUTS(ADDR(M_BADOP));
                 CALL PRINT_INT(G_OP);
@@ -302,6 +366,7 @@ DCL M_TESTA(20) CHAR INIT('--- alloc/dealloc-');
 DCL M_TESTB(20) CHAR INIT('--- ancestor    ---');
 DCL M_TESTC(20) CHAR INIT('--- ancestor X  ---');
 DCL M_TESTD(20) CHAR INIT('--- retry 3cls  ---');
+DCL M_TESTE(20) CHAR INIT('--- arithmetic  ---');
 DCL M_BP(5) CHAR    INIT(' BP=');
 DCL M_TR(5) CHAR    INIT(' TR=');
 DCL M_A0(5) CHAR    INIT(' A0=');
@@ -513,6 +578,18 @@ MAIN: PROC;
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
     CALL LOAD_RETRY_TEST;
+    CALL VM_RUN;
+    CALL UART_PUTCHAR(10);
+
+    /* Test 14: arithmetic
+     * 3 + 4 = 7, print 7.
+     * 3 < 7 succeeds, 7 < 3 fails.
+     * Expected: prints 7, then FAIL.
+     */
+    CALL UART_PUTS(ADDR(M_TESTE));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_ARITH_TEST;
     CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 END;

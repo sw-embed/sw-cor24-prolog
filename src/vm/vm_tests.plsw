@@ -437,5 +437,50 @@ LOAD_RETRY_TEST: PROC;
     MEM(21) = OP_PROCEED * OP_MULT;
 END;
 
+/* --------------------------------------------------------
+ * Test 14: arithmetic
+ *
+ * Compute 3 + 4, print result (should print 7).
+ * Then test 3 < 7 (succeed) and 7 < 3 (fail).
+ *
+ * Layout:
+ *   0-1: PUT_CONST A1, int(3)
+ *   2-3: PUT_CONST A2, int(4)
+ *   4:   B_IS_ADD               A0 = A1 + A2 = int(7)
+ *   5:   B_WRITE A0             print 7
+ *   6:   B_NL
+ *   7-8: PUT_CONST A0, int(3)   test 3 < 7
+ *   9-10: PUT_CONST A1, int(7)
+ *   11:  B_LT                   3 < 7 -> succeed
+ *   12-13: PUT_CONST A0, int(7) test 7 < 3
+ *   14-15: PUT_CONST A1, int(3)
+ *   16:  B_LT                   7 < 3 -> fail
+ *   17:  HALT                   (not reached)
+ * -------------------------------------------------------- */
+
+LOAD_ARITH_TEST: PROC;
+    /* 3 + 4 = 7 */
+    MEM(0)  = OP_PUT_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(1)  = TAG_INT * TAG_MULT + 3;
+    MEM(2)  = OP_PUT_CONST * OP_MULT + REG_A2 * OP1_MULT;
+    MEM(3)  = TAG_INT * TAG_MULT + 4;
+    MEM(4)  = OP_B_IS_ADD * OP_MULT;
+    MEM(5)  = OP_B_WRITE * OP_MULT + REG_A0 * OP1_MULT;
+    MEM(6)  = OP_B_NL * OP_MULT;
+    /* 3 < 7 -> succeed */
+    MEM(7)  = OP_PUT_CONST * OP_MULT;
+    MEM(8)  = TAG_INT * TAG_MULT + 3;
+    MEM(9)  = OP_PUT_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(10) = TAG_INT * TAG_MULT + 7;
+    MEM(11) = OP_B_LT * OP_MULT;
+    /* 7 < 3 -> fail (no choice points, halts) */
+    MEM(12) = OP_PUT_CONST * OP_MULT;
+    MEM(13) = TAG_INT * TAG_MULT + 7;
+    MEM(14) = OP_PUT_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(15) = TAG_INT * TAG_MULT + 3;
+    MEM(16) = OP_B_LT * OP_MULT;
+    MEM(17) = OP_HALT * OP_MULT;
+END;
+
 MAIN: PROC;
 END;
