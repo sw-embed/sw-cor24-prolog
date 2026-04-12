@@ -1,0 +1,11 @@
+number = 2
+slug = "modularize"
+status = "in-progress"
+description = """
+Split vm_main.plsw into modular PL/SW files.
+
+Context: vm_main.plsw is now ~1..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T15:29:42"
+commits = []

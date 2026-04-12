@@ -1,0 +1,19 @@
+/* vm_regs.plsw -- Register access helpers
+ *
+ * Provides REG_GET and REG_SET for the VM register file.
+ */
+%DEFINE LIBRARY;
+
+%INCLUDE memory;
+%INCLUDE vmglob;
+
+REG_GET: PROC(OFF INT) RETURNS(INT);
+    RETURN(MEM(REG_BASE + OFF));
+END;
+
+REG_SET: PROC(OFF INT, VAL INT);
+    MEM(REG_BASE + OFF) = VAL;
+END;
+
+MAIN: PROC;
+END;

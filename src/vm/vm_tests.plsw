@@ -1,0 +1,172 @@
+/* vm_tests.plsw -- Test program loaders for the LAM VM
+ *
+ * Each LOAD_* proc writes bytecode into the code area.
+ * Called from MAIN in vm_main.plsw.
+ */
+%DEFINE LIBRARY;
+
+%INCLUDE cell;
+%INCLUDE memory;
+%INCLUDE opcodes;
+%INCLUDE frames;
+%INCLUDE vmglob;
+
+/* --------------------------------------------------------
+ * Test 1: fact_lookup
+ * parent(bob, ann).  ?- parent(bob, ann).
+ * -------------------------------------------------------- */
+
+LOAD_FACT_LOOKUP: PROC;
+    MEM(0)  = OP_PUT_CONST * OP_MULT;
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(2)  = OP_PUT_CONST * OP_MULT + 1 * OP1_MULT;
+    MEM(3)  = TAG_ATOM * TAG_MULT + 2;
+    MEM(4)  = OP_CALL * OP_MULT;
+    MEM(5)  = 8;
+    MEM(6)  = OP_HALT * OP_MULT;
+
+    MEM(8)  = OP_GET_CONST * OP_MULT;
+    MEM(9)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(10) = OP_GET_CONST * OP_MULT + 1 * OP1_MULT;
+    MEM(11) = TAG_ATOM * TAG_MULT + 2;
+    MEM(12) = OP_PROCEED * OP_MULT;
+END;
+
+/* --------------------------------------------------------
+ * Test 2: fact_fail
+ * parent(bob, ann).  ?- parent(bob, joe).  -- should fail
+ * -------------------------------------------------------- */
+
+LOAD_FACT_FAIL: PROC;
+    MEM(0)  = OP_PUT_CONST * OP_MULT;
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(2)  = OP_PUT_CONST * OP_MULT + 1 * OP1_MULT;
+    MEM(3)  = TAG_ATOM * TAG_MULT + 3;
+    MEM(4)  = OP_CALL * OP_MULT;
+    MEM(5)  = 8;
+    MEM(6)  = OP_HALT * OP_MULT;
+
+    MEM(8)  = OP_GET_CONST * OP_MULT;
+    MEM(9)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(10) = OP_GET_CONST * OP_MULT + 1 * OP1_MULT;
+    MEM(11) = TAG_ATOM * TAG_MULT + 2;
+    MEM(12) = OP_PROCEED * OP_MULT;
+END;
+
+/* --------------------------------------------------------
+ * Test 3: put_var
+ * PUT_CONST A0 bob, PUT_VAR X0 A1, HALT
+ * -------------------------------------------------------- */
+
+LOAD_PUT_VAR_TEST: PROC;
+    MEM(0) = OP_PUT_CONST * OP_MULT;
+    MEM(1) = TAG_ATOM * TAG_MULT + 1;
+    MEM(2) = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1;
+    MEM(3) = OP_HALT * OP_MULT;
+END;
+
+/* --------------------------------------------------------
+ * Test 5: unify_var
+ * parent(bob, X) against parent(bob, ann). Binds X=ann.
+ * -------------------------------------------------------- */
+
+LOAD_UNIFY_TEST: PROC;
+    MEM(0)  = OP_PUT_CONST * OP_MULT;
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(2)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1;
+    MEM(3)  = OP_CALL * OP_MULT;
+    MEM(4)  = 7;
+    MEM(5)  = OP_HALT * OP_MULT;
+
+    MEM(7)  = OP_GET_CONST * OP_MULT;
+    MEM(8)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(9)  = OP_GET_CONST * OP_MULT + 1 * OP1_MULT;
+    MEM(10) = TAG_ATOM * TAG_MULT + 2;
+    MEM(11) = OP_PROCEED * OP_MULT;
+END;
+
+/* --------------------------------------------------------
+ * Test 7: try/trust
+ * pred(bob)/pred(ann), query pred(bob). First clause matches.
+ * -------------------------------------------------------- */
+
+LOAD_TRY_TEST: PROC;
+    MEM(0)  = OP_PUT_CONST * OP_MULT;
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(2)  = OP_CALL * OP_MULT;
+    MEM(3)  = 6;
+    MEM(4)  = OP_HALT * OP_MULT;
+
+    MEM(6)  = OP_TRY * OP_MULT;
+    MEM(7)  = 12;
+
+    MEM(8)  = OP_GET_CONST * OP_MULT;
+    MEM(9)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(10) = OP_PROCEED * OP_MULT;
+
+    MEM(12) = OP_TRUST * OP_MULT;
+    MEM(13) = OP_GET_CONST * OP_MULT;
+    MEM(14) = TAG_ATOM * TAG_MULT + 2;
+    MEM(15) = OP_PROCEED * OP_MULT;
+END;
+
+/* --------------------------------------------------------
+ * Test 8: backtrack
+ * pred(bob)/pred(ann), query pred(ann). Backtracks to clause2.
+ * -------------------------------------------------------- */
+
+LOAD_BACKTRACK_TEST: PROC;
+    MEM(0)  = OP_PUT_CONST * OP_MULT;
+    MEM(1)  = TAG_ATOM * TAG_MULT + 2;
+    MEM(2)  = OP_CALL * OP_MULT;
+    MEM(3)  = 6;
+    MEM(4)  = OP_HALT * OP_MULT;
+
+    MEM(6)  = OP_TRY * OP_MULT;
+    MEM(7)  = 12;
+
+    MEM(8)  = OP_GET_CONST * OP_MULT;
+    MEM(9)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(10) = OP_PROCEED * OP_MULT;
+
+    MEM(12) = OP_TRUST * OP_MULT;
+    MEM(13) = OP_GET_CONST * OP_MULT;
+    MEM(14) = TAG_ATOM * TAG_MULT + 2;
+    MEM(15) = OP_PROCEED * OP_MULT;
+END;
+
+/* --------------------------------------------------------
+ * Test 9: two_facts
+ * parent(bob,ann). parent(bob,joe).
+ * ?- parent(bob, X), write(X), nl, fail.
+ * -------------------------------------------------------- */
+
+LOAD_TWO_FACTS: PROC;
+    MEM(0)  = OP_PUT_CONST * OP_MULT;
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;
+    MEM(2)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1;
+    MEM(3)  = OP_CALL * OP_MULT;
+    MEM(4)  = 10;
+    MEM(5)  = OP_B_WRITE * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(6)  = OP_B_NL * OP_MULT;
+    MEM(7)  = OP_FAIL * OP_MULT;
+
+    MEM(10) = OP_TRY * OP_MULT;
+    MEM(11) = 19;
+
+    MEM(12) = OP_GET_CONST * OP_MULT;
+    MEM(13) = TAG_ATOM * TAG_MULT + 1;
+    MEM(14) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(15) = TAG_ATOM * TAG_MULT + 2;
+    MEM(16) = OP_PROCEED * OP_MULT;
+
+    MEM(19) = OP_TRUST * OP_MULT;
+    MEM(20) = OP_GET_CONST * OP_MULT;
+    MEM(21) = TAG_ATOM * TAG_MULT + 1;
+    MEM(22) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(23) = TAG_ATOM * TAG_MULT + 3;
+    MEM(24) = OP_PROCEED * OP_MULT;
+END;
+
+MAIN: PROC;
+END;

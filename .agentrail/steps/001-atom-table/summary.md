@@ -1,0 +1,1 @@
+Added atom table with 7 atoms in fixed 8-cell slots. ATOM_STORE/ATOM_INIT/ATOM_PRINT PROCs. B_WRITE now dispatches on tag: atoms print names, ints print decimal, refs print _Vaddr. VM_INIT calls ATOM_INIT. two_facts now outputs 'ann' and 'joe' instead of raw tagged ints.

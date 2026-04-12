@@ -1,0 +1,137 @@
+/* vm_heap.plsw -- Heap, cell, unification, and trail primitives
+ *
+ * Core term operations: cell construction/extraction, heap
+ * allocation, dereference, bind, trail push/unwind.
+ */
+%DEFINE LIBRARY;
+
+%INCLUDE cell;
+%INCLUDE memory;
+%INCLUDE vmglob;
+
+/* --------------------------------------------------------
+ * Cell helpers
+ *
+ * Thin PROC wrappers around the MACRODEF cell operations
+ * in cell.msw. The macros use COR24 srl/sll/and/or
+ * instructions directly -- no software divide.
+ * -------------------------------------------------------- */
+
+CELL_TAG: PROC(C INT) RETURNS(INT);
+    G_TMP = C;
+    ?CELL_GET_TAG(SRC(ADDR(G_TMP)), DST(ADDR(G_TAG)));
+    RETURN(G_TAG);
+END;
+
+CELL_PAY: PROC(C INT) RETURNS(INT);
+    G_TMP = C;
+    ?CELL_GET_PAY(SRC(ADDR(G_TMP)), DST(ADDR(G_PAY)));
+    RETURN(G_PAY);
+END;
+
+MAKE_CELL: PROC(T INT, P INT) RETURNS(INT);
+    G_TAG = T;
+    G_PAY = P;
+    ?CELL_MAKE(TAG(ADDR(G_TAG)), PAY(ADDR(G_PAY)), DST(ADDR(G_TMP)));
+    RETURN(G_TMP);
+END;
+
+/* --------------------------------------------------------
+ * Heap allocation
+ * -------------------------------------------------------- */
+
+HEAP_ALLOC: PROC RETURNS(INT);
+    DCL HP INT;
+    HP = REG_GET(REG_HP);
+    IF (HP >= HEAP_BASE + HEAP_SIZE) THEN DO;
+        CALL UART_PUTS(ADDR(M_HEAPOV));
+        G_RUNNING = 0;
+        RETURN(0);
+    END;
+    CALL REG_SET(REG_HP, HP + 1);
+    RETURN(HP);
+END;
+
+HEAP_PUSH: PROC(VAL INT) RETURNS(INT);
+    DCL A INT;
+    A = HEAP_ALLOC;
+    MEM(A) = VAL;
+    RETURN(A);
+END;
+
+/* --------------------------------------------------------
+ * Dereference and bind
+ * -------------------------------------------------------- */
+
+DEREF: PROC(CELL INT) RETURNS(INT);
+    DCL TAG INT;
+    DCL PAY INT;
+    DCL NEXT INT;
+
+    DO WHILE (1 = 1);
+        TAG = CELL_TAG(CELL);
+        IF (TAG != TAG_REF) THEN
+            RETURN(CELL);
+        PAY = CELL_PAY(CELL);
+        NEXT = MEM(PAY);
+        IF (NEXT = CELL) THEN
+            RETURN(CELL);
+        CELL = NEXT;
+    END;
+    RETURN(CELL);
+END;
+
+BIND: PROC(REF_ADDR INT, VAL INT);
+    CALL TRAIL_PUSH(REF_ADDR);
+    MEM(REF_ADDR) = VAL;
+END;
+
+IS_UNBOUND: PROC(CELL INT) RETURNS(INT);
+    DCL TAG INT;
+    DCL PAY INT;
+    TAG = CELL_TAG(CELL);
+    IF (TAG != TAG_REF) THEN
+        RETURN(0);
+    PAY = CELL_PAY(CELL);
+    IF (MEM(PAY) = CELL) THEN
+        RETURN(1);
+    RETURN(0);
+END;
+
+/* --------------------------------------------------------
+ * Trail
+ * -------------------------------------------------------- */
+
+TRAIL_PUSH: PROC(HEAP_ADDR INT);
+    DCL TR INT;
+    TR = REG_GET(REG_TR);
+    IF (TR >= TRAIL_BASE + TRAIL_SIZE) THEN DO;
+        CALL UART_PUTS(ADDR(M_TRLOV));
+        G_RUNNING = 0;
+        RETURN;
+    END;
+    MEM(TR) = HEAP_ADDR;
+    CALL REG_SET(REG_TR, TR + 1);
+END;
+
+TRAIL_UNWIND: PROC(SAVED_TR INT);
+    DCL TR INT;
+    DCL H INT;
+    TR = REG_GET(REG_TR);
+    DO WHILE (TR > SAVED_TR);
+        TR = TR - 1;
+        H = MEM(TR);
+        MEM(H) = MAKE_CELL(TAG_REF, H);
+    END;
+    CALL REG_SET(REG_TR, SAVED_TR);
+END;
+
+/* --------------------------------------------------------
+ * Error messages (referenced by overflow guards)
+ * -------------------------------------------------------- */
+
+DCL M_HEAPOV(15) CHAR INIT('Heap overflow ');
+DCL M_TRLOV(16) CHAR INIT('Trail overflow ');
+
+MAIN: PROC;
+END;

@@ -1,13 +1,20 @@
-/* vm_main.plsw -- LAM Virtual Machine
+/* vm_main.plsw -- LAM Virtual Machine entry point
  *
- * Entry point for the Logic Abstract Machine. Initializes VM
- * state, loads a test program, and runs the fetch/decode/dispatch
- * loop.
+ * Contains VM_INIT, VM_RUN dispatch loop, and MAIN.
+ * Runtime primitives are in separate library modules:
+ *   vm_regs.plsw   -- REG_GET, REG_SET
+ *   vm_heap.plsw   -- cell helpers, heap, deref, bind, trail
+ *   vm_choice.plsw -- choice-point push/restore/pop
+ *   vm_io.plsw     -- PRINT_INT, VM_TRACE, atom table
+ *   vm_tests.plsw  -- test program loaders
  *
  * Build:
  *   pipeline.sh include/cell.msw include/memory.msw \
  *     include/opcodes.msw include/frames.msw \
- *     include/vmglob.msw src/vm/vm_main.plsw
+ *     include/vmglob.msw \
+ *     src/vm/vm_regs.plsw src/vm/vm_heap.plsw \
+ *     src/vm/vm_choice.plsw src/vm/vm_io.plsw \
+ *     src/vm/vm_tests.plsw src/vm/vm_main.plsw
  */
 
 %INCLUDE cell;
@@ -15,296 +22,6 @@
 %INCLUDE opcodes;
 %INCLUDE frames;
 %INCLUDE vmglob;
-
-/* --------------------------------------------------------
- * Cell helpers
- *
- * Thin PROC wrappers around the MACRODEF cell operations
- * in cell.msw. The macros use COR24 srl/sll/and/or
- * instructions directly -- no software divide.
- * -------------------------------------------------------- */
-
-CELL_TAG: PROC(C INT) RETURNS(INT);
-    G_TMP = C;
-    ?CELL_GET_TAG(SRC(ADDR(G_TMP)), DST(ADDR(G_TAG)));
-    RETURN(G_TAG);
-END;
-
-CELL_PAY: PROC(C INT) RETURNS(INT);
-    G_TMP = C;
-    ?CELL_GET_PAY(SRC(ADDR(G_TMP)), DST(ADDR(G_PAY)));
-    RETURN(G_PAY);
-END;
-
-MAKE_CELL: PROC(T INT, P INT) RETURNS(INT);
-    G_TAG = T;
-    G_PAY = P;
-    ?CELL_MAKE(TAG(ADDR(G_TAG)), PAY(ADDR(G_PAY)), DST(ADDR(G_TMP)));
-    RETURN(G_TMP);
-END;
-
-/* --------------------------------------------------------
- * Register access
- * -------------------------------------------------------- */
-
-REG_GET: PROC(OFF INT) RETURNS(INT);
-    RETURN(MEM(REG_BASE + OFF));
-END;
-
-REG_SET: PROC(OFF INT, VAL INT);
-    MEM(REG_BASE + OFF) = VAL;
-END;
-
-/* --------------------------------------------------------
- * Heap allocation
- * -------------------------------------------------------- */
-
-/* Allocate one heap cell. Returns the address (absolute).
- * Increments HP. Halts on overflow. */
-HEAP_ALLOC: PROC RETURNS(INT);
-    DCL HP INT;
-    HP = REG_GET(REG_HP);
-    IF (HP >= HEAP_BASE + HEAP_SIZE) THEN DO;
-        CALL UART_PUTS(ADDR(M_HEAPOV));
-        G_RUNNING = 0;
-        RETURN(0);
-    END;
-    CALL REG_SET(REG_HP, HP + 1);
-    RETURN(HP);
-END;
-
-/* Allocate one heap cell and store VAL in it.
- * Returns the address. */
-HEAP_PUSH: PROC(VAL INT) RETURNS(INT);
-    DCL A INT;
-    A = HEAP_ALLOC;
-    MEM(A) = VAL;
-    RETURN(A);
-END;
-
-/* --------------------------------------------------------
- * Dereference and bind -- core unification primitives
- * -------------------------------------------------------- */
-
-/* Follow REF chains to the end.
- * Returns either an unbound REF (self-referencing) or a
- * non-REF cell (the bound value).
- * Uses a loop -- no recursion. */
-DEREF: PROC(CELL INT) RETURNS(INT);
-    DCL TAG INT;
-    DCL PAY INT;
-    DCL NEXT INT;
-
-    DO WHILE (1 = 1);
-        TAG = CELL_TAG(CELL);
-        IF (TAG != TAG_REF) THEN
-            RETURN(CELL);
-        PAY = CELL_PAY(CELL);
-        NEXT = MEM(PAY);
-        IF (NEXT = CELL) THEN
-            RETURN(CELL);
-        CELL = NEXT;
-    END;
-    RETURN(CELL);
-END;
-
-/* Bind an unbound REF to a value.
- * REF_ADDR is the heap address of the unbound REF cell.
- * Overwrites MEM(REF_ADDR) with VAL. */
-BIND: PROC(REF_ADDR INT, VAL INT);
-    CALL TRAIL_PUSH(REF_ADDR);
-    MEM(REF_ADDR) = VAL;
-END;
-
-/* Test whether CELL is an unbound variable.
- * Returns 1 if self-referencing REF, 0 otherwise. */
-IS_UNBOUND: PROC(CELL INT) RETURNS(INT);
-    DCL TAG INT;
-    DCL PAY INT;
-    TAG = CELL_TAG(CELL);
-    IF (TAG != TAG_REF) THEN
-        RETURN(0);
-    PAY = CELL_PAY(CELL);
-    IF (MEM(PAY) = CELL) THEN
-        RETURN(1);
-    RETURN(0);
-END;
-
-/* --------------------------------------------------------
- * Trail -- undo log for variable bindings
- * -------------------------------------------------------- */
-
-/* Record a heap address on the trail so it can be unbound
- * during backtracking. */
-TRAIL_PUSH: PROC(HEAP_ADDR INT);
-    DCL TR INT;
-    TR = REG_GET(REG_TR);
-    IF (TR >= TRAIL_BASE + TRAIL_SIZE) THEN DO;
-        CALL UART_PUTS(ADDR(M_TRLOV));
-        G_RUNNING = 0;
-        RETURN;
-    END;
-    MEM(TR) = HEAP_ADDR;
-    CALL REG_SET(REG_TR, TR + 1);
-END;
-
-/* Unwind trail from current TR back to SAVED_TR.
- * Resets each trailed variable to an unbound self-ref REF. */
-TRAIL_UNWIND: PROC(SAVED_TR INT);
-    DCL TR INT;
-    DCL H INT;
-    TR = REG_GET(REG_TR);
-    DO WHILE (TR > SAVED_TR);
-        TR = TR - 1;
-        H = MEM(TR);
-        MEM(H) = MAKE_CELL(TAG_REF, H);
-    END;
-    CALL REG_SET(REG_TR, SAVED_TR);
-END;
-
-/* --------------------------------------------------------
- * Choice-point frame helpers
- * -------------------------------------------------------- */
-
-CP_READ: PROC(BASE INT, OFF INT) RETURNS(INT);
-    RETURN(MEM(BASE + OFF));
-END;
-
-CP_WRITE: PROC(BASE INT, OFF INT, VAL INT);
-    MEM(BASE + OFF) = VAL;
-END;
-
-/* Save a full choice-point frame.
- * ALT is the code address of the next alternative clause.
- *
- * Convention: BP points to the base of the most recent frame.
- * New frame is written at the top of the choice-point stack
- * (BP + CP_FRAME_SIZE if a frame exists, or CP_BASE if first).
- * For simplicity, we use BP as the write position and then
- * advance: the initial BP = CP_BASE serves as a sentinel
- * (prev_BP = CP_BASE means "no previous frame"). */
-CP_PUSH: PROC(ALT INT);
-    DCL OLD_BP INT;
-    DCL NEW_BP INT;
-    OLD_BP = REG_GET(REG_BP);
-    NEW_BP = OLD_BP;
-    IF (OLD_BP != CP_BASE) THEN
-        NEW_BP = OLD_BP + CP_FRAME_SIZE;
-    IF (NEW_BP + CP_FRAME_SIZE > CP_BASE + CP_STKSZ) THEN DO;
-        CALL UART_PUTS(ADDR(M_CPOV));
-        G_RUNNING = 0;
-        RETURN;
-    END;
-    CALL CP_WRITE(NEW_BP, CPF_PREV_BP,  OLD_BP);
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_CP, REG_GET(REG_CP));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_EP, REG_GET(REG_EP));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_HP, REG_GET(REG_HP));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_TR, REG_GET(REG_TR));
-    CALL CP_WRITE(NEW_BP, CPF_NEXT_ALT, ALT);
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A0, REG_GET(REG_A0));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A1, REG_GET(REG_A1));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A2, REG_GET(REG_A2));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A3, REG_GET(REG_A3));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A4, REG_GET(REG_A4));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A5, REG_GET(REG_A5));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A6, REG_GET(REG_A6));
-    CALL CP_WRITE(NEW_BP, CPF_SAVED_A7, REG_GET(REG_A7));
-    CALL REG_SET(REG_BP, NEW_BP);
-END;
-
-/* Restore state from the most recent choice-point frame.
- * Unwinds trail, resets HP, restores A0-A7 and CP/EP.
- * Pops the frame by setting BP = prev_BP.
- * Returns the next_alt address so the caller can jump there. */
-/* Restore state from the current choice-point frame WITHOUT
- * popping it. Used by FAIL to jump to the alternative.
- * Unwinds trail, resets HP, restores A0-A7 and CP/EP.
- * Returns the next_alt address. BP is unchanged. */
-CP_RESTORE: PROC RETURNS(INT);
-    DCL FB INT;
-    DCL SAVED_TR INT;
-    DCL SAVED_HP INT;
-    FB = REG_GET(REG_BP);
-
-    /* Unwind trail and reset heap */
-    SAVED_TR = CP_READ(FB, CPF_SAVED_TR);
-    SAVED_HP = CP_READ(FB, CPF_SAVED_HP);
-    CALL TRAIL_UNWIND(SAVED_TR);
-    CALL REG_SET(REG_HP, SAVED_HP);
-
-    /* Restore registers */
-    CALL REG_SET(REG_CP, CP_READ(FB, CPF_SAVED_CP));
-    CALL REG_SET(REG_EP, CP_READ(FB, CPF_SAVED_EP));
-    CALL REG_SET(REG_A0, CP_READ(FB, CPF_SAVED_A0));
-    CALL REG_SET(REG_A1, CP_READ(FB, CPF_SAVED_A1));
-    CALL REG_SET(REG_A2, CP_READ(FB, CPF_SAVED_A2));
-    CALL REG_SET(REG_A3, CP_READ(FB, CPF_SAVED_A3));
-    CALL REG_SET(REG_A4, CP_READ(FB, CPF_SAVED_A4));
-    CALL REG_SET(REG_A5, CP_READ(FB, CPF_SAVED_A5));
-    CALL REG_SET(REG_A6, CP_READ(FB, CPF_SAVED_A6));
-    CALL REG_SET(REG_A7, CP_READ(FB, CPF_SAVED_A7));
-
-    RETURN(CP_READ(FB, CPF_NEXT_ALT));
-END;
-
-/* Restore state AND pop the choice-point frame.
- * Used by TRUST (last alternative). */
-CP_POP: PROC RETURNS(INT);
-    DCL ALT INT;
-    ALT = CP_RESTORE;
-    CALL REG_SET(REG_BP, CP_READ(REG_GET(REG_BP), CPF_PREV_BP));
-    RETURN(ALT);
-END;
-
-/* --------------------------------------------------------
- * Atom table
- * -------------------------------------------------------- */
-
-/* Store a string into atom table slot ID.
- * STR_ADDR is the address of a null-terminated CHAR array.
- * Copies up to ATOM_SLOT_SIZE-1 chars, null-terminates. */
-ATOM_STORE: PROC(ID INT, C0 INT, C1 INT, C2 INT, C3 INT,
-                  C4 INT, C5 INT, C6 INT);
-    DCL BASE INT;
-    BASE = ATOM_BASE + ID * ATOM_SLOT_SIZE;
-    MEM(BASE)     = C0;
-    MEM(BASE + 1) = C1;
-    MEM(BASE + 2) = C2;
-    MEM(BASE + 3) = C3;
-    MEM(BASE + 4) = C4;
-    MEM(BASE + 5) = C5;
-    MEM(BASE + 6) = C6;
-    MEM(BASE + 7) = 0;
-END;
-
-/* Initialize the atom table with known atoms. */
-ATOM_INIT: PROC;
-    /* 0: []       */  CALL ATOM_STORE(0, 91, 93, 0, 0, 0, 0, 0);
-    /* 1: bob      */  CALL ATOM_STORE(1, 98, 111, 98, 0, 0, 0, 0);
-    /* 2: ann      */  CALL ATOM_STORE(2, 97, 110, 110, 0, 0, 0, 0);
-    /* 3: joe      */  CALL ATOM_STORE(3, 106, 111, 101, 0, 0, 0, 0);
-    /* 4: liz      */  CALL ATOM_STORE(4, 108, 105, 122, 0, 0, 0, 0);
-    /* 5: parent   */  CALL ATOM_STORE(5, 112, 97, 114, 101, 110, 116, 0);
-    /* 6: ancestor */  CALL ATOM_STORE(6, 97, 110, 99, 101, 115, 116, 111);
-    /* Note: "ancestor" is 8 chars, truncated to 7 + null.
-     * PLSW-ISSUE: ATOM_SLOT_SIZE of 8 is tight for longer names.
-     * Could increase to 12 or use variable-length encoding later. */
-END;
-
-/* Print an atom name by ID from the atom table. */
-ATOM_PRINT: PROC(ID INT);
-    DCL BASE INT;
-    DCL I INT;
-    DCL CH INT;
-    BASE = ATOM_BASE + ID * ATOM_SLOT_SIZE;
-    I = 0;
-    CH = MEM(BASE);
-    DO WHILE (CH != 0 AND I < ATOM_SLOT_SIZE);
-        CALL UART_PUTCHAR(CH);
-        I = I + 1;
-        CH = MEM(BASE + I);
-    END;
-END;
 
 /* --------------------------------------------------------
  * VM initialization
@@ -331,72 +48,7 @@ VM_INIT: PROC;
 END;
 
 /* --------------------------------------------------------
- * Instruction decode
- *
- * Uses ?INST_DECODE macro from opcodes.msw. Generates
- * COR24 srl/and instructions -- no software divide.
- * Results stored in globals G_OP, G_OP1, G_OP2.
- * -------------------------------------------------------- */
-
-/* --------------------------------------------------------
- * Trace output
- *
- * Prints PC and opcode before each instruction.
- * -------------------------------------------------------- */
-
-DCL T_MSG(4) CHAR INIT('PC=');
-DCL T_SEP(5) CHAR INIT(' op=');
-
-PRINT_INT: PROC(N INT);
-    DCL D INT;
-    DCL R INT;
-    DCL BUF(8) CHAR;
-    DCL POS INT;
-    DCL NEG INT;
-
-    IF (N = 0) THEN DO;
-        CALL UART_PUTCHAR(48);
-        RETURN;
-    END;
-
-    NEG = 0;
-    IF (N < 0) THEN DO;
-        NEG = 1;
-        N = 0 - N;
-    END;
-
-    POS = 7;
-    BUF(POS) = 0;
-    DO WHILE (N > 0);
-        POS = POS - 1;
-        D = N / 10;
-        R = N - D * 10;
-        BUF(POS) = R + 48;
-        N = D;
-    END;
-
-    IF (NEG = 1) THEN DO;
-        POS = POS - 1;
-        BUF(POS) = 45;
-    END;
-
-    CALL UART_PUTS(ADDR(BUF) + POS);
-END;
-
-VM_TRACE: PROC(PC INT, OP INT);
-    CALL UART_PUTS(ADDR(T_MSG));
-    CALL PRINT_INT(PC);
-    CALL UART_PUTS(ADDR(T_SEP));
-    CALL PRINT_INT(OP);
-    CALL UART_PUTCHAR(10);
-END;
-
-/* --------------------------------------------------------
  * Fetch / decode / dispatch loop
- *
- * Currently handles NOP and HALT. Additional opcodes are
- * added in separate modules (vm_ctrl.plsw, vm_data.plsw,
- * etc.) as the VM grows.
  * -------------------------------------------------------- */
 
 VM_RUN: PROC;
@@ -422,39 +74,32 @@ VM_RUN: PROC;
                 G_RUNNING = 0;
             END;
 
-            /* PUT_CONST Ai, [imm] -- 2-cell
-             * Load tagged constant from next cell into Ai */
+            /* PUT_CONST Ai, [imm] -- 2-cell */
             WHEN (G_OP = OP_PUT_CONST) DO;
                 IMM = MEM(PC + 1);
                 CALL REG_SET(G_OP1, IMM);
                 CALL REG_SET(REG_PC, PC + 2);
             END;
 
-            /* PUT_VAR Xn, Ai -- 1-cell
-             * Create unbound variable on heap (self-ref REF).
-             * Store the REF in both Xn (op1) and Ai (op2). */
+            /* PUT_VAR Xn, Ai -- 1-cell */
             WHEN (G_OP = OP_PUT_VAR) DO;
-                DCL ADDR INT;
-                DCL REF INT;
-                ADDR = HEAP_ALLOC;
-                REF = MAKE_CELL(TAG_REF, ADDR);
-                MEM(ADDR) = REF;
-                CALL REG_SET(G_OP1, REF);
-                CALL REG_SET(G_OP2, REF);
+                DCL PV_ADDR INT;
+                DCL PV_REF INT;
+                PV_ADDR = HEAP_ALLOC;
+                PV_REF = MAKE_CELL(TAG_REF, PV_ADDR);
+                MEM(PV_ADDR) = PV_REF;
+                CALL REG_SET(G_OP1, PV_REF);
+                CALL REG_SET(G_OP2, PV_REF);
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
-            /* GET_VAR Xn, Ai -- 1-cell
-             * Copy Ai to Xn (first occurrence in head). */
+            /* GET_VAR Xn, Ai -- 1-cell */
             WHEN (G_OP = OP_GET_VAR) DO;
                 CALL REG_SET(G_OP1, REG_GET(G_OP2));
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
-            /* GET_CONST Ai, [imm] -- 2-cell
-             * Unify Ai with tagged constant from next cell.
-             * Dereferences Ai first: if unbound REF, bind
-             * it to the constant; if bound, compare. */
+            /* GET_CONST Ai, [imm] -- 2-cell */
             WHEN (G_OP = OP_GET_CONST) DO;
                 IMM = MEM(PC + 1);
                 REGVAL = DEREF(REG_GET(G_OP1));
@@ -467,7 +112,6 @@ VM_RUN: PROC;
                         CALL REG_SET(REG_PC, PC + 2);
                     END;
                     ELSE DO;
-                        /* Mismatch -- trigger backtracking */
                         IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
                             CALL UART_PUTS(ADDR(M_FAIL));
                             G_RUNNING = 0;
@@ -479,58 +123,46 @@ VM_RUN: PROC;
                 END;
             END;
 
-            /* CALL [imm] -- 2-cell
-             * Save return address (PC+2) in CP, jump to
-             * target address in next cell */
+            /* CALL [imm] -- 2-cell */
             WHEN (G_OP = OP_CALL) DO;
                 CALL REG_SET(REG_CP, PC + 2);
                 IMM = MEM(PC + 1);
                 CALL REG_SET(REG_PC, IMM);
             END;
 
-            /* PROCEED -- 1-cell
-             * Return to continuation: set PC = CP */
+            /* PROCEED -- 1-cell */
             WHEN (G_OP = OP_PROCEED) DO;
                 CALL REG_SET(REG_PC, REG_GET(REG_CP));
             END;
 
-            /* TRY [imm] -- 2-cell
-             * Push choice point with alt = [imm].
-             * Fall through to first clause. */
+            /* TRY [imm] -- 2-cell */
             WHEN (G_OP = OP_TRY) DO;
                 IMM = MEM(PC + 1);
                 CALL CP_PUSH(IMM);
                 CALL REG_SET(REG_PC, PC + 2);
             END;
 
-            /* TRUST -- 1-cell
-             * Last alternative: restore from choice point,
-             * pop it, fall through to clause body. */
+            /* TRUST -- 1-cell */
             WHEN (G_OP = OP_TRUST) DO;
-                DCL DUMMY INT;
-                DUMMY = CP_POP;
+                DCL TR_DUMMY INT;
+                TR_DUMMY = CP_POP;
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
-            /* FAIL -- 1-cell
-             * Backtrack: restore from choice point and jump
-             * to next_alt. If no choice points, halt. */
+            /* FAIL -- 1-cell */
             WHEN (G_OP = OP_FAIL) DO;
                 IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
                     CALL UART_PUTS(ADDR(M_FAIL));
                     G_RUNNING = 0;
                 END;
                 ELSE DO;
-                    DCL ALT_ADDR INT;
-                    ALT_ADDR = CP_RESTORE;
-                    CALL REG_SET(REG_PC, ALT_ADDR);
+                    DCL FAIL_ALT INT;
+                    FAIL_ALT = CP_RESTORE;
+                    CALL REG_SET(REG_PC, FAIL_ALT);
                 END;
             END;
 
-            /* B_WRITE Ai -- 1-cell
-             * Print the dereferenced value of Ai.
-             * Dispatches on tag: atom->name, int->decimal,
-             * ref->_Vaddr, other->raw int. */
+            /* B_WRITE Ai -- 1-cell */
             WHEN (G_OP = OP_B_WRITE) DO;
                 DCL WVAL INT;
                 DCL WTAG INT;
@@ -546,8 +178,8 @@ VM_RUN: PROC;
                         CALL PRINT_INT(WPAY);
                     END;
                     WHEN (WTAG = TAG_REF) DO;
-                        CALL UART_PUTCHAR(95);  /* _ */
-                        CALL UART_PUTCHAR(86);  /* V */
+                        CALL UART_PUTCHAR(95);
+                        CALL UART_PUTCHAR(86);
                         CALL PRINT_INT(WPAY);
                     END;
                     OTHERWISE DO;
@@ -557,8 +189,7 @@ VM_RUN: PROC;
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
-            /* B_NL -- 1-cell
-             * Print newline. */
+            /* B_NL -- 1-cell */
             WHEN (G_OP = OP_B_NL) DO;
                 CALL UART_PUTCHAR(10);
                 CALL REG_SET(REG_PC, PC + 1);
@@ -578,244 +209,13 @@ END;
  * Messages
  * -------------------------------------------------------- */
 
-DCL M_INIT(12) CHAR INIT('LAM v0.1   ');
+DCL M_INIT(12) CHAR INIT('LAM v0.2   ');
 DCL M_HALT(7) CHAR  INIT('HALT  ');
 DCL M_FAIL(7) CHAR  INIT('FAIL  ');
-DCL M_BADOP(12) CHAR  INIT('Bad opcode ');
-DCL M_OK(10) CHAR    INIT('Success  ');
-DCL M_HEAPOV(15) CHAR INIT('Heap overflow ');
-DCL M_TRLOV(16) CHAR INIT('Trail overflow ');
-DCL M_CPOV(14) CHAR  INIT('CP overflow  ');
+DCL M_BADOP(12) CHAR INIT('Bad opcode ');
 
 /* --------------------------------------------------------
- * Entry point
- * -------------------------------------------------------- */
-
-/* --------------------------------------------------------
- * Load fact_lookup example into code area
- *
- * Prolog:  parent(bob, ann).  ?- parent(bob, ann).
- * Atoms:   0=[], 1=bob, 2=ann
- *
- * Expected trace:
- *   PC=0  op=12  PUT_CONST A0, atom(bob)
- *   PC=2  op=12  PUT_CONST A1, atom(ann)
- *   PC=4  op=2   CALL 8
- *   PC=8  op=18  GET_CONST A0, atom(bob)  -> match
- *   PC=10 op=18  GET_CONST A1, atom(ann)  -> match
- *   PC=12 op=4   PROCEED -> PC=6
- *   PC=6  op=1   HALT
- * -------------------------------------------------------- */
-
-LOAD_FACT_LOOKUP: PROC;
-    /* Query: ?- parent(bob, ann). */
-    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
-    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(2)  = OP_PUT_CONST * OP_MULT + 1 * OP1_MULT;  /* PUT_CONST A1 */
-    MEM(3)  = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
-    MEM(4)  = OP_CALL * OP_MULT;                       /* CALL */
-    MEM(5)  = 8;                                        /* target: addr 8 */
-    MEM(6)  = OP_HALT * OP_MULT;                       /* HALT */
-
-    /* Clause: parent(bob, ann). at addr 8 */
-    MEM(8)  = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
-    MEM(9)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(10) = OP_GET_CONST * OP_MULT + 1 * OP1_MULT;  /* GET_CONST A1 */
-    MEM(11) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
-    MEM(12) = OP_PROCEED * OP_MULT;                    /* PROCEED */
-END;
-
-/* --------------------------------------------------------
- * Negative test: query parent(bob, joe) against
- * clause parent(bob, ann). Should FAIL at GET_CONST A1.
- *
- * Atoms: 1=bob, 2=ann, 3=joe
- * -------------------------------------------------------- */
-
-LOAD_FACT_FAIL: PROC;
-    /* Query: ?- parent(bob, joe). */
-    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
-    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(2)  = OP_PUT_CONST * OP_MULT + 1 * OP1_MULT;  /* PUT_CONST A1 */
-    MEM(3)  = TAG_ATOM * TAG_MULT + 3;                 /* atom(joe) <-- different */
-    MEM(4)  = OP_CALL * OP_MULT;                       /* CALL */
-    MEM(5)  = 8;                                        /* target: addr 8 */
-    MEM(6)  = OP_HALT * OP_MULT;                       /* HALT */
-
-    /* Clause: parent(bob, ann). at addr 8 */
-    MEM(8)  = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
-    MEM(9)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(10) = OP_GET_CONST * OP_MULT + 1 * OP1_MULT;  /* GET_CONST A1 */
-    MEM(11) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
-    MEM(12) = OP_PROCEED * OP_MULT;                    /* PROCEED */
-END;
-
-/* --------------------------------------------------------
- * PUT_VAR test: PUT_CONST A0 bob, PUT_VAR X0 A1, HALT
- *
- * Expected: A0 = atom(bob) = 4194305
- *           A1 = REF(536)  = 536 (self-ref, TAG_REF=0)
- *           HP = 537 (one cell allocated)
- *           MEM(536) = 536 (self-referencing REF on heap)
- * -------------------------------------------------------- */
-
-LOAD_PUT_VAR_TEST: PROC;
-    MEM(0) = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
-    MEM(1) = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(2) = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1; /* PUT_VAR X0, A1 */
-    MEM(3) = OP_HALT * OP_MULT;                       /* HALT */
-END;
-
-/* --------------------------------------------------------
- * Unification test: query parent(bob, X) against
- * clause parent(bob, ann). GET_CONST A1 should bind X
- * to atom(ann) via DEREF+BIND.
- *
- * Expected: A1 derefs to atom(ann) = 4194306 after PROCEED.
- * -------------------------------------------------------- */
-
-LOAD_UNIFY_TEST: PROC;
-    /* Query: ?- parent(bob, X). */
-    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
-    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(2)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1; /* PUT_VAR X0, A1 */
-    MEM(3)  = OP_CALL * OP_MULT;                       /* CALL */
-    MEM(4)  = 7;                                        /* target: addr 7 */
-    MEM(5)  = OP_HALT * OP_MULT;                       /* HALT */
-
-    /* Clause: parent(bob, ann). at addr 7 */
-    MEM(7)  = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
-    MEM(8)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) -- match */
-    MEM(9)  = OP_GET_CONST * OP_MULT + 1 * OP1_MULT;  /* GET_CONST A1 */
-    MEM(10) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) -- binds X */
-    MEM(11) = OP_PROCEED * OP_MULT;                    /* PROCEED */
-END;
-
-/* --------------------------------------------------------
- * TRY/TRUST test: two-clause predicate, query first clause.
- *
- * pred/1: clause1 = pred(bob).  clause2 = pred(ann).
- * Query: ?- pred(bob).  (matches clause1 via TRY path)
- *
- * Layout:
- *   0-1: PUT_CONST A0, bob
- *   2-3: CALL 6
- *   4:   HALT
- *   6-7: TRY 12        (alt = clause2 at addr 12)
- *   8-9: GET_CONST A0, bob   (clause1)
- *   10:  PROCEED
- *   12:  TRUST          (clause2 entry)
- *   13-14: GET_CONST A0, ann
- *   15:  PROCEED
- *
- * Expected: TRY pushes choice point, clause1 matches,
- * PROCEED returns to HALT. Choice point left on stack
- * (would be used by FAIL if query continued).
- * -------------------------------------------------------- */
-
-LOAD_TRY_TEST: PROC;
-    /* Query */
-    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
-    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(2)  = OP_CALL * OP_MULT;                       /* CALL */
-    MEM(3)  = 6;                                        /* target: pred/1 */
-    MEM(4)  = OP_HALT * OP_MULT;                       /* HALT */
-
-    /* pred/1 dispatch */
-    MEM(6)  = OP_TRY * OP_MULT;                        /* TRY */
-    MEM(7)  = 12;                                       /* alt: clause2 */
-
-    /* clause1: pred(bob). */
-    MEM(8)  = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
-    MEM(9)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(10) = OP_PROCEED * OP_MULT;                    /* PROCEED */
-
-    /* clause2: pred(ann). */
-    MEM(12) = OP_TRUST * OP_MULT;                      /* TRUST */
-    MEM(13) = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
-    MEM(14) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
-    MEM(15) = OP_PROCEED * OP_MULT;                    /* PROCEED */
-END;
-
-/* --------------------------------------------------------
- * Backtracking test: query pred(ann) against pred(bob)/pred(ann).
- * Clause1 fails at GET_CONST (bob != ann), backtracks to
- * clause2 via TRUST, which matches. Should succeed.
- *
- * Same code layout as LOAD_TRY_TEST but query uses atom(ann).
- * -------------------------------------------------------- */
-
-LOAD_BACKTRACK_TEST: PROC;
-    /* Query: ?- pred(ann). */
-    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
-    MEM(1)  = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
-    MEM(2)  = OP_CALL * OP_MULT;                       /* CALL */
-    MEM(3)  = 6;                                        /* target: pred/1 */
-    MEM(4)  = OP_HALT * OP_MULT;                       /* HALT */
-
-    /* pred/1 dispatch */
-    MEM(6)  = OP_TRY * OP_MULT;                        /* TRY */
-    MEM(7)  = 12;                                       /* alt: clause2 */
-
-    /* clause1: pred(bob). -- will fail */
-    MEM(8)  = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
-    MEM(9)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(10) = OP_PROCEED * OP_MULT;                    /* PROCEED */
-
-    /* clause2: pred(ann). -- will match */
-    MEM(12) = OP_TRUST * OP_MULT;                      /* TRUST */
-    MEM(13) = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
-    MEM(14) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
-    MEM(15) = OP_PROCEED * OP_MULT;                    /* PROCEED */
-END;
-
-/* --------------------------------------------------------
- * two_facts: parent(bob, ann). parent(bob, joe).
- *            ?- parent(bob, X), write(X), nl, fail.
- *
- * Atoms: 1=bob, 2=ann, 3=joe
- *
- * Expected output (as integers for now):
- *   4194306   (atom ann = TAG_ATOM*TAG_MULT + 2)
- *   4194307   (atom joe = TAG_ATOM*TAG_MULT + 3)
- *   FAIL
- *
- * Layout matches examples/ancestor/two_facts.asm exactly.
- * -------------------------------------------------------- */
-
-LOAD_TWO_FACTS: PROC;
-    /* Query: ?- parent(bob, X), write(X), nl, fail. */
-    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
-    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(2)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1; /* PUT_VAR X0, A1 */
-    MEM(3)  = OP_CALL * OP_MULT;                       /* CALL */
-    MEM(4)  = 10;                                       /* target: parent/2 at 0x0A */
-    MEM(5)  = OP_B_WRITE * OP_MULT + REG_A1 * OP1_MULT; /* B_WRITE A1 */
-    MEM(6)  = OP_B_NL * OP_MULT;                       /* B_NL */
-    MEM(7)  = OP_FAIL * OP_MULT;                       /* FAIL */
-
-    /* parent/2 entry at addr 10 (0x0A) */
-    MEM(10) = OP_TRY * OP_MULT;                        /* TRY */
-    MEM(11) = 19;                                       /* alt: clause2 at 0x13 */
-
-    /* Clause 1: parent(bob, ann). */
-    MEM(12) = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
-    MEM(13) = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(14) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT; /* GET_CONST A1 */
-    MEM(15) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
-    MEM(16) = OP_PROCEED * OP_MULT;                    /* PROCEED */
-
-    /* Clause 2: parent(bob, joe). at addr 19 (0x13) */
-    MEM(19) = OP_TRUST * OP_MULT;                      /* TRUST */
-    MEM(20) = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
-    MEM(21) = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
-    MEM(22) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT; /* GET_CONST A1 */
-    MEM(23) = TAG_ATOM * TAG_MULT + 3;                 /* atom(joe) */
-    MEM(24) = OP_PROCEED * OP_MULT;                    /* PROCEED */
-END;
-
-/* --------------------------------------------------------
- * Entry point
+ * Test labels and display helpers
  * -------------------------------------------------------- */
 
 DCL M_TEST1(20) CHAR INIT('--- fact_lookup ---');
@@ -836,6 +236,10 @@ DCL M_HEAP(8) CHAR  INIT(' H[0]=');
 DCL M_UB(5) CHAR    INIT(' ub=');
 DCL M_DR(5) CHAR    INIT(' dr=');
 
+/* --------------------------------------------------------
+ * Entry point
+ * -------------------------------------------------------- */
+
 MAIN: PROC;
     DCL VAR_ADDR INT;
     DCL VAR_REF INT;
@@ -851,7 +255,7 @@ MAIN: PROC;
     CALL UART_PUTS(ADDR(M_INIT));
     CALL UART_PUTCHAR(10);
 
-    /* Test 1: positive case -- should succeed */
+    /* Test 1: fact_lookup -- should succeed */
     CALL UART_PUTS(ADDR(M_TEST1));
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
@@ -859,7 +263,7 @@ MAIN: PROC;
     CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 
-    /* Test 2: negative case -- should fail at GET_CONST A1 */
+    /* Test 2: fact_fail -- should fail */
     CALL UART_PUTS(ADDR(M_TEST2));
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
@@ -867,13 +271,12 @@ MAIN: PROC;
     CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 
-    /* Test 3: PUT_VAR -- creates unbound var on heap */
+    /* Test 3: put_var */
     CALL UART_PUTS(ADDR(M_TEST3));
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
     CALL LOAD_PUT_VAR_TEST;
     CALL VM_RUN;
-    /* Show A0, A1, HP, heap[0] */
     CALL UART_PUTS(ADDR(M_A0));
     CALL PRINT_INT(REG_GET(REG_A0));
     CALL UART_PUTS(ADDR(M_A1));
@@ -884,79 +287,49 @@ MAIN: PROC;
     CALL PRINT_INT(MEM(HEAP_BASE));
     CALL UART_PUTCHAR(10);
 
-    /* Test 4: DEREF and BIND
-     * Create var via PUT_VAR, verify unbound, bind to atom,
-     * deref through the ref, verify bound value.
-     *
-     * Steps (done manually, not via VM_RUN):
-     *   1. VM_INIT (HP=536)
-     *   2. Allocate var at heap[536] = REF(536)
-     *   3. IS_UNBOUND -> 1
-     *   4. BIND heap[536] to atom(ann)
-     *   5. IS_UNBOUND -> 0
-     *   6. DEREF(REF(536)) -> atom(ann) = 4194306
-     */
+    /* Test 4: deref_bind (manual, no VM_RUN) */
     CALL UART_PUTS(ADDR(M_TEST4));
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
 
-    /* Create unbound var */
     VAR_ADDR = HEAP_ALLOC;
     VAR_REF = MAKE_CELL(TAG_REF, VAR_ADDR);
     MEM(VAR_ADDR) = VAR_REF;
 
-    /* Check: should be unbound */
     UB = IS_UNBOUND(VAR_REF);
     CALL UART_PUTS(ADDR(M_UB));
     CALL PRINT_INT(UB);
 
-    /* Bind to atom(ann) */
     ATOM_ANN = MAKE_CELL(TAG_ATOM, 2);
     CALL BIND(VAR_ADDR, ATOM_ANN);
 
-    /* Check: should be bound now */
     UB = IS_UNBOUND(VAR_REF);
     CALL UART_PUTS(ADDR(M_UB));
     CALL PRINT_INT(UB);
 
-    /* Deref: follow REF -> get atom(ann) */
     DR = DEREF(VAR_REF);
     CALL UART_PUTS(ADDR(M_DR));
     CALL PRINT_INT(DR);
     CALL UART_PUTCHAR(10);
 
-    /* Test 5: GET_CONST with unification
-     * Query parent(bob, X) against clause parent(bob, ann).
-     * GET_CONST A0 matches bob directly.
-     * GET_CONST A1 finds unbound REF, binds to atom(ann).
-     * After PROCEED, deref A1 should give atom(ann) = 4194306.
-     */
+    /* Test 5: unify_var */
     CALL UART_PUTS(ADDR(M_TEST5));
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
     CALL LOAD_UNIFY_TEST;
     CALL VM_RUN;
-    /* Deref A1 to see the bound value */
     DR = DEREF(REG_GET(REG_A1));
     CALL UART_PUTS(ADDR(M_A1));
     CALL PRINT_INT(DR);
     CALL UART_PUTCHAR(10);
 
-    /* Test 6: Trail push and unwind
-     * Create two vars, bind both, verify bound, unwind, verify unbound.
-     *
-     * Expected:
-     *   TR before bind = 4632 (TRAIL_BASE)
-     *   After 2 binds: TR = 4634, both deref to atoms
-     *   After unwind:  TR = 4632, both IS_UNBOUND = 1
-     */
+    /* Test 6: trail push and unwind */
     CALL UART_PUTS(ADDR(M_TEST6));
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
 
     SAVED_TR = REG_GET(REG_TR);
 
-    /* Create two unbound vars */
     V1_ADDR = HEAP_ALLOC;
     V1_REF = MAKE_CELL(TAG_REF, V1_ADDR);
     MEM(V1_ADDR) = V1_REF;
@@ -965,11 +338,9 @@ MAIN: PROC;
     V2_REF = MAKE_CELL(TAG_REF, V2_ADDR);
     MEM(V2_ADDR) = V2_REF;
 
-    /* Bind both to atoms */
     CALL BIND(V1_ADDR, MAKE_CELL(TAG_ATOM, 1));
     CALL BIND(V2_ADDR, MAKE_CELL(TAG_ATOM, 2));
 
-    /* Show: TR after bind, both derefs */
     CALL UART_PUTS(ADDR(M_TR));
     CALL PRINT_INT(REG_GET(REG_TR));
     CALL UART_PUTS(ADDR(M_DR));
@@ -977,10 +348,8 @@ MAIN: PROC;
     CALL UART_PUTS(ADDR(M_DR));
     CALL PRINT_INT(DEREF(V2_REF));
 
-    /* Unwind trail */
     CALL TRAIL_UNWIND(SAVED_TR);
 
-    /* Show: TR after unwind, both unbound */
     CALL UART_PUTS(ADDR(M_TR));
     CALL PRINT_INT(REG_GET(REG_TR));
     CALL UART_PUTS(ADDR(M_UB));
@@ -989,11 +358,7 @@ MAIN: PROC;
     CALL PRINT_INT(IS_UNBOUND(V2_REF));
     CALL UART_PUTCHAR(10);
 
-    /* Test 7: TRY/TRUST -- choice point creation
-     * Query pred(bob) against pred(bob) / pred(ann).
-     * TRY pushes choice point, clause1 matches, PROCEED.
-     * Show BP changed (choice point exists).
-     */
+    /* Test 7: try/trust */
     CALL UART_PUTS(ADDR(M_TEST7));
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
@@ -1007,15 +372,7 @@ MAIN: PROC;
     CALL PRINT_INT(REG_GET(REG_A0));
     CALL UART_PUTCHAR(10);
 
-    /* Test 8: Backtracking via FAIL
-     * Query pred(ann) against pred(bob) / pred(ann).
-     * Clause1 fails (bob != ann), backtracks to clause2.
-     * TRUST pops choice point, GET_CONST matches ann, PROCEED.
-     *
-     * Trace should show:
-     *   TRY -> GET_CONST A0 bob (fail, backtrack) ->
-     *   TRUST -> GET_CONST A0 ann (match) -> PROCEED -> HALT
-     */
+    /* Test 8: backtracking */
     CALL UART_PUTS(ADDR(M_TEST8));
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
@@ -1025,15 +382,7 @@ MAIN: PROC;
     CALL PRINT_INT(REG_GET(REG_A0));
     CALL UART_PUTCHAR(10);
 
-    /* Test 9: two_facts -- the saga milestone
-     * parent(bob, ann). parent(bob, joe).
-     * ?- parent(bob, X), write(X), nl, fail.
-     *
-     * Expected output:
-     *   4194306   (ann as tagged int)
-     *   4194307   (joe as tagged int)
-     *   FAIL      (no more choice points)
-     */
+    /* Test 9: two_facts milestone */
     CALL UART_PUTS(ADDR(M_TEST9));
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
