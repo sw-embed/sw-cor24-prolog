@@ -1,6 +1,6 @@
 number = 2
 slug = "arithmetic"
-status = "in-progress"
+status = "completed"
 description = """
 Add arithmetic builtins: B_IS_ADD, B_IS_SUB, B_LT, B_GT.
 
@@ -8,4 +8,5 @@ Context: Read src/v..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T16:01:32"
-commits = []
+completed_at = "2026-04-12T16:08:11"
+commits = ["748bfea073897859531c1bfb6dee354c4bd7f136"]

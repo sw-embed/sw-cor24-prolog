@@ -1,0 +1,1 @@
+Added B_IS_ADD (A0=A1+A2), B_IS_SUB (A0=A1-A2), B_LT (A0<A1 or fail), B_GT (A0>A1 or fail). All deref args and extract INT payloads. Comparison builtins trigger backtracking on failure. Test 14: 3+4=7 printed, 3<7 passes, 7<3 fails. 23 opcodes total.

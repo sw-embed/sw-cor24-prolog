@@ -191,6 +191,16 @@ VM_RUN: PROC;
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
+            /* CUT -- 1-cell
+             * Remove all choice points (blunt CUT).
+             * Sets BP = CP_BASE. A proper WAM CUT would
+             * restore to the BP at predicate entry; this
+             * simplified version is noted as a limitation. */
+            WHEN (G_OP = OP_CUT) DO;
+                CALL REG_SET(REG_BP, CP_BASE);
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
             /* ALLOCATE n -- 1-cell (op1 = n local slots)
              * Push environment frame: save EP and CP,
              * reserve n slots for local variables Y0..Yn-1. */
@@ -367,6 +377,7 @@ DCL M_TESTB(20) CHAR INIT('--- ancestor    ---');
 DCL M_TESTC(20) CHAR INIT('--- ancestor X  ---');
 DCL M_TESTD(20) CHAR INIT('--- retry 3cls  ---');
 DCL M_TESTE(20) CHAR INIT('--- arithmetic  ---');
+DCL M_TESTF(20) CHAR INIT('--- cut         ---');
 DCL M_BP(5) CHAR    INIT(' BP=');
 DCL M_TR(5) CHAR    INIT(' TR=');
 DCL M_A0(5) CHAR    INIT(' A0=');
@@ -590,6 +601,17 @@ MAIN: PROC;
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
     CALL LOAD_ARITH_TEST;
+    CALL VM_RUN;
+    CALL UART_PUTCHAR(10);
+
+    /* Test 15: CUT prevents backtracking
+     * first(X) :- color(X), !.
+     * Expected: prints red only, then FAIL (CUT removed CPs).
+     */
+    CALL UART_PUTS(ADDR(M_TESTF));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_CUT_TEST;
     CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 END;

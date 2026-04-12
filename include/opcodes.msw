@@ -20,6 +20,8 @@
 %DEFINE OP_RETRY    7;
 %DEFINE OP_TRUST    8;
 
+%DEFINE OP_CUT      9;
+
 /* PUT family (10-15) */
 %DEFINE OP_PUT_VAR   10;
 %DEFINE OP_PUT_VAL   11;

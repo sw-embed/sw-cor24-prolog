@@ -482,5 +482,91 @@ LOAD_ARITH_TEST: PROC;
     MEM(17) = OP_HALT * OP_MULT;
 END;
 
+/* --------------------------------------------------------
+ * Test 15: CUT -- prevent backtracking
+ *
+ * first(X) :- color(X), !.
+ * Uses the 3-clause color/1 from test 13.
+ * Query: ?- first(X), write(X), nl, fail.
+ *
+ * Without CUT: would print red, green, blue.
+ * With CUT: prints red, then FAIL (no choice points).
+ *
+ * Layout:
+ *   0:   PUT_VAR X0, A0
+ *   1-2: CALL 5                 call first/1
+ *   3:   B_WRITE A0
+ *   4:   B_NL
+ *   5:   FAIL                   -- wait, addr 5 is CALL target
+ *
+ * Fix layout:
+ *   0:   PUT_VAR X0, A0
+ *   1-2: CALL 6                 call first/1
+ *   3:   B_WRITE A0
+ *   4:   B_NL
+ *   5:   FAIL
+ *
+ *   first/1 at 6:
+ *   6:   ALLOCATE 0             save CP
+ *   7:   PUT_VAR X1, A0         fresh var for color arg
+ *         -- wait, A0 already has query's X. Just pass through.
+ *         -- Actually first(X) :- color(X), !.
+ *         -- At entry A0 = X (from query). Call color(X).
+ *   7-8: CALL 12                call color/1
+ *   9:   CUT
+ *   10:  DEALLOCATE
+ *   11:  PROCEED
+ *
+ *   color/1 at 12 (same as retry test):
+ *   12-13: TRY 18
+ *   14-15: GET_CONST A0, red
+ *   16:  PROCEED
+ *   18-19: RETRY 24
+ *   20-21: GET_CONST A0, green
+ *   22:  PROCEED
+ *   24:  TRUST
+ *   25-26: GET_CONST A0, blue
+ *   27:  PROCEED
+ *
+ * Expected: color(X) binds X=red, CUT removes all CPs,
+ * PROCEED returns to query. B_WRITE prints red. FAIL halts.
+ * -------------------------------------------------------- */
+
+LOAD_CUT_TEST: PROC;
+    /* Query */
+    MEM(0)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A0;
+    MEM(1)  = OP_CALL * OP_MULT;
+    MEM(2)  = 6;
+    MEM(3)  = OP_B_WRITE * OP_MULT + REG_A0 * OP1_MULT;
+    MEM(4)  = OP_B_NL * OP_MULT;
+    MEM(5)  = OP_FAIL * OP_MULT;
+
+    /* first/1: first(X) :- color(X), !. */
+    MEM(6)  = OP_ALLOCATE * OP_MULT;                   /* ALLOCATE 0 */
+    MEM(7)  = OP_CALL * OP_MULT;
+    MEM(8)  = 12;                                       /* call color/1 */
+    MEM(9)  = OP_CUT * OP_MULT;
+    MEM(10) = OP_DEALLOCATE * OP_MULT;
+    MEM(11) = OP_PROCEED * OP_MULT;
+
+    /* color/1: TRY/RETRY/TRUST */
+    MEM(12) = OP_TRY * OP_MULT;
+    MEM(13) = 18;
+    MEM(14) = OP_GET_CONST * OP_MULT;
+    MEM(15) = TAG_ATOM * TAG_MULT + 7;                 /* red */
+    MEM(16) = OP_PROCEED * OP_MULT;
+
+    MEM(18) = OP_RETRY * OP_MULT;
+    MEM(19) = 24;
+    MEM(20) = OP_GET_CONST * OP_MULT;
+    MEM(21) = TAG_ATOM * TAG_MULT + 8;                 /* green */
+    MEM(22) = OP_PROCEED * OP_MULT;
+
+    MEM(24) = OP_TRUST * OP_MULT;
+    MEM(25) = OP_GET_CONST * OP_MULT;
+    MEM(26) = TAG_ATOM * TAG_MULT + 9;                 /* blue */
+    MEM(27) = OP_PROCEED * OP_MULT;
+END;
+
 MAIN: PROC;
 END;
