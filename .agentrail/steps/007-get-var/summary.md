@@ -1,0 +1,1 @@
+Added GET_VAR Xn Ai (opcode 16): copies Ai to Xn, PC+1. Trivial but needed for two_facts example.

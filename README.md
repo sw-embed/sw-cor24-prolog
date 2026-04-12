@@ -44,8 +44,11 @@ examples/
 
 VM implementation in PL/SW (`src/vm/vm_main.plsw`):
 - Fetch/decode/dispatch loop with trace output
-- Opcodes: NOP, HALT, PUT_CONST, GET_CONST, CALL, PROCEED, FAIL
-- Runs the fact_lookup example (parent(bob, ann) query)
+- 11 opcodes: NOP, HALT, PUT_CONST, PUT_VAR, GET_VAR, GET_CONST,
+  CALL, PROCEED, FAIL, TRY, TRUST
+- Heap allocation, dereference, bind, trail push/unwind
+- Choice-point save/restore with backtracking on failure
+- Runs fact_lookup (direct match) and backtracking tests
 - Dogfooding the PL/SW compiler (sw-cor24-plsw)
 
 VM specification complete (`docs/vm-spec.md`):

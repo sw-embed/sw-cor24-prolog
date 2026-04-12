@@ -1,0 +1,11 @@
+number = 8
+slug = "two-facts-test"
+status = "pending"
+description = """
+Load and run the two_facts example end-to-end.
+
+Context: Read src/vm/vm_main...."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T15:15:13"
+commits = []
