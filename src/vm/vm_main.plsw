@@ -157,6 +157,8 @@ END;
 VM_RUN: PROC;
     DCL PC INT;
     DCL INST INT;
+    DCL IMM INT;
+    DCL REGVAL INT;
 
     G_RUNNING = 1;
 
@@ -176,6 +178,54 @@ VM_RUN: PROC;
                 G_RUNNING = 0;
             END;
 
+            /* PUT_CONST Ai, [imm] -- 2-cell
+             * Load tagged constant from next cell into Ai */
+            WHEN (G_OP = OP_PUT_CONST) DO;
+                IMM = MEM(PC + 1);
+                CALL REG_SET(G_OP1, IMM);
+                CALL REG_SET(REG_PC, PC + 2);
+            END;
+
+            /* GET_CONST Ai, [imm] -- 2-cell
+             * Unify Ai with tagged constant from next cell.
+             * Initial version: direct equality check only.
+             * Full unification with REF dereferencing is a
+             * later step. */
+            WHEN (G_OP = OP_GET_CONST) DO;
+                IMM = MEM(PC + 1);
+                REGVAL = REG_GET(G_OP1);
+                IF (REGVAL = IMM) THEN DO;
+                    CALL REG_SET(REG_PC, PC + 2);
+                END;
+                ELSE DO;
+                    CALL UART_PUTS(ADDR(M_FAIL));
+                    G_RUNNING = 0;
+                END;
+            END;
+
+            /* CALL [imm] -- 2-cell
+             * Save return address (PC+2) in CP, jump to
+             * target address in next cell */
+            WHEN (G_OP = OP_CALL) DO;
+                CALL REG_SET(REG_CP, PC + 2);
+                IMM = MEM(PC + 1);
+                CALL REG_SET(REG_PC, IMM);
+            END;
+
+            /* PROCEED -- 1-cell
+             * Return to continuation: set PC = CP */
+            WHEN (G_OP = OP_PROCEED) DO;
+                CALL REG_SET(REG_PC, REG_GET(REG_CP));
+            END;
+
+            /* FAIL -- 1-cell
+             * Force backtracking. No choice points yet,
+             * so just halt with failure. */
+            WHEN (G_OP = OP_FAIL) DO;
+                CALL UART_PUTS(ADDR(M_FAIL));
+                G_RUNNING = 0;
+            END;
+
             OTHERWISE DO;
                 CALL UART_PUTS(ADDR(M_BADOP));
                 CALL PRINT_INT(G_OP);
@@ -192,7 +242,47 @@ END;
 
 DCL M_INIT(12) CHAR INIT('LAM v0.1   ');
 DCL M_HALT(7) CHAR  INIT('HALT  ');
+DCL M_FAIL(7) CHAR  INIT('FAIL  ');
 DCL M_BADOP(12) CHAR INIT('Bad opcode ');
+DCL M_OK(10) CHAR   INIT('Success  ');
+
+/* --------------------------------------------------------
+ * Entry point
+ * -------------------------------------------------------- */
+
+/* --------------------------------------------------------
+ * Load fact_lookup example into code area
+ *
+ * Prolog:  parent(bob, ann).  ?- parent(bob, ann).
+ * Atoms:   0=[], 1=bob, 2=ann
+ *
+ * Expected trace:
+ *   PC=0  op=12  PUT_CONST A0, atom(bob)
+ *   PC=2  op=12  PUT_CONST A1, atom(ann)
+ *   PC=4  op=2   CALL 8
+ *   PC=8  op=18  GET_CONST A0, atom(bob)  -> match
+ *   PC=10 op=18  GET_CONST A1, atom(ann)  -> match
+ *   PC=12 op=4   PROCEED -> PC=6
+ *   PC=6  op=1   HALT
+ * -------------------------------------------------------- */
+
+LOAD_FACT_LOOKUP: PROC;
+    /* Query: ?- parent(bob, ann). */
+    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(2)  = OP_PUT_CONST * OP_MULT + 1 * OP1_MULT;  /* PUT_CONST A1 */
+    MEM(3)  = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
+    MEM(4)  = OP_CALL * OP_MULT;                       /* CALL */
+    MEM(5)  = 8;                                        /* target: addr 8 */
+    MEM(6)  = OP_HALT * OP_MULT;                       /* HALT */
+
+    /* Clause: parent(bob, ann). at addr 8 */
+    MEM(8)  = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
+    MEM(9)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(10) = OP_GET_CONST * OP_MULT + 1 * OP1_MULT;  /* GET_CONST A1 */
+    MEM(11) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
+    MEM(12) = OP_PROCEED * OP_MULT;                    /* PROCEED */
+END;
 
 /* --------------------------------------------------------
  * Entry point
@@ -203,11 +293,14 @@ MAIN: PROC;
     CALL UART_PUTCHAR(10);
 
     CALL VM_INIT;
-
-    /* Load a minimal test: NOP, NOP, HALT */
-    MEM(CODE_BASE)     = OP_NOP * OP_MULT;
-    MEM(CODE_BASE + 1) = OP_NOP * OP_MULT;
-    MEM(CODE_BASE + 2) = OP_HALT * OP_MULT;
-
+    CALL LOAD_FACT_LOOKUP;
     CALL VM_RUN;
+
+    /* Show final register state */
+    CALL UART_PUTS(ADDR(M_OK));
+    CALL UART_PUTS(ADDR(T_MSG));
+    CALL PRINT_INT(REG_GET(REG_PC));
+    CALL UART_PUTS(ADDR(T_SEP));
+    CALL PRINT_INT(REG_GET(REG_A0));
+    CALL UART_PUTCHAR(10);
 END;

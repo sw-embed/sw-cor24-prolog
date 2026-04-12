@@ -1,6 +1,6 @@
 number = 6
 slug = "vm-state-init"
-status = "in-progress"
+status = "completed"
 description = """
 Implement VM state initialization in PL/SW.
 
@@ -8,4 +8,5 @@ Context: Read docs/vm-spec.md (s..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T13:57:11"
-commits = []
+completed_at = "2026-04-12T14:16:11"
+commits = ["2947259434e4555c0e5e8486821440d98771e7e6"]

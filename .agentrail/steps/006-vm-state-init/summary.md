@@ -1,0 +1,1 @@
+Rewrote all VM constants from wrong EQU/.plsw format to proper PL/SW %DEFINE/.msw headers (cell.msw, memory.msw, opcodes.msw, frames.msw, vmglob.msw). Created first real PL/SW code: vm_main.plsw with VM_INIT, cell helpers, DECODE, VM_RUN dispatch loop (NOP/HALT), trace output, and MAIN entry point. Noted PLSW-ISSUE for shift intrinsics.
