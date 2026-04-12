@@ -1,6 +1,6 @@
 number = 8
 slug = "two-facts-test"
-status = "pending"
+status = "in-progress"
 description = """
 Load and run the two_facts example end-to-end.
 

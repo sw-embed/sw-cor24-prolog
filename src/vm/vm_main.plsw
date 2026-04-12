@@ -474,6 +474,22 @@ VM_RUN: PROC;
                 END;
             END;
 
+            /* B_WRITE Ai -- 1-cell
+             * Print the dereferenced value of Ai as integer.
+             * Full atom-name lookup from atom table is a
+             * future enhancement. */
+            WHEN (G_OP = OP_B_WRITE) DO;
+                CALL PRINT_INT(DEREF(REG_GET(G_OP1)));
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
+            /* B_NL -- 1-cell
+             * Print newline. */
+            WHEN (G_OP = OP_B_NL) DO;
+                CALL UART_PUTCHAR(10);
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+
             OTHERWISE DO;
                 CALL UART_PUTS(ADDR(M_BADOP));
                 CALL PRINT_INT(G_OP);
@@ -680,6 +696,51 @@ LOAD_BACKTRACK_TEST: PROC;
 END;
 
 /* --------------------------------------------------------
+ * two_facts: parent(bob, ann). parent(bob, joe).
+ *            ?- parent(bob, X), write(X), nl, fail.
+ *
+ * Atoms: 1=bob, 2=ann, 3=joe
+ *
+ * Expected output (as integers for now):
+ *   4194306   (atom ann = TAG_ATOM*TAG_MULT + 2)
+ *   4194307   (atom joe = TAG_ATOM*TAG_MULT + 3)
+ *   FAIL
+ *
+ * Layout matches examples/ancestor/two_facts.asm exactly.
+ * -------------------------------------------------------- */
+
+LOAD_TWO_FACTS: PROC;
+    /* Query: ?- parent(bob, X), write(X), nl, fail. */
+    MEM(0)  = OP_PUT_CONST * OP_MULT;                  /* PUT_CONST A0 */
+    MEM(1)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(2)  = OP_PUT_VAR * OP_MULT + REG_X0 * OP1_MULT + REG_A1; /* PUT_VAR X0, A1 */
+    MEM(3)  = OP_CALL * OP_MULT;                       /* CALL */
+    MEM(4)  = 10;                                       /* target: parent/2 at 0x0A */
+    MEM(5)  = OP_B_WRITE * OP_MULT + REG_A1 * OP1_MULT; /* B_WRITE A1 */
+    MEM(6)  = OP_B_NL * OP_MULT;                       /* B_NL */
+    MEM(7)  = OP_FAIL * OP_MULT;                       /* FAIL */
+
+    /* parent/2 entry at addr 10 (0x0A) */
+    MEM(10) = OP_TRY * OP_MULT;                        /* TRY */
+    MEM(11) = 19;                                       /* alt: clause2 at 0x13 */
+
+    /* Clause 1: parent(bob, ann). */
+    MEM(12) = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
+    MEM(13) = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(14) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT; /* GET_CONST A1 */
+    MEM(15) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
+    MEM(16) = OP_PROCEED * OP_MULT;                    /* PROCEED */
+
+    /* Clause 2: parent(bob, joe). at addr 19 (0x13) */
+    MEM(19) = OP_TRUST * OP_MULT;                      /* TRUST */
+    MEM(20) = OP_GET_CONST * OP_MULT;                  /* GET_CONST A0 */
+    MEM(21) = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(22) = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT; /* GET_CONST A1 */
+    MEM(23) = TAG_ATOM * TAG_MULT + 3;                 /* atom(joe) */
+    MEM(24) = OP_PROCEED * OP_MULT;                    /* PROCEED */
+END;
+
+/* --------------------------------------------------------
  * Entry point
  * -------------------------------------------------------- */
 
@@ -691,6 +752,7 @@ DCL M_TEST5(20) CHAR INIT('--- unify_var  ---');
 DCL M_TEST6(20) CHAR INIT('--- trail      ---');
 DCL M_TEST7(20) CHAR INIT('--- try/trust  ---');
 DCL M_TEST8(20) CHAR INIT('--- backtrack  ---');
+DCL M_TEST9(20) CHAR INIT('--- two_facts  ---');
 DCL M_BP(5) CHAR    INIT(' BP=');
 DCL M_TR(5) CHAR    INIT(' TR=');
 DCL M_A0(5) CHAR    INIT(' A0=');
@@ -887,5 +949,21 @@ MAIN: PROC;
     CALL VM_RUN;
     CALL UART_PUTS(ADDR(M_A0));
     CALL PRINT_INT(REG_GET(REG_A0));
+    CALL UART_PUTCHAR(10);
+
+    /* Test 9: two_facts -- the saga milestone
+     * parent(bob, ann). parent(bob, joe).
+     * ?- parent(bob, X), write(X), nl, fail.
+     *
+     * Expected output:
+     *   4194306   (ann as tagged int)
+     *   4194307   (joe as tagged int)
+     *   FAIL      (no more choice points)
+     */
+    CALL UART_PUTS(ADDR(M_TEST9));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_TWO_FACTS;
+    CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 END;
