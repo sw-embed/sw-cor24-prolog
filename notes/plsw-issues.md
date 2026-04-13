@@ -100,8 +100,35 @@ Shift count must be in a register (loaded via `lc`).
 - PLSW-004 (GEN last line): workaround applied (duplicate last line).
 - PLSW-005 (ISA syntax): FIXED in our macros.
 
+## PLSW-006: PROC defs fail without %INCLUDE (sw-cor24-plsw#38)
+
+**Severity**: Blocker for bare .plsw files
+**Symptom**: "expected PROC after label" when defining PROCs in a
+.plsw file that has no %INCLUDE directives. Adding any %INCLUDE
+(even an empty .msw) fixes it. Likely a parser state initialization
+issue.
+
+## PLSW-007: Cross-module PROC calls undocumented (sw-cor24-plsw#38)
+
+**Severity**: Blocker for modular build
+**Symptom**: vm_heap.plsw calls REG_GET (defined in vm_regs.plsw)
+and fails with "CODEGEN ERROR: undefined variable." Need either:
+- Forward PROC declarations in .msw headers
+- Compiler support for undefined PROC references (emit la+jal, let linker resolve)
+- Documentation of the cross-module pattern used by sw-cor24-snobol4
+
+## Status update (2026-04-12, late)
+
+- PLSW-001 (division): FIXED (plsw#35)
+- PLSW-002 (large source): use modular build
+- PLSW-003 (shift operators): enhancement request
+- PLSW-004 (GEN last line): FIXED (plsw#37)
+- PLSW-005 (ISA syntax): FIXED in our macros
+- PLSW-006 (PROC without include): reported (plsw#38)
+- PLSW-007 (cross-module calls): reported (plsw#38)
+
 ## Next steps
 
-1. Fix PLSW-004 in sw-cor24-plsw (GEN last line dropped).
-2. Test modular build with link24.
+1. Fix PLSW-006/007 in sw-cor24-plsw (modular build support).
+2. Once fixed, complete the link24 modular build.
 3. Consider PLSW-003 for performance improvement.

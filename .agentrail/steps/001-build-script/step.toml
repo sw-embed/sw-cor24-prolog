@@ -1,6 +1,6 @@
 number = 1
 slug = "build-script"
-status = "pending"
+status = "in-progress"
 description = """
 Write a modular build script for the LAM VM.
 
