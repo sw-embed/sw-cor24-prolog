@@ -3,60 +3,60 @@
 * Reads Prolog source via RAWINPUT (case-preserving).
 * Outputs one token per line:  TYPE VALUE
 *
-* Strategy: extract first char with LEN(1), classify it,
-* then SPAN the rest of multi-char tokens. LEN(1) is
-* anchored to position 0 (avoids unanchored SPAN issues).
+* Uses LEN(1) peek for first-char classification, then
+* BREAK on delimiters to consume the rest of multi-char
+* tokens (SPAN is unanchored, BREAK is anchored).
 *
 READ   LINE = RAWINPUT                  :F(DONE)
 *
 SCAN   IDENT(LINE,'')                   :S(READ)
 *      Skip whitespace
-       LINE LEN(1) . CH                :F(READ)
-       IDENT(CH,' ')                    :F(SK2)
-       LINE ' ' = ''                   :(SCAN)
-SK2    IDENT(CH,'	')                  :F(CHCK)
-       LINE '	' = ''                  :(SCAN)
+       LINE ' ' = ''                   :S(SCAN)
+       IDENT(LINE,'')                   :S(READ)
 *
-*      Classify first character
-CHCK   IDENT(CH,'%')                    :F(CK1)
-       LINE = ''                       :(READ)
-*
-*      Two-char operators: must check before consuming CH
-CK1    LINE ':-' = ''                  :F(CK2)
+*      Two-char operators (check before consuming)
+       LINE ':-' = ''                  :F(CK2)
        OUTPUT = 'NECK :-'             :(SCAN)
 CK2    LINE '?-' = ''                  :F(CK3)
        OUTPUT = 'QUERY ?-'            :(SCAN)
 *
+*      Peek at first char
+CK3    LINE LEN(1) . CH                :F(READ)
+*
+*      Comment
+       IDENT(CH,'%')                    :F(CK4)
+       LINE = ''                       :(READ)
+*
 *      Lowercase -> atom
-CK3    'abcdefghijklmnopqrstuvwxyz' CH :F(CK4)
-       LINE LEN(1) = ''
-       LINE SPAN('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_') . REST = '' :F(A1)
-       OUTPUT = 'ATOM ' CH REST       :(SCAN)
-A1     OUTPUT = 'ATOM ' CH            :(SCAN)
+CK4    'abcdefghijklmnopqrstuvwxyz' CH :F(CK5)
+       LINE BREAK(' ,().:;!?%-') . TOK = '' :F(A1)
+       OUTPUT = 'ATOM ' TOK           :(SCAN)
+A1     LINE REM . TOK = ''
+       OUTPUT = 'ATOM ' TOK           :(SCAN)
 *
 *      Uppercase -> variable
-CK4    'ABCDEFGHIJKLMNOPQRSTUVWXYZ' CH :F(CK5)
-       LINE LEN(1) = ''
-       LINE SPAN('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_') . REST = '' :F(V1)
-       OUTPUT = 'VAR ' CH REST        :(SCAN)
-V1     OUTPUT = 'VAR ' CH             :(SCAN)
+CK5    'ABCDEFGHIJKLMNOPQRSTUVWXYZ' CH :F(CK6)
+       LINE BREAK(' ,().:;!?%-') . TOK = '' :F(V1)
+       OUTPUT = 'VAR ' TOK            :(SCAN)
+V1     LINE REM . TOK = ''
+       OUTPUT = 'VAR ' TOK            :(SCAN)
 *
 *      Underscore -> variable
-CK5    IDENT(CH,'_')                    :F(CK6)
-       LINE LEN(1) = ''
-       LINE SPAN('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_') . REST = '' :F(U1)
-       OUTPUT = 'VAR _' REST          :(SCAN)
-U1     OUTPUT = 'VAR _'               :(SCAN)
+CK6    IDENT(CH,'_')                    :F(CK7)
+       LINE BREAK(' ,().:;!?%-') . TOK = '' :F(U1)
+       OUTPUT = 'VAR ' TOK            :(SCAN)
+U1     LINE REM . TOK = ''
+       OUTPUT = 'VAR ' TOK            :(SCAN)
 *
 *      Digit -> integer
-CK6    '0123456789' CH                  :F(CK7)
-       LINE LEN(1) = ''
-       LINE SPAN('0123456789') . REST = '' :F(I1)
-       OUTPUT = 'INT ' CH REST        :(SCAN)
-I1     OUTPUT = 'INT ' CH             :(SCAN)
+CK7    '0123456789' CH                  :F(CK8)
+       LINE BREAK(' ,().:;!?%-') . TOK = '' :F(I1)
+       OUTPUT = 'INT ' TOK            :(SCAN)
+I1     LINE REM . TOK = ''
+       OUTPUT = 'INT ' TOK            :(SCAN)
 *
-*      Single-char punctuation
-CK7    LINE LEN(1) = ''
+*      Single-char punctuation (consume it)
+CK8    LINE LEN(1) = ''
        IDENT(CH,'.')                    :F(P1)
        OUTPUT = 'DOT .'               :(SCAN)
 P1     IDENT(CH,',')                    :F(P2)
