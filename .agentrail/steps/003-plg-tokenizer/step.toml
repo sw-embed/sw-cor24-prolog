@@ -1,6 +1,6 @@
 number = 3
 slug = "plg-tokenizer"
-status = "pending"
+status = "in-progress"
 description = "Begin the Prolog compiler: implement a Python tokenizer for .pl files. See sa..."
 role = "legacy"
 context_files = []
