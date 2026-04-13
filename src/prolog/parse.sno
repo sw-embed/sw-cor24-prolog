@@ -1,0 +1,122 @@
+* parse.sno -- Prolog parser (inline, no subroutines)
+*
+* Reads .pl via RAWINPUT. Outputs one clause per line:
+*   FACT functor arity arg1 arg2 ...
+*   RULE functor arity arg1 ... BODY goal1 COMMA goal2 ...
+*   QUERY goal1 COMMA goal2 ...
+*
+* Args: a:name v:Name i:N
+*
+* Uses BREAK for all multi-char extraction (anchored).
+* Uses LEN(1) peek for single-char checks (anchored).
+*
+READ   LINE = RAWINPUT                  :F(DONE)
+       IDENT(LINE,'')                   :S(READ)
+*
+*      Skip leading whitespace
+RS     LINE LEN(1) . CH                :F(READ)
+       IDENT(CH,' ')                    :F(RS2)
+       LINE ' ' = ''                   :(RS)
+RS2    IDENT(CH,'%')                    :S(READ)
+*
+*      Query?
+       LINE '?-' = ''                  :F(CFACT)
+       OUT = 'QUERY'
+       :(GOALS)
+*
+*      Clause: extract head functor
+CFACT  LINE BREAK('(') . HFUN = ''    :F(READ)
+       LINE '(' = ''
+*      Parse head args
+       ACNT = 0
+       AOUT = ''
+       :(HARGS)
+*
+* ---- Head arg loop: BREAK to next delimiter ----
+HARGS  LINE LEN(1) . CH                :F(HDONE)
+       IDENT(CH,' ')                    :F(HAS2)
+       LINE ' ' = ''                   :(HARGS)
+HAS2   IDENT(CH,')')                    :F(HAS3)
+       LINE ')' = ''                   :(HDONE)
+HAS3   IDENT(CH,',')                    :F(HAS4)
+       LINE ',' = ''                   :(HARGS)
+*      Extract arg value up to next delimiter
+HAS4   LINE BREAK(',) ') . AV = ''    :F(HREM)
+       :(HCLAS)
+HREM   LINE REM . AV = ''
+*      Classify arg by first char
+HCLAS  AV LEN(1) . AC
+       'abcdefghijklmnopqrstuvwxyz' AC :F(HC2)
+       AOUT = AOUT ' a:' AV
+       ACNT = ACNT + 1                :(HARGS)
+HC2    'ABCDEFGHIJKLMNOPQRSTUVWXYZ' AC :F(HC3)
+       AOUT = AOUT ' v:' AV
+       ACNT = ACNT + 1                :(HARGS)
+HC3    IDENT(AC,'_')                    :F(HC4)
+       AOUT = AOUT ' v:' AV
+       ACNT = ACNT + 1                :(HARGS)
+HC4    '0123456789' AC                  :F(HC5)
+       AOUT = AOUT ' i:' AV
+       ACNT = ACNT + 1                :(HARGS)
+HC5    AOUT = AOUT ' ?:' AV
+       ACNT = ACNT + 1                :(HARGS)
+*
+HDONE  OUT = HFUN ' ' ACNT AOUT
+*      Skip whitespace before . or :-
+HD2    LINE LEN(1) . CH                :F(READ)
+       IDENT(CH,' ')                    :F(HD3)
+       LINE ' ' = ''                   :(HD2)
+*      Fact or rule?
+HD3    IDENT(CH,'.')                     :F(HRULE)
+       OUTPUT = 'FACT ' OUT           :(READ)
+HRULE  LINE ':-' = ''                  :F(READ)
+       OUT = 'RULE ' OUT ' BODY'
+       :(GOALS)
+*
+* ---- Parse body/query goal list ----
+*
+GOALS  LINE LEN(1) . CH                :F(GFIN)
+       IDENT(CH,' ')                    :F(GS2)
+       LINE ' ' = ''                   :(GOALS)
+GS2    IDENT(CH,'.')                     :S(GFIN)
+       IDENT(CH,',')                    :F(GS3)
+       LINE ',' = ''                   :(GOALS)
+*      Extract goal functor
+GS3    LINE BREAK('(') . GF = ''      :F(GFIN)
+       LINE '(' = ''
+*      Parse goal args (same pattern as head args)
+       GCNT = 0
+       GARGS = ''
+GLOOP  LINE LEN(1) . CH                :F(GGOT)
+       IDENT(CH,' ')                    :F(GL2)
+       LINE ' ' = ''                   :(GLOOP)
+GL2    IDENT(CH,')')                    :F(GL3)
+       LINE ')' = ''                   :(GGOT)
+GL3    IDENT(CH,',')                    :F(GL4)
+       LINE ',' = ''                   :(GLOOP)
+GL4    LINE BREAK(',) ') . AV = ''    :F(GLREM)
+       :(GLCLS)
+GLREM  LINE REM . AV = ''
+GLCLS  AV LEN(1) . AC
+       'abcdefghijklmnopqrstuvwxyz' AC :F(GC2)
+       GARGS = GARGS ' a:' AV
+       GCNT = GCNT + 1                :(GLOOP)
+GC2    'ABCDEFGHIJKLMNOPQRSTUVWXYZ' AC :F(GC3)
+       GARGS = GARGS ' v:' AV
+       GCNT = GCNT + 1                :(GLOOP)
+GC3    IDENT(AC,'_')                    :F(GC4)
+       GARGS = GARGS ' v:' AV
+       GCNT = GCNT + 1                :(GLOOP)
+GC4    '0123456789' AC                  :F(GC5)
+       GARGS = GARGS ' i:' AV
+       GCNT = GCNT + 1                :(GLOOP)
+GC5    GARGS = GARGS ' ?:' AV
+       GCNT = GCNT + 1                :(GLOOP)
+*
+GGOT   OUT = OUT ' ' GF ' ' GCNT GARGS
+       :(GOALS)
+*
+GFIN   OUTPUT = OUT                    :(READ)
+*
+DONE
+END
