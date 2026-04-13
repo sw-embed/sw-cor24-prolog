@@ -1,0 +1,119 @@
+/* vm_builtin.plsw -- Builtin opcode handlers
+ *
+ * Called from VM_RUN when opcode is in the builtin family (32-37).
+ * Returns 1 if handled, 0 if not.
+ */
+%DEFINE LIBRARY;
+
+%INCLUDE cell;
+%INCLUDE memory;
+%INCLUDE opcodes;
+%INCLUDE vmglob;
+
+EXEC_BUILTIN: PROC(PC INT) RETURNS(INT);
+
+    SELECT;
+        /* B_WRITE Ai -- 1-cell */
+        WHEN (G_OP = OP_B_WRITE) DO;
+            DCL WVAL INT;
+            DCL WTAG INT;
+            DCL WPAY INT;
+            WVAL = DEREF(REG_GET(G_OP1));
+            WTAG = CELL_TAG(WVAL);
+            WPAY = CELL_PAY(WVAL);
+            SELECT;
+                WHEN (WTAG = TAG_ATOM) DO;
+                    CALL ATOM_PRINT(WPAY);
+                END;
+                WHEN (WTAG = TAG_INT) DO;
+                    CALL PRINT_INT(WPAY);
+                END;
+                WHEN (WTAG = TAG_REF) DO;
+                    CALL UART_PUTCHAR(95);
+                    CALL UART_PUTCHAR(86);
+                    CALL PRINT_INT(WPAY);
+                END;
+                OTHERWISE DO;
+                    CALL PRINT_INT(WVAL);
+                END;
+            END;
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        /* B_NL -- 1-cell */
+        WHEN (G_OP = OP_B_NL) DO;
+            CALL UART_PUTCHAR(10);
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        /* B_IS_ADD -- 1-cell */
+        WHEN (G_OP = OP_B_IS_ADD) DO;
+            DCL ADD_L INT;
+            DCL ADD_R INT;
+            ADD_L = CELL_PAY(DEREF(REG_GET(REG_A1)));
+            ADD_R = CELL_PAY(DEREF(REG_GET(REG_A2)));
+            CALL REG_SET(REG_A0, MAKE_CELL(TAG_INT, ADD_L + ADD_R));
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        /* B_IS_SUB -- 1-cell */
+        WHEN (G_OP = OP_B_IS_SUB) DO;
+            DCL SUB_L INT;
+            DCL SUB_R INT;
+            SUB_L = CELL_PAY(DEREF(REG_GET(REG_A1)));
+            SUB_R = CELL_PAY(DEREF(REG_GET(REG_A2)));
+            CALL REG_SET(REG_A0, MAKE_CELL(TAG_INT, SUB_L - SUB_R));
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        /* B_LT -- 1-cell */
+        WHEN (G_OP = OP_B_LT) DO;
+            DCL LT_L INT;
+            DCL LT_R INT;
+            LT_L = CELL_PAY(DEREF(REG_GET(REG_A0)));
+            LT_R = CELL_PAY(DEREF(REG_GET(REG_A1)));
+            IF (LT_L < LT_R) THEN DO;
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+            ELSE DO;
+                IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
+                    CALL UART_PUTS(ADDR(M_FAIL));
+                    G_RUNNING = 0;
+                END;
+                ELSE DO;
+                    CALL REG_SET(REG_PC, CP_RESTORE());
+                END;
+            END;
+        END;
+
+        /* B_GT -- 1-cell */
+        WHEN (G_OP = OP_B_GT) DO;
+            DCL GT_L INT;
+            DCL GT_R INT;
+            GT_L = CELL_PAY(DEREF(REG_GET(REG_A0)));
+            GT_R = CELL_PAY(DEREF(REG_GET(REG_A1)));
+            IF (GT_L > GT_R) THEN DO;
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+            ELSE DO;
+                IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
+                    CALL UART_PUTS(ADDR(M_FAIL));
+                    G_RUNNING = 0;
+                END;
+                ELSE DO;
+                    CALL REG_SET(REG_PC, CP_RESTORE());
+                END;
+            END;
+        END;
+
+        OTHERWISE DO;
+            RETURN(0);
+        END;
+    END;
+    RETURN(1);
+END;
+
+DCL M_FAIL(7) CHAR INIT('FAIL  ');
+
+MAIN: PROC;
+END;

@@ -1,0 +1,107 @@
+/* vm_data.plsw -- PUT/GET opcode handlers
+ *
+ * Called from VM_RUN when opcode is in the data family (10-20).
+ * Returns 1 if handled, 0 if not.
+ */
+%DEFINE LIBRARY;
+
+%INCLUDE cell;
+%INCLUDE memory;
+%INCLUDE opcodes;
+%INCLUDE frames;
+%INCLUDE vmglob;
+
+/* Backtrack helper: shared by GET_CONST mismatch and comparisons.
+ * Flattened to avoid deep nesting (workaround for plsw#39). */
+VM_BACKTRACK: PROC;
+    IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
+        CALL UART_PUTS(ADDR(M_FAIL));
+        G_RUNNING = 0;
+    END;
+    ELSE DO;
+        CALL REG_SET(REG_PC, CP_RESTORE());
+    END;
+END;
+
+/* GET_CONST helper: deref, bind-or-compare.
+ * Separate PROC to keep nesting shallow. */
+DO_GET_CONST: PROC(PC INT, IMM INT, REGVAL INT);
+    IF (IS_UNBOUND(REGVAL) = 1) THEN DO;
+        CALL BIND(CELL_PAY(REGVAL), IMM);
+        CALL REG_SET(REG_PC, PC + 2);
+        RETURN;
+    END;
+    IF (REGVAL = IMM) THEN DO;
+        CALL REG_SET(REG_PC, PC + 2);
+        RETURN;
+    END;
+    CALL VM_BACKTRACK();
+END;
+
+EXEC_DATA: PROC(PC INT) RETURNS(INT);
+    DCL IMM INT;
+    DCL REGVAL INT;
+
+    SELECT;
+        /* PUT_CONST Ai, [imm] -- 2-cell */
+        WHEN (G_OP = OP_PUT_CONST) DO;
+            IMM = MEM(PC + 1);
+            CALL REG_SET(G_OP1, IMM);
+            CALL REG_SET(REG_PC, PC + 2);
+        END;
+
+        /* PUT_VAR Xn, Ai -- 1-cell */
+        WHEN (G_OP = OP_PUT_VAR) DO;
+            DCL PV_ADDR INT;
+            DCL PV_REF INT;
+            PV_ADDR = HEAP_ALLOC();
+            PV_REF = MAKE_CELL(TAG_REF, PV_ADDR);
+            MEM(PV_ADDR) = PV_REF;
+            CALL REG_SET(G_OP1, PV_REF);
+            CALL REG_SET(G_OP2, PV_REF);
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        /* PUT_VAL Xn, Ai -- 1-cell */
+        WHEN (G_OP = OP_PUT_VAL) DO;
+            CALL REG_SET(G_OP2, REG_GET(G_OP1));
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        /* PUT_Y_VAL Yi, Ai -- 1-cell */
+        WHEN (G_OP = OP_PUT_Y_VAL) DO;
+            CALL REG_SET(G_OP2, Y_GET(G_OP1));
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        /* GET_VAR Xn, Ai -- 1-cell */
+        WHEN (G_OP = OP_GET_VAR) DO;
+            CALL REG_SET(G_OP1, REG_GET(G_OP2));
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        /* GET_Y_VAR Yi, Ai -- 1-cell */
+        WHEN (G_OP = OP_GET_Y_VAR) DO;
+            CALL Y_SET(G_OP1, REG_GET(G_OP2));
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        /* GET_CONST Ai, [imm] -- 2-cell
+         * Flattened to avoid deep IF/ELSE nesting (plsw#39). */
+        WHEN (G_OP = OP_GET_CONST) DO;
+            IMM = MEM(PC + 1);
+            REGVAL = DEREF(REG_GET(G_OP1));
+            CALL DO_GET_CONST(PC, IMM, REGVAL);
+        END;
+
+        OTHERWISE DO;
+            RETURN(0);
+        END;
+    END;
+    RETURN(1);
+END;
+
+DCL M_FAIL(7) CHAR INIT('FAIL  ');
+
+MAIN: PROC;
+END;

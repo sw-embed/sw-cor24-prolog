@@ -1,0 +1,117 @@
+/* vm_ctrl.plsw -- Control and choice-point opcode handlers
+ *
+ * Called from VM_RUN when opcode is in the control family (0-9)
+ * or frame management (28-29).
+ * Returns 1 if handled, 0 if not.
+ */
+%DEFINE LIBRARY;
+
+%INCLUDE cell;
+%INCLUDE memory;
+%INCLUDE opcodes;
+%INCLUDE frames;
+%INCLUDE vmglob;
+
+EXEC_CTRL: PROC(PC INT) RETURNS(INT);
+    DCL IMM INT;
+
+    SELECT;
+        WHEN (G_OP = OP_NOP) DO;
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        WHEN (G_OP = OP_HALT) DO;
+            CALL UART_PUTS(ADDR(M_HALT));
+            G_RUNNING = 0;
+        END;
+
+        WHEN (G_OP = OP_CALL) DO;
+            CALL REG_SET(REG_CP, PC + 2);
+            IMM = MEM(PC + 1);
+            CALL REG_SET(REG_PC, IMM);
+        END;
+
+        WHEN (G_OP = OP_EXECUTE) DO;
+            IMM = MEM(PC + 1);
+            CALL REG_SET(REG_PC, IMM);
+        END;
+
+        WHEN (G_OP = OP_PROCEED) DO;
+            CALL REG_SET(REG_PC, REG_GET(REG_CP));
+        END;
+
+        WHEN (G_OP = OP_TRY) DO;
+            IMM = MEM(PC + 1);
+            CALL CP_PUSH(IMM);
+            CALL REG_SET(REG_PC, PC + 2);
+        END;
+
+        WHEN (G_OP = OP_RETRY) DO;
+            DCL RT_DUMMY INT;
+            DCL RT_FB INT;
+            RT_DUMMY = CP_RESTORE();
+            RT_FB = REG_GET(REG_BP) - CP_FRAME_SIZE;
+            IMM = MEM(PC + 1);
+            CALL CP_WRITE(RT_FB, CPF_NEXT_ALT, IMM);
+            CALL REG_SET(REG_PC, PC + 2);
+        END;
+
+        WHEN (G_OP = OP_TRUST) DO;
+            DCL TR_DUMMY INT;
+            TR_DUMMY = CP_POP();
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        WHEN (G_OP = OP_CUT) DO;
+            CALL REG_SET(REG_BP, CP_BASE);
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        WHEN (G_OP = OP_FAIL) DO;
+            IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
+                CALL UART_PUTS(ADDR(M_FAIL));
+                G_RUNNING = 0;
+            END;
+            ELSE DO;
+                DCL FAIL_ALT INT;
+                FAIL_ALT = CP_RESTORE();
+                CALL REG_SET(REG_PC, FAIL_ALT);
+            END;
+        END;
+
+        WHEN (G_OP = OP_ALLOCATE) DO;
+            IF (G_ET + ENV_HDR_SIZE + G_OP1 > ENV_BASE + ENV_SIZE) THEN DO;
+                CALL UART_PUTS(ADDR(M_ENVOV));
+                G_RUNNING = 0;
+            END;
+            ELSE DO;
+                MEM(G_ET + ENV_PREV_EP) = REG_GET(REG_EP);
+                MEM(G_ET + ENV_SAVED_CP) = REG_GET(REG_CP);
+                CALL REG_SET(REG_EP, G_ET);
+                G_ET = G_ET + ENV_HDR_SIZE + G_OP1;
+                CALL REG_SET(REG_PC, PC + 1);
+            END;
+        END;
+
+        WHEN (G_OP = OP_DEALLOCATE) DO;
+            DCL D_EP INT;
+            D_EP = REG_GET(REG_EP);
+            CALL REG_SET(REG_CP, MEM(D_EP + ENV_SAVED_CP));
+            G_ET = D_EP;
+            CALL REG_SET(REG_EP, MEM(D_EP + ENV_PREV_EP));
+            CALL REG_SET(REG_PC, PC + 1);
+        END;
+
+        OTHERWISE DO;
+            RETURN(0);
+        END;
+    END;
+    RETURN(1);
+END;
+
+DCL M_HALT(7) CHAR  INIT('HALT  ');
+DCL M_FAIL(7) CHAR  INIT('FAIL  ');
+DCL M_ENVOV(15) CHAR INIT('Env overflow  ');
+
+MAIN: PROC;
+END;
