@@ -92,6 +92,5 @@ MACRODEF INST_DECODE;
         'srl r0,r1';
         'la r1,_G_OP';
         'sw r0,0(r1)';
-        'sw r0,0(r1)';
     END;
 END;
