@@ -1,0 +1,1 @@
+LAM VM links and runs on COR24. build-vm.sh implements the full 7-phase modular build pipeline. 9 modules compile, link via meta-gen + link24 into 39KB binary. First COR24 execution shows banner and test start. Library modules use PROC-local STATIC for module-private strings (plsw#42/#43 fixes). 8 PL/SW compiler/linker bugs found and fixed during dogfooding (#35-#43).
