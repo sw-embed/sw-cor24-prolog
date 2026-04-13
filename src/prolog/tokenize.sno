@@ -1,102 +1,74 @@
 * tokenize.sno -- Prolog tokenizer for the LAM compiler
 *
-* Reads Prolog source from INPUT (one line at a time).
-* Outputs one token per line in the format:
-*   TYPE VALUE
-* where TYPE is one of:
-*   ATOM   -- lowercase identifier (bob, parent, ancestor)
-*   VAR    -- variable (X, Y, _Temp)
-*   INT    -- integer literal (42, 0)
-*   DOT    -- .  (clause terminator)
-*   COMMA  -- ,  (conjunction)
-*   LPAREN -- (
-*   RPAREN -- )
-*   NECK   -- :-  (rule operator)
-*   QUERY  -- ?-  (query operator)
-*   CUT    -- !   (cut)
-*   EOF    -- end of input
+* Reads Prolog source via RAWINPUT (case-preserving).
+* Outputs one token per line:  TYPE VALUE
 *
-* Usage:
-*   run-snobol4.sh src/prolog/tokenize.sno source.pl
+* Strategy: extract first char with LEN(1), classify it,
+* then SPAN the rest of multi-char tokens. LEN(1) is
+* anchored to position 0 (avoids unanchored SPAN issues).
 *
-* Character classes for SPAN/BREAK
-       LOWER = 'abcdefghijklmnopqrstuvwxyz'
-       UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ_'
-       DIGIT = '0123456789'
-       ALNUM = LOWER UPPER DIGIT
-       SPACE = ' '
+READ   LINE = RAWINPUT                  :F(DONE)
 *
-* Read next line
-READ   LINE = INPUT                     :F(DONE)
-*      Skip empty lines
-       IDENT(LINE,'')                   :S(READ)
-*      Skip comment lines (% to end)
-       LINE '%' REM                     :S(READ)
-*
-* Scan tokens from LINE
 SCAN   IDENT(LINE,'')                   :S(READ)
-*      Skip leading whitespace
-SKWS   LINE SPAN(SPACE) =              :S(SKWS)
-       IDENT(LINE,'')                   :S(READ)
+*      Skip whitespace
+       LINE LEN(1) . CH                :F(READ)
+       IDENT(CH,' ')                    :F(SK2)
+       LINE ' ' = ''                   :(SCAN)
+SK2    IDENT(CH,'	')                  :F(CHCK)
+       LINE '	' = ''                  :(SCAN)
 *
-*      Try :- (neck)
-       LINE ':-' =                      :F(T1)
-       OUTPUT = 'NECK :-'              :(SCAN)
+*      Classify first character
+CHCK   IDENT(CH,'%')                    :F(CK1)
+       LINE = ''                       :(READ)
 *
-*      Try ?- (query)
-T1     LINE '?-' =                      :F(T2)
+*      Two-char operators: must check before consuming CH
+CK1    LINE ':-' = ''                  :F(CK2)
+       OUTPUT = 'NECK :-'             :(SCAN)
+CK2    LINE '?-' = ''                  :F(CK3)
        OUTPUT = 'QUERY ?-'            :(SCAN)
 *
-*      Try single-char punctuation
-T2     LINE LEN(1) . CH =              :F(READ)
+*      Lowercase -> atom
+CK3    'abcdefghijklmnopqrstuvwxyz' CH :F(CK4)
+       LINE LEN(1) = ''
+       LINE SPAN('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_') . REST = '' :F(A1)
+       OUTPUT = 'ATOM ' CH REST       :(SCAN)
+A1     OUTPUT = 'ATOM ' CH            :(SCAN)
 *
-*      Dot
-       IDENT(CH,'.')                    :F(T3)
+*      Uppercase -> variable
+CK4    'ABCDEFGHIJKLMNOPQRSTUVWXYZ' CH :F(CK5)
+       LINE LEN(1) = ''
+       LINE SPAN('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_') . REST = '' :F(V1)
+       OUTPUT = 'VAR ' CH REST        :(SCAN)
+V1     OUTPUT = 'VAR ' CH             :(SCAN)
+*
+*      Underscore -> variable
+CK5    IDENT(CH,'_')                    :F(CK6)
+       LINE LEN(1) = ''
+       LINE SPAN('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_') . REST = '' :F(U1)
+       OUTPUT = 'VAR _' REST          :(SCAN)
+U1     OUTPUT = 'VAR _'               :(SCAN)
+*
+*      Digit -> integer
+CK6    '0123456789' CH                  :F(CK7)
+       LINE LEN(1) = ''
+       LINE SPAN('0123456789') . REST = '' :F(I1)
+       OUTPUT = 'INT ' CH REST        :(SCAN)
+I1     OUTPUT = 'INT ' CH             :(SCAN)
+*
+*      Single-char punctuation
+CK7    LINE LEN(1) = ''
+       IDENT(CH,'.')                    :F(P1)
        OUTPUT = 'DOT .'               :(SCAN)
-*
-*      Comma
-T3     IDENT(CH,',')                    :F(T4)
+P1     IDENT(CH,',')                    :F(P2)
        OUTPUT = 'COMMA ,'             :(SCAN)
-*
-*      Left paren
-T4     IDENT(CH,'(')                    :F(T5)
+P2     IDENT(CH,'(')                    :F(P3)
        OUTPUT = 'LPAREN ('            :(SCAN)
-*
-*      Right paren
-T5     IDENT(CH,')')                    :F(T6)
+P3     IDENT(CH,')')                    :F(P4)
        OUTPUT = 'RPAREN )'            :(SCAN)
-*
-*      Cut
-T6     IDENT(CH,'!')                    :F(T7)
+P4     IDENT(CH,'!')                    :F(PERR)
        OUTPUT = 'CUT !'               :(SCAN)
 *
-*      Comment (% -- skip rest of line)
-T7     IDENT(CH,'%')                    :F(T8)
-       LINE =                          :(READ)
-*
-*      Check if it starts a lowercase identifier (atom)
-T8     CH SPAN(LOWER) . L              :F(T9)
-*      Put the char back and extract full identifier
-       LINE = CH LINE
-       LINE SPAN(ALNUM) . TOK =        :F(READ)
-       OUTPUT = 'ATOM ' TOK           :(SCAN)
-*
-*      Check if it starts an uppercase/underscore (variable)
-T9     CH SPAN(UPPER) . L              :F(T10)
-       LINE = CH LINE
-       LINE SPAN(ALNUM) . TOK =        :F(VONE)
-       OUTPUT = 'VAR ' TOK            :(SCAN)
-VONE   OUTPUT = 'VAR ' CH             :(SCAN)
-*
-*      Check if it starts a digit (integer)
-T10    CH SPAN(DIGIT) . L              :F(TBAD)
-       LINE = CH LINE
-       LINE SPAN(DIGIT) . TOK =        :F(IONE)
-       OUTPUT = 'INT ' TOK            :(SCAN)
-IONE   OUTPUT = 'INT ' CH             :(SCAN)
-*
-*      Unknown character -- skip
-TBAD   OUTPUT = 'ERR ' CH             :(SCAN)
+PERR   OUTPUT = 'ERR ' CH             :(SCAN)
 *
 DONE   OUTPUT = 'EOF'
 END

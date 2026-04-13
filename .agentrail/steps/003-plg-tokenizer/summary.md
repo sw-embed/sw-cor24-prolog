@@ -1,0 +1,1 @@
+Created SNOBOL4 tokenizer prototype and ancestor.pl test file. Discovered two SNOBOL4 interpreter blockers: (1) no pattern-replacement assignment — can't consume chars from string, (2) INPUT uppercases all text — destroys Prolog case sensitivity. Also identified runtime architecture question: need loading strategy for LAM VM + SNOBOL4 interpreter coexistence on COR24.

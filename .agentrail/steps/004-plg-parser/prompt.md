@@ -1,0 +1,1 @@
+Blocked: SNOBOL4 interpreter needs (1) pattern-replacement or cursor-based scanning, (2) case-preserving INPUT. Also need runtime architecture plan for multi-binary REPL. Create issues in sw-cor24-snobol4 for the blockers.

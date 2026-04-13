@@ -1,8 +1,9 @@
 number = 3
 slug = "plg-tokenizer"
-status = "in-progress"
+status = "completed"
 description = "Begin the Prolog compiler: implement a Python tokenizer for .pl files. See sa..."
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T20:03:32"
-commits = []
+completed_at = "2026-04-12T20:32:06"
+commits = ["415bf65168af5d9fd3986c4f27fd1854ac9f5b16"]
