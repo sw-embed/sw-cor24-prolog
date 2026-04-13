@@ -69,41 +69,118 @@ cor24-run --load-binary lam.bin@0 \
   ...
 ```
 
-### Phase 2: Integrated REPL (future)
+### Phase 2: PL/SW orchestrator REPL (recommended)
 
-Both binaries loaded simultaneously. A monitor coordinates.
+A PL/SW main program acts as the top-level orchestrator. It
+owns the REPL loop, calls the SNOBOL4 compiler and LAM VM
+as library subroutines. All three components are linked into
+a single COR24 binary.
 
-```
-Memory layout:
-  000000-00FFFF   Monitor/bootstrap (~4 KB)
-  010000-01FFFF   LAM VM binary (~39 KB, rebased to 0x010000)
-  020000-03FFFF   SNOBOL4 binary (~91 KB, rebased to 0x020000)
-  040000-04FFFF   Prolog compiler .sno source
-  050000-05FFFF   Prolog source (.pl input buffer)
-  060000-06FFFF   LAM bytecode (compiled output)
-  070000-0FFFFF   VM heap, trail, stacks, atom table
-```
-
-The monitor implements the REPL loop:
+**Why PL/SW as orchestrator:**
+- PL/SW is the systems language — natural for I/O, memory
+  management, and control flow
+- SNOBOL4 and LAM VM become "libraries" called via `jal`
+- No multi-binary loading problem — link24 combines everything
+- Shared memory buffers at known addresses for data passing
+- The orchestrator handles interactive `;`/`.` for backtracking
 
 ```
-1. Print prompt "?- "
-2. Read a line from UART
-3. Pass to SNOBOL4 to compile (call into snobol4 _start with
-   the line as input)
-4. Collect emitted LAM bytecode
-5. Load bytecode into LAM VM code area
-6. Call LAM VM to execute the query
-7. Print variable bindings
-8. On ";" from user, force backtrack (FAIL) for next answer
-9. On "." or no more answers, return to step 1
+Architecture:
+
+  PL/SW orchestrator (MAIN)
+    |
+    |-- reads UART input (Prolog source lines)
+    |-- writes source to shared buffer
+    |
+    |-- calls SNOBOL4 compiler entry point
+    |     |-- SNOBOL4 reads from source buffer (not UART)
+    |     |-- SNOBOL4 writes .lam bytecodes to output buffer
+    |     |-- returns to orchestrator
+    |
+    |-- loads bytecodes into LAM VM code area
+    |-- calls LAM VM_RUN
+    |     |-- executes query
+    |     |-- prints results via UART
+    |     |-- returns on HALT or exhaustion
+    |
+    |-- prompts for next query
 ```
 
-This requires:
-- Both binaries linked with --base-addr at their respective offsets
-- The monitor knowing the entry points of both
-- A protocol for passing data between SNOBOL4 and LAM VM
-  (shared memory buffer at known addresses)
+```
+Memory layout (single linked binary):
+
+  000000-009FFF   PL/SW orchestrator + LAM VM (~39 KB)
+  00A000-024FFF   SNOBOL4 interpreter (~91 KB)
+  025000-027FFF   Prolog compiler .sno source (~12 KB)
+  028000-029FFF   Source input buffer (8 KB)
+  02A000-02BFFF   Bytecode output buffer (8 KB)
+  02C000-0FFFFF   VM heap, trail, stacks, atom table (~848 KB)
+```
+
+Total: ~160 KB code + buffers, ~848 KB for VM runtime. Fits
+easily in 1 MB SRAM.
+
+**Build process:**
+
+```bash
+# 1. Compile LAM VM modules (9 .plsw files)
+# 2. Compile orchestrator module (new plsw_repl.plsw)
+# 3. Compile SNOBOL4 interpreter modules (4 .plsw files)
+# 4. Link all ~14 modules with link24
+#    Entry module: plsw_repl (the orchestrator)
+```
+
+**SNOBOL4 as a callable library:**
+
+The SNOBOL4 interpreter needs a modification: instead of reading
+source from UART and data from a file, it reads both from known
+memory addresses. This requires:
+- A `COMPILE_FROM_BUFFER` entry point (instead of `_start`)
+- Source buffer address passed via a global or register
+- Output written to a buffer instead of UART
+- Return to caller on completion (instead of halt)
+
+This is a moderate change to sno_main.plsw — the core interpreter
+(lexer, parser, executor) stays the same; only the I/O boundary
+changes.
+
+**Orchestrator REPL loop:**
+
+```
+1. Print "?- " prompt
+2. Read line from UART
+3. If line is a clause (ends with "."):
+   a. Write to source buffer
+   b. Call SNOBOL4 compiler to parse + emit bytecodes
+   c. Load bytecodes into VM code area
+   d. Add to predicate database
+4. If line is a query (starts with "?-" or bare goal):
+   a. Compile query to bytecode
+   b. Load into VM
+   c. Call VM_RUN
+   d. On success: print variable bindings
+   e. Read ";" (more) or "." (stop)
+   f. On ";": force FAIL in VM, re-run for next answer
+   g. On ".": done
+5. Loop to step 1
+```
+
+### Phase 2b: Multi-binary loading (alternative)
+
+If modifying SNOBOL4 for library mode is too complex, the
+alternative is loading two separate binaries:
+
+```
+cor24-run --load-binary lam-repl.bin@0 \
+          --load-binary snobol4.bin@0x020000 \
+          --entry 0 --terminal
+```
+
+The PL/SW orchestrator at address 0 calls into the SNOBOL4
+binary at 0x020000 via absolute addresses. This requires:
+- SNOBOL4 built with `--base-addr 0x020000`
+- Orchestrator knows SNOBOL4 entry point address
+- No link24 needed — just separate binaries at fixed addresses
 
 ### Phase 3: Self-hosting (aspirational)
 
