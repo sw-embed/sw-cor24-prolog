@@ -15,7 +15,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -31,7 +31,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -52,7 +52,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -68,7 +68,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -82,7 +82,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -94,7 +94,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -108,7 +108,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -122,7 +122,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -138,7 +138,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -159,7 +159,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -175,7 +175,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -189,7 +189,7 @@ _LOAD_FACT_LOOKUP:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -215,7 +215,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -231,7 +231,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -252,7 +252,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -268,7 +268,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -282,7 +282,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -294,7 +294,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -308,7 +308,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -322,7 +322,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -338,7 +338,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -359,7 +359,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -375,7 +375,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -389,7 +389,7 @@ _LOAD_FACT_FAIL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -415,7 +415,7 @@ _LOAD_PUT_VAR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -431,7 +431,7 @@ _LOAD_PUT_VAR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -454,7 +454,7 @@ _LOAD_PUT_VAR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -468,7 +468,7 @@ _LOAD_PUT_VAR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -494,7 +494,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -510,7 +510,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -533,7 +533,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -547,7 +547,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -559,7 +559,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -573,7 +573,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -587,7 +587,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -603,7 +603,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -624,7 +624,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -640,7 +640,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -654,7 +654,7 @@ _LOAD_UNIFY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -680,7 +680,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -696,7 +696,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -710,7 +710,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -722,7 +722,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -736,7 +736,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -750,7 +750,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -762,7 +762,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -776,7 +776,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -792,7 +792,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -806,7 +806,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -820,7 +820,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -834,7 +834,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -850,7 +850,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -864,7 +864,7 @@ _LOAD_TRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -890,7 +890,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -906,7 +906,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -920,7 +920,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -932,7 +932,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -946,7 +946,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -960,7 +960,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -972,7 +972,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -986,7 +986,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1002,7 +1002,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1016,7 +1016,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1030,7 +1030,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1044,7 +1044,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1060,7 +1060,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1074,7 +1074,7 @@ _LOAD_BACKTRACK_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1100,7 +1100,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1116,7 +1116,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1139,7 +1139,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1153,7 +1153,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1165,7 +1165,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1186,7 +1186,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1200,7 +1200,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1214,7 +1214,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1228,7 +1228,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1240,7 +1240,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1254,7 +1254,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1270,7 +1270,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1291,7 +1291,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1307,7 +1307,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1321,7 +1321,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1335,7 +1335,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1349,7 +1349,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1365,7 +1365,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1386,7 +1386,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1402,7 +1402,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1416,7 +1416,7 @@ _LOAD_TWO_FACTS:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1442,7 +1442,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1458,7 +1458,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1472,7 +1472,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1484,7 +1484,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1498,7 +1498,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1512,7 +1512,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1535,7 +1535,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1549,7 +1549,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1561,7 +1561,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1575,7 +1575,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1589,7 +1589,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1603,7 +1603,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1619,7 +1619,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1640,7 +1640,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1656,7 +1656,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1670,7 +1670,7 @@ _LOAD_ALLOC_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1694,7 +1694,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1709,7 +1709,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1729,7 +1729,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1744,7 +1744,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1757,7 +1757,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1768,7 +1768,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1781,7 +1781,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1794,7 +1794,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1805,7 +1805,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1818,7 +1818,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1829,7 +1829,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1842,7 +1842,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1862,7 +1862,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1884,7 +1884,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1906,7 +1906,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1919,7 +1919,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1930,7 +1930,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1952,7 +1952,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1974,7 +1974,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -1996,7 +1996,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2009,7 +2009,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2022,7 +2022,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2033,7 +2033,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2046,7 +2046,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2057,7 +2057,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2070,7 +2070,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2085,7 +2085,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2105,7 +2105,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2120,7 +2120,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2133,7 +2133,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2146,7 +2146,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2159,7 +2159,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2174,7 +2174,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2194,7 +2194,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2209,7 +2209,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2222,7 +2222,7 @@ _LOAD_ANCESTOR_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2246,7 +2246,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2261,7 +2261,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2283,7 +2283,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2296,7 +2296,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2307,7 +2307,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2327,7 +2327,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2340,7 +2340,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2353,7 +2353,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2366,7 +2366,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2377,7 +2377,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2390,7 +2390,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2401,7 +2401,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2414,7 +2414,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2434,7 +2434,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2456,7 +2456,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2478,7 +2478,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2491,7 +2491,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2502,7 +2502,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2524,7 +2524,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2546,7 +2546,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2568,7 +2568,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2581,7 +2581,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2594,7 +2594,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2605,7 +2605,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2618,7 +2618,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2629,7 +2629,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2642,7 +2642,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2657,7 +2657,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2677,7 +2677,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2692,7 +2692,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2705,7 +2705,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2718,7 +2718,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2731,7 +2731,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2746,7 +2746,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2766,7 +2766,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2781,7 +2781,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2794,7 +2794,7 @@ _LOAD_ANCESTOR_ALL:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2827,7 +2827,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2840,7 +2840,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2851,7 +2851,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2871,7 +2871,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2884,7 +2884,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2897,7 +2897,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2910,7 +2910,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2921,7 +2921,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2934,7 +2934,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2949,7 +2949,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2962,7 +2962,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2975,7 +2975,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2986,7 +2986,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -2999,7 +2999,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3014,7 +3014,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3027,7 +3027,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3040,7 +3040,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3053,7 +3053,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3068,7 +3068,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3081,7 +3081,7 @@ _LOAD_RETRY_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3112,7 +3112,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3127,7 +3127,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3147,7 +3147,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3162,7 +3162,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3175,7 +3175,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3195,7 +3195,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3208,7 +3208,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3221,7 +3221,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3236,7 +3236,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3256,7 +3256,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3271,7 +3271,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3284,7 +3284,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3297,7 +3297,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3312,7 +3312,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3332,7 +3332,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3347,7 +3347,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3360,7 +3360,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3373,7 +3373,7 @@ _LOAD_ARITH_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3406,7 +3406,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3419,7 +3419,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3430,7 +3430,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3450,7 +3450,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3463,7 +3463,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3476,7 +3476,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3489,7 +3489,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3502,7 +3502,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3513,7 +3513,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3526,7 +3526,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3539,7 +3539,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3552,7 +3552,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3565,7 +3565,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3576,7 +3576,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3589,7 +3589,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3604,7 +3604,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3617,7 +3617,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3630,7 +3630,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3641,7 +3641,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3654,7 +3654,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3669,7 +3669,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3682,7 +3682,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3695,7 +3695,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3708,7 +3708,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3723,7 +3723,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -3736,7 +3736,7 @@ _LOAD_CUT_TEST:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)

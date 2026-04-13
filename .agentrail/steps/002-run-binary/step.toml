@@ -1,6 +1,6 @@
 number = 2
 slug = "run-binary"
-status = "pending"
+status = "in-progress"
 description = "Blocked: waiting for sw-cor24-plsw#38 fix (cross-module PROC calls). Once fix..."
 role = "legacy"
 context_files = []

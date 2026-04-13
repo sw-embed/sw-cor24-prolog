@@ -24,7 +24,7 @@ L1:
 ; 22:         CALL UART_PUTCHAR(48);
         lc      r0,48
         push    r0
-        la      r2,_UART_PUTCHAR
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 23:         RETURN;
@@ -154,7 +154,7 @@ L7:
         lw      r1,-17(fp)
         add     r0,r1
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         mov     sp,fp
@@ -174,7 +174,7 @@ _VM_TRACE:
 ; 53:     CALL UART_PUTS(ADDR(T_MSG));
         la      r0,_VM_TRACE__T_MSG
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 54:     CALL PRINT_INT(PC);
@@ -186,7 +186,7 @@ _VM_TRACE:
 ; 55:     CALL UART_PUTS(ADDR(T_SEP));
         la      r0,_VM_TRACE__T_SEP
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 56:     CALL PRINT_INT(OP);
@@ -198,7 +198,7 @@ _VM_TRACE:
 ; 57:     CALL UART_PUTCHAR(10);
         lc      r0,10
         push    r0
-        la      r2,_UART_PUTCHAR
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         mov     sp,fp
@@ -243,7 +243,7 @@ _ATOM_STORE:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -257,7 +257,7 @@ _ATOM_STORE:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -271,7 +271,7 @@ _ATOM_STORE:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -285,7 +285,7 @@ _ATOM_STORE:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -299,7 +299,7 @@ _ATOM_STORE:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -313,7 +313,7 @@ _ATOM_STORE:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -327,7 +327,7 @@ _ATOM_STORE:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -341,7 +341,7 @@ _ATOM_STORE:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -592,7 +592,7 @@ _ATOM_PRINT:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         sw      r0,-9(fp)
@@ -621,7 +621,7 @@ L11:
 ; 99:         CALL UART_PUTCHAR(CH);
         lw      r0,-9(fp)
         push    r0
-        la      r2,_UART_PUTCHAR
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 100:         I = I + 1;
@@ -637,7 +637,7 @@ L11:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         sw      r0,-9(fp)

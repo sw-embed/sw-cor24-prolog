@@ -41,6 +41,7 @@ END;
  * -------------------------------------------------------- */
 
 HEAP_ALLOC: PROC RETURNS(INT);
+    DCL M_HEAPOV(15) CHAR STATIC INIT('Heap overflow ');
     DCL HP INT;
     HP = REG_GET(REG_HP);
     IF (HP >= HEAP_BASE + HEAP_SIZE) THEN DO;
@@ -103,6 +104,7 @@ END;
  * -------------------------------------------------------- */
 
 TRAIL_PUSH: PROC(HEAP_ADDR INT);
+    DCL M_TRLOV(16) CHAR STATIC INIT('Trail overflow ');
     DCL TR INT;
     TR = REG_GET(REG_TR);
     IF (TR >= TRAIL_BASE + TRAIL_SIZE) THEN DO;
@@ -130,8 +132,6 @@ END;
  * Error messages (referenced by overflow guards)
  * -------------------------------------------------------- */
 
-DCL M_HEAPOV(15) CHAR INIT('Heap overflow ');
-DCL M_TRLOV(16) CHAR INIT('Trail overflow ');
 
 MAIN: PROC;
 END;

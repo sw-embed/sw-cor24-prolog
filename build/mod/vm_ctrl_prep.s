@@ -11,7 +11,7 @@ _EXEC_CTRL:
 ; 18:     DCL M_ENVOV(15) CHAR STATIC INIT('Env overflow  ');
 ; 19:     DCL IMM INT;
 ; 22:         WHEN (G_OP = OP_NOP) DO;
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,0
         ceq     r0,r1
@@ -28,13 +28,13 @@ L2:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L1:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,1
         ceq     r0,r1
@@ -48,17 +48,17 @@ L4:
 ; 27:             CALL UART_PUTS(ADDR(M_HALT));
         la      r0,_EXEC_CTRL__M_HALT
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 28:             G_RUNNING = 0;
         lc      r0,0
-        la      r2,_G_RUNNING
+        la      r2,0
         sw      r0,0(r2)
         la      r0,L0
         jmp     (r0)
 L3:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,2
         ceq     r0,r1
@@ -76,7 +76,7 @@ L6:
         push    r0
         lc      r0,17
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 33:             IMM = MEM(PC + 1);
@@ -87,7 +87,7 @@ L6:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         sw      r0,-3(fp)
@@ -96,13 +96,13 @@ L6:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L5:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,3
         ceq     r0,r1
@@ -121,7 +121,7 @@ L8:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         sw      r0,-3(fp)
@@ -130,13 +130,13 @@ L8:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L7:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,4
         ceq     r0,r1
@@ -150,19 +150,19 @@ L10:
 ; 43:             CALL REG_SET(REG_PC, REG_GET(REG_CP));
         lc      r0,17
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L9:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,6
         ceq     r0,r1
@@ -181,14 +181,14 @@ L12:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         sw      r0,-3(fp)
 ; 48:             CALL CP_PUSH(IMM);
         lw      r0,-3(fp)
         push    r0
-        la      r2,_CP_PUSH
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 49:             CALL REG_SET(REG_PC, PC + 2);
@@ -198,13 +198,13 @@ L12:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L11:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,7
         ceq     r0,r1
@@ -218,13 +218,13 @@ L14:
 ; 53:             DCL RT_DUMMY INT;
 ; 54:             DCL RT_FB INT;
 ; 55:             RT_DUMMY = CP_RESTORE();
-        la      r2,_CP_RESTORE
+        la      r2,0
         jal     r1,(r2)
         sw      r0,-6(fp)
 ; 56:             RT_FB = REG_GET(REG_BP) - CP_FRAME_SIZE;
         lc      r0,21
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         lc      r1,14
@@ -238,7 +238,7 @@ L14:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         sw      r0,-3(fp)
@@ -249,7 +249,7 @@ L14:
         push    r0
         lw      r0,-9(fp)
         push    r0
-        la      r2,_CP_WRITE
+        la      r2,0
         jal     r1,(r2)
         add     sp,9
 ; 59:             CALL REG_SET(REG_PC, PC + 2);
@@ -259,13 +259,13 @@ L14:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L13:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,8
         ceq     r0,r1
@@ -278,7 +278,7 @@ L16:
 ; 62:         WHEN (G_OP = OP_TRUST) DO;
 ; 63:             DCL TR_DUMMY INT;
 ; 64:             TR_DUMMY = CP_POP();
-        la      r2,_CP_POP
+        la      r2,0
         jal     r1,(r2)
         sw      r0,-12(fp)
 ; 65:             CALL REG_SET(REG_PC, PC + 1);
@@ -288,13 +288,13 @@ L16:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L15:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,9
         ceq     r0,r1
@@ -310,7 +310,7 @@ L18:
         push    r0
         lc      r0,21
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 70:             CALL REG_SET(REG_PC, PC + 1);
@@ -320,13 +320,13 @@ L18:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L17:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,5
         ceq     r0,r1
@@ -341,7 +341,7 @@ L20:
 ; 78:             ELSE DO;
         lc      r0,21
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         la      r1,6680
@@ -355,19 +355,19 @@ L23:
 ; 75:                 CALL UART_PUTS(ADDR(M_FAIL));
         la      r0,_EXEC_CTRL__M_FAIL
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 76:                 G_RUNNING = 0;
         lc      r0,0
-        la      r2,_G_RUNNING
+        la      r2,0
         sw      r0,0(r2)
         la      r0,L21
         jmp     (r0)
 L22:
 ; 79:                 DCL FAIL_ALT INT;
 ; 80:                 FAIL_ALT = CP_RESTORE();
-        la      r2,_CP_RESTORE
+        la      r2,0
         jal     r1,(r2)
         sw      r0,-15(fp)
 ; 81:                 CALL REG_SET(REG_PC, FAIL_ALT);
@@ -375,14 +375,14 @@ L22:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 L21:
         la      r0,L0
         jmp     (r0)
 L19:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,28
         ceq     r0,r1
@@ -395,11 +395,11 @@ L25:
 ; 85:         WHEN (G_OP = OP_ALLOCATE) DO;
 ; 86:             IF (G_ET + ENV_HDR_SIZE + G_OP1 > ENV_BASE + ENV_SIZE) THEN DO;
 ; 90:             ELSE DO;
-        la      r2,_G_ET
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,2
         add     r0,r1
-        la      r2,_G_OP1
+        la      r2,0
         lw      r1,0(r2)
         add     r0,r1
         push     r0
@@ -418,12 +418,12 @@ L28:
 ; 87:                 CALL UART_PUTS(ADDR(M_ENVOV));
         la      r0,_EXEC_CTRL__M_ENVOV
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 88:                 G_RUNNING = 0;
         lc      r0,0
-        la      r2,_G_RUNNING
+        la      r2,0
         sw      r0,0(r2)
         la      r0,L26
         jmp     (r0)
@@ -431,11 +431,11 @@ L27:
 ; 91:                 MEM(G_ET + ENV_PREV_EP) = REG_GET(REG_EP);
         lc      r0,20
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_G_ET
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,0
         add     r0,r1
@@ -443,18 +443,18 @@ L27:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
 ; 92:                 MEM(G_ET + ENV_SAVED_CP) = REG_GET(REG_CP);
         lc      r0,17
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_G_ET
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,1
         add     r0,r1
@@ -462,28 +462,28 @@ L27:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
 ; 93:                 CALL REG_SET(REG_EP, G_ET);
-        la      r2,_G_ET
+        la      r2,0
         lw      r0,0(r2)
         push    r0
         lc      r0,20
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 94:                 G_ET = G_ET + ENV_HDR_SIZE + G_OP1;
-        la      r2,_G_ET
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,2
         add     r0,r1
-        la      r2,_G_OP1
+        la      r2,0
         lw      r1,0(r2)
         add     r0,r1
-        la      r2,_G_ET
+        la      r2,0
         sw      r0,0(r2)
 ; 95:                 CALL REG_SET(REG_PC, PC + 1);
         lw      r0,9(fp)
@@ -492,14 +492,14 @@ L27:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 L26:
         la      r0,L0
         jmp     (r0)
 L24:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,29
         ceq     r0,r1
@@ -514,7 +514,7 @@ L30:
 ; 101:             D_EP = REG_GET(REG_EP);
         lc      r0,20
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-18(fp)
@@ -526,18 +526,18 @@ L30:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         push    r0
         lc      r0,17
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 103:             G_ET = D_EP;
         lw      r0,-18(fp)
-        la      r2,_G_ET
+        la      r2,0
         sw      r0,0(r2)
 ; 104:             CALL REG_SET(REG_EP, MEM(D_EP + ENV_PREV_EP));
         lw      r0,-18(fp)
@@ -547,13 +547,13 @@ L30:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         push    r0
         lc      r0,20
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 105:             CALL REG_SET(REG_PC, PC + 1);
@@ -563,7 +563,7 @@ L30:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0

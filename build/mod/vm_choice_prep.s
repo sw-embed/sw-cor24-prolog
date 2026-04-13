@@ -13,7 +13,7 @@ _CP_READ:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         mov     sp,fp
@@ -43,7 +43,7 @@ _CP_WRITE:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -65,7 +65,7 @@ _CP_PUSH:
 ; 31:     FB = REG_GET(REG_BP);
         lc      r0,21
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-3(fp)
@@ -89,12 +89,12 @@ L1:
 ; 33:         CALL UART_PUTS(ADDR(M_CPOV));
         la      r0,_CP_PUSH__M_CPOV
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 34:         G_RUNNING = 0;
         lc      r0,0
-        la      r2,_G_RUNNING
+        la      r2,0
         sw      r0,0(r2)
 ; 35:         RETURN;
         mov     sp,fp
@@ -116,7 +116,7 @@ L0:
 ; 38:     CALL CP_WRITE(FB, CPF_SAVED_CP, REG_GET(REG_CP));
         lc      r0,17
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -130,7 +130,7 @@ L0:
 ; 39:     CALL CP_WRITE(FB, CPF_SAVED_EP, REG_GET(REG_EP));
         lc      r0,20
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -144,7 +144,7 @@ L0:
 ; 40:     CALL CP_WRITE(FB, CPF_SAVED_HP, REG_GET(REG_HP));
         lc      r0,18
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -158,7 +158,7 @@ L0:
 ; 41:     CALL CP_WRITE(FB, CPF_SAVED_TR, REG_GET(REG_TR));
         lc      r0,19
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -182,7 +182,7 @@ L0:
 ; 43:     CALL CP_WRITE(FB, CPF_SAVED_A0, REG_GET(REG_A0));
         lc      r0,0
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -196,7 +196,7 @@ L0:
 ; 44:     CALL CP_WRITE(FB, CPF_SAVED_A1, REG_GET(REG_A1));
         lc      r0,1
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -210,7 +210,7 @@ L0:
 ; 45:     CALL CP_WRITE(FB, CPF_SAVED_A2, REG_GET(REG_A2));
         lc      r0,2
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -224,7 +224,7 @@ L0:
 ; 46:     CALL CP_WRITE(FB, CPF_SAVED_A3, REG_GET(REG_A3));
         lc      r0,3
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -238,7 +238,7 @@ L0:
 ; 47:     CALL CP_WRITE(FB, CPF_SAVED_A4, REG_GET(REG_A4));
         lc      r0,4
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -252,7 +252,7 @@ L0:
 ; 48:     CALL CP_WRITE(FB, CPF_SAVED_A5, REG_GET(REG_A5));
         lc      r0,5
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -266,7 +266,7 @@ L0:
 ; 49:     CALL CP_WRITE(FB, CPF_SAVED_A6, REG_GET(REG_A6));
         lc      r0,6
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -280,7 +280,7 @@ L0:
 ; 50:     CALL CP_WRITE(FB, CPF_SAVED_A7, REG_GET(REG_A7));
         lc      r0,7
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
@@ -298,7 +298,7 @@ L0:
         push    r0
         lc      r0,21
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         mov     sp,fp
@@ -327,7 +327,7 @@ _CP_RESTORE:
 ; 62:     FB = REG_GET(REG_BP) - CP_FRAME_SIZE;
         lc      r0,21
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         lc      r1,14
@@ -354,7 +354,7 @@ _CP_RESTORE:
 ; 66:     CALL TRAIL_UNWIND(SAVED_TR);
         lw      r0,-6(fp)
         push    r0
-        la      r2,_TRAIL_UNWIND
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 67:     CALL REG_SET(REG_HP, SAVED_HP);
@@ -362,7 +362,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,18
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 69:     CALL REG_SET(REG_CP, CP_READ(FB, CPF_SAVED_CP));
@@ -376,7 +376,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,17
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 70:     CALL REG_SET(REG_EP, CP_READ(FB, CPF_SAVED_EP));
@@ -390,7 +390,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,20
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 71:     CALL REG_SET(REG_A0, CP_READ(FB, CPF_SAVED_A0));
@@ -404,7 +404,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,0
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 72:     CALL REG_SET(REG_A1, CP_READ(FB, CPF_SAVED_A1));
@@ -418,7 +418,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,1
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 73:     CALL REG_SET(REG_A2, CP_READ(FB, CPF_SAVED_A2));
@@ -432,7 +432,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,2
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 74:     CALL REG_SET(REG_A3, CP_READ(FB, CPF_SAVED_A3));
@@ -446,7 +446,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,3
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 75:     CALL REG_SET(REG_A4, CP_READ(FB, CPF_SAVED_A4));
@@ -460,7 +460,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,4
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 76:     CALL REG_SET(REG_A5, CP_READ(FB, CPF_SAVED_A5));
@@ -474,7 +474,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,5
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 77:     CALL REG_SET(REG_A6, CP_READ(FB, CPF_SAVED_A6));
@@ -488,7 +488,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,6
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 78:     CALL REG_SET(REG_A7, CP_READ(FB, CPF_SAVED_A7));
@@ -502,7 +502,7 @@ _CP_RESTORE:
         push    r0
         lc      r0,7
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 80:     RETURN(CP_READ(FB, CPF_NEXT_ALT));
@@ -540,7 +540,7 @@ _CP_POP:
 ; 88:     FB = REG_GET(REG_BP) - CP_FRAME_SIZE;
         lc      r0,21
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         lc      r1,14
@@ -557,7 +557,7 @@ _CP_POP:
         push    r0
         lc      r0,21
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 90:     RETURN(ALT);

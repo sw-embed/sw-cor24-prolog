@@ -13,7 +13,7 @@ _REG_GET:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         mov     sp,fp
@@ -43,7 +43,7 @@ _REG_SET:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -73,7 +73,7 @@ _Y_GET:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         mov     sp,fp
@@ -109,7 +109,7 @@ _Y_SET:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)

@@ -26,6 +26,7 @@ END;
 /* Push a choice-point frame at current BP, advance BP.
  * ALT = code address of next alternative clause. */
 CP_PUSH: PROC(ALT INT);
+    DCL M_CPOV(14) CHAR STATIC INIT('CP overflow  ');
     DCL FB INT;
     FB = REG_GET(REG_BP);
     IF (FB + CP_FRAME_SIZE > CP_BASE + CP_STKSZ) THEN DO;
@@ -89,7 +90,6 @@ CP_POP: PROC RETURNS(INT);
     RETURN(ALT);
 END;
 
-DCL M_CPOV(14) CHAR INIT('CP overflow  ');
 
 MAIN: PROC;
 END;

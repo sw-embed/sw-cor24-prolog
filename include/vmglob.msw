@@ -28,3 +28,7 @@ DCL G_ET INT;
 
 /* VM run flag (1 = running, 0 = halted) */
 DCL G_RUNNING INT;
+
+/* Note: library modules must use PROC-local STATIC for
+ * module-private strings (DCL at top level is suppressed
+ * in LIBRARY mode). See PL/SW usage.md lines 369-387. */

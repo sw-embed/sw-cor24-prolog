@@ -11,9 +11,6 @@
  * Integer printing
  * -------------------------------------------------------- */
 
-DCL T_MSG(4) CHAR INIT('PC=');
-DCL T_SEP(5) CHAR INIT(' op=');
-
 PRINT_INT: PROC(N INT);
     DCL D INT;
     DCL R INT;
@@ -51,6 +48,8 @@ PRINT_INT: PROC(N INT);
 END;
 
 VM_TRACE: PROC(PC INT, OP INT);
+    DCL T_MSG(4) CHAR STATIC INIT('PC=');
+    DCL T_SEP(5) CHAR STATIC INIT(' op=');
     CALL UART_PUTS(ADDR(T_MSG));
     CALL PRINT_INT(PC);
     CALL UART_PUTS(ADDR(T_SEP));

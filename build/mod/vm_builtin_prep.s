@@ -8,7 +8,7 @@ _EXEC_BUILTIN:
         add     sp,-33
 ; 14:     DCL M_FAIL(7) CHAR STATIC INIT('FAIL  ');
 ; 18:         WHEN (G_OP = OP_B_WRITE) DO;
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,32
         ceq     r0,r1
@@ -22,28 +22,28 @@ L2:
 ; 20:             DCL WTAG INT;
 ; 21:             DCL WPAY INT;
 ; 22:             WVAL = DEREF(REG_GET(G_OP1));
-        la      r2,_G_OP1
+        la      r2,0
         lw      r0,0(r2)
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_DEREF
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-3(fp)
 ; 23:             WTAG = CELL_TAG(WVAL);
         lw      r0,-3(fp)
         push    r0
-        la      r2,_CELL_TAG
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-6(fp)
 ; 24:             WPAY = CELL_PAY(WVAL);
         lw      r0,-3(fp)
         push    r0
-        la      r2,_CELL_PAY
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-9(fp)
@@ -60,7 +60,7 @@ L5:
 ; 27:                     CALL ATOM_PRINT(WPAY);
         lw      r0,-9(fp)
         push    r0
-        la      r2,_ATOM_PRINT
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         la      r0,L3
@@ -79,7 +79,7 @@ L7:
 ; 30:                     CALL PRINT_INT(WPAY);
         lw      r0,-9(fp)
         push    r0
-        la      r2,_PRINT_INT
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         la      r0,L3
@@ -98,19 +98,19 @@ L9:
 ; 33:                     CALL UART_PUTCHAR(95);
         lc      r0,95
         push    r0
-        la      r2,_UART_PUTCHAR
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 34:                     CALL UART_PUTCHAR(86);
         lc      r0,86
         push    r0
-        la      r2,_UART_PUTCHAR
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 35:                     CALL PRINT_INT(WPAY);
         lw      r0,-9(fp)
         push    r0
-        la      r2,_PRINT_INT
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         la      r0,L3
@@ -120,7 +120,7 @@ L8:
 ; 38:                     CALL PRINT_INT(WVAL);
         lw      r0,-3(fp)
         push    r0
-        la      r2,_PRINT_INT
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 L3:
@@ -131,13 +131,13 @@ L3:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L1:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,33
         ceq     r0,r1
@@ -151,7 +151,7 @@ L11:
 ; 46:             CALL UART_PUTCHAR(10);
         lc      r0,10
         push    r0
-        la      r2,_UART_PUTCHAR
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 47:             CALL REG_SET(REG_PC, PC + 1);
@@ -161,13 +161,13 @@ L11:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L10:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,34
         ceq     r0,r1
@@ -183,30 +183,30 @@ L13:
 ; 54:             ADD_L = CELL_PAY(DEREF(REG_GET(REG_A1)));
         lc      r0,1
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_DEREF
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_CELL_PAY
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-12(fp)
 ; 55:             ADD_R = CELL_PAY(DEREF(REG_GET(REG_A2)));
         lc      r0,2
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_DEREF
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_CELL_PAY
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-15(fp)
@@ -217,13 +217,13 @@ L13:
         push    r0
         lc      r0,1
         push    r0
-        la      r2,_MAKE_CELL
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         push    r0
         lc      r0,0
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 57:             CALL REG_SET(REG_PC, PC + 1);
@@ -233,13 +233,13 @@ L13:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L12:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,35
         ceq     r0,r1
@@ -255,30 +255,30 @@ L15:
 ; 64:             SUB_L = CELL_PAY(DEREF(REG_GET(REG_A1)));
         lc      r0,1
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_DEREF
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_CELL_PAY
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-18(fp)
 ; 65:             SUB_R = CELL_PAY(DEREF(REG_GET(REG_A2)));
         lc      r0,2
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_DEREF
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_CELL_PAY
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-21(fp)
@@ -289,13 +289,13 @@ L15:
         push    r0
         lc      r0,1
         push    r0
-        la      r2,_MAKE_CELL
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         push    r0
         lc      r0,0
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 67:             CALL REG_SET(REG_PC, PC + 1);
@@ -305,13 +305,13 @@ L15:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L0
         jmp     (r0)
 L14:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,36
         ceq     r0,r1
@@ -327,30 +327,30 @@ L17:
 ; 74:             LT_L = CELL_PAY(DEREF(REG_GET(REG_A0)));
         lc      r0,0
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_DEREF
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_CELL_PAY
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-24(fp)
 ; 75:             LT_R = CELL_PAY(DEREF(REG_GET(REG_A1)));
         lc      r0,1
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_DEREF
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_CELL_PAY
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-27(fp)
@@ -371,7 +371,7 @@ L20:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L18
@@ -381,7 +381,7 @@ L19:
 ; 84:                 ELSE DO;
         lc      r0,21
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         la      r1,6680
@@ -395,23 +395,23 @@ L23:
 ; 81:                     CALL UART_PUTS(ADDR(M_FAIL));
         la      r0,_EXEC_BUILTIN__M_FAIL
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 82:                     G_RUNNING = 0;
         lc      r0,0
-        la      r2,_G_RUNNING
+        la      r2,0
         sw      r0,0(r2)
         la      r0,L21
         jmp     (r0)
 L22:
 ; 85:                     CALL REG_SET(REG_PC, CP_RESTORE());
-        la      r2,_CP_RESTORE
+        la      r2,0
         jal     r1,(r2)
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 L21:
@@ -419,7 +419,7 @@ L18:
         la      r0,L0
         jmp     (r0)
 L16:
-        la      r2,_G_OP
+        la      r2,0
         lw      r0,0(r2)
         lc      r1,37
         ceq     r0,r1
@@ -435,30 +435,30 @@ L25:
 ; 94:             GT_L = CELL_PAY(DEREF(REG_GET(REG_A0)));
         lc      r0,0
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_DEREF
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_CELL_PAY
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-30(fp)
 ; 95:             GT_R = CELL_PAY(DEREF(REG_GET(REG_A1)));
         lc      r0,1
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_DEREF
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         push    r0
-        la      r2,_CELL_PAY
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-33(fp)
@@ -479,7 +479,7 @@ L28:
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         la      r0,L26
@@ -489,7 +489,7 @@ L27:
 ; 104:                 ELSE DO;
         lc      r0,21
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         la      r1,6680
@@ -503,23 +503,23 @@ L31:
 ; 101:                     CALL UART_PUTS(ADDR(M_FAIL));
         la      r0,_EXEC_BUILTIN__M_FAIL
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 102:                     G_RUNNING = 0;
         lc      r0,0
-        la      r2,_G_RUNNING
+        la      r2,0
         sw      r0,0(r2)
         la      r0,L29
         jmp     (r0)
 L30:
 ; 105:                     CALL REG_SET(REG_PC, CP_RESTORE());
-        la      r2,_CP_RESTORE
+        la      r2,0
         jal     r1,(r2)
         push    r0
         lc      r0,16
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 L29:

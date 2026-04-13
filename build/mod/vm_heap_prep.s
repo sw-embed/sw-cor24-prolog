@@ -7,10 +7,10 @@ _CELL_TAG:
         mov     fp,sp
 ; 21:     G_TMP = C;
         lw      r0,9(fp)
-        la      r2,_G_TMP
+        la      r2,0
         sw      r0,0(r2)
         ; ASM DO block
-        la r0,_G_TMP
+        la r0,0
         ; ASM DO block
         lw r0,0(r0)
         ; ASM DO block
@@ -18,11 +18,11 @@ _CELL_TAG:
         ; ASM DO block
         srl r0,r1
         ; ASM DO block
-        la r1,_G_TAG
+        la r1,0
         ; ASM DO block
         sw r0,0(r1)
 ; 23:     RETURN(G_TAG);
-        la      r2,_G_TAG
+        la      r2,0
         lw      r0,0(r2)
         mov     sp,fp
         pop     r1
@@ -43,10 +43,10 @@ _CELL_PAY:
         mov     fp,sp
 ; 27:     G_TMP = C;
         lw      r0,9(fp)
-        la      r2,_G_TMP
+        la      r2,0
         sw      r0,0(r2)
         ; ASM DO block
-        la r0,_G_TMP
+        la r0,0
         ; ASM DO block
         lw r0,0(r0)
         ; ASM DO block
@@ -54,11 +54,11 @@ _CELL_PAY:
         ; ASM DO block
         and r0,r1
         ; ASM DO block
-        la r1,_G_PAY
+        la r1,0
         ; ASM DO block
         sw r0,0(r1)
 ; 29:     RETURN(G_PAY);
-        la      r2,_G_PAY
+        la      r2,0
         lw      r0,0(r2)
         mov     sp,fp
         pop     r1
@@ -79,14 +79,14 @@ _MAKE_CELL:
         mov     fp,sp
 ; 33:     G_TAG = T;
         lw      r0,9(fp)
-        la      r2,_G_TAG
+        la      r2,0
         sw      r0,0(r2)
 ; 34:     G_PAY = P;
         lw      r0,12(fp)
-        la      r2,_G_PAY
+        la      r2,0
         sw      r0,0(r2)
         ; ASM DO block
-        la r0,_G_TAG
+        la r0,0
         ; ASM DO block
         lw r0,0(r0)
         ; ASM DO block
@@ -94,17 +94,17 @@ _MAKE_CELL:
         ; ASM DO block
         shl r0,r1
         ; ASM DO block
-        la r1,_G_PAY
+        la r1,0
         ; ASM DO block
         lw r1,0(r1)
         ; ASM DO block
         or r0,r1
         ; ASM DO block
-        la r1,_G_TMP
+        la r1,0
         ; ASM DO block
         sw r0,0(r1)
 ; 36:     RETURN(G_TMP);
-        la      r2,_G_TMP
+        la      r2,0
         lw      r0,0(r2)
         mov     sp,fp
         pop     r1
@@ -129,7 +129,7 @@ _HEAP_ALLOC:
 ; 46:     HP = REG_GET(REG_HP);
         lc      r0,18
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-3(fp)
@@ -153,12 +153,12 @@ L1:
 ; 48:         CALL UART_PUTS(ADDR(M_HEAPOV));
         la      r0,_HEAP_ALLOC__M_HEAPOV
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 49:         G_RUNNING = 0;
         lc      r0,0
-        la      r2,_G_RUNNING
+        la      r2,0
         sw      r0,0(r2)
 ; 50:         RETURN(0);
         lc      r0,0
@@ -175,7 +175,7 @@ L0:
         push    r0
         lc      r0,18
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
 ; 53:     RETURN(HP);
@@ -218,7 +218,7 @@ _HEAP_PUSH:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -296,7 +296,7 @@ L5:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         sw      r0,-9(fp)
@@ -357,7 +357,7 @@ _BIND:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -416,7 +416,7 @@ L9:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         lw      r1,9(fp)
@@ -460,7 +460,7 @@ _TRAIL_PUSH:
 ; 109:     TR = REG_GET(REG_TR);
         lc      r0,19
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-3(fp)
@@ -484,12 +484,12 @@ L14:
 ; 111:         CALL UART_PUTS(ADDR(M_TRLOV));
         la      r0,_TRAIL_PUSH__M_TRLOV
         push    r0
-        la      r2,_UART_PUTS
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
 ; 112:         G_RUNNING = 0;
         lc      r0,0
-        la      r2,_G_RUNNING
+        la      r2,0
         sw      r0,0(r2)
 ; 113:         RETURN;
         mov     sp,fp
@@ -506,7 +506,7 @@ L13:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -517,7 +517,7 @@ L13:
         push    r0
         lc      r0,19
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         mov     sp,fp
@@ -545,7 +545,7 @@ _TRAIL_UNWIND:
 ; 122:     TR = REG_GET(REG_TR);
         lc      r0,19
         push    r0
-        la      r2,_REG_GET
+        la      r2,0
         jal     r1,(r2)
         add     sp,3
         sw      r0,-3(fp)
@@ -571,7 +571,7 @@ L17:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         lw      r0,0(r2)
         sw      r0,-6(fp)
@@ -589,7 +589,7 @@ L17:
         add     r0,r1
         add     r0,r1
         mov     r2,r0
-        la      r0,_MEM
+        la      r0,0
         add     r2,r0
         pop     r0
         sw      r0,0(r2)
@@ -601,7 +601,7 @@ L16:
         push    r0
         lc      r0,19
         push    r0
-        la      r2,_REG_SET
+        la      r2,0
         jal     r1,(r2)
         add     sp,6
         mov     sp,fp

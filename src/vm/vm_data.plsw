@@ -14,6 +14,7 @@
 /* Backtrack helper: shared by GET_CONST mismatch and comparisons.
  * Flattened to avoid deep nesting (workaround for plsw#39). */
 VM_BACKTRACK: PROC;
+    DCL M_FAIL(7) CHAR STATIC INIT('FAIL  ');
     IF (REG_GET(REG_BP) = CP_BASE) THEN DO;
         CALL UART_PUTS(ADDR(M_FAIL));
         G_RUNNING = 0;
@@ -101,7 +102,6 @@ EXEC_DATA: PROC(PC INT) RETURNS(INT);
     RETURN(1);
 END;
 
-DCL M_FAIL(7) CHAR INIT('FAIL  ');
 
 MAIN: PROC;
 END;
