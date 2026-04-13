@@ -25,10 +25,16 @@ Compiles (143 lines of assembly) but outputs nothing.
 **Impact**: Blocks PRINT_INT, DECODE (instruction field extraction),
 and all arithmetic in the VM. Division by powers of 2 for tag
 extraction is also affected.
-**Workaround**: None. MACRODEF shift operations work for tag
-extraction but PRINT_INT still needs integer division.
-**Note**: COR24 has no hardware divide. The compiler must emit a
-software divide subroutine or inline sequence.
+**Root cause**: The compiler emits `la r2,__plsw_div` + `jal r1,(r2)`
+for the `/` operator, but the `__plsw_div:` subroutine body is never
+generated in the output assembly. The compiler has `_cg_emit_div_routine`
+and a `_cg_div_emitted` flag in its codegen, suggesting it was designed
+to lazily emit the routine, but the emit never triggers.
+**Fix needed**: In sw-cor24-plsw, ensure `_cg_emit_div_routine` is
+called at the end of code generation (after all procedures are emitted)
+whenever `_cg_div_emitted` is false and division was used.
+**Workaround**: None for general division. MACRODEF shift operations
+work for power-of-2 tag extraction but PRINT_INT needs integer division.
 
 ## PLSW-002: Large source files may exceed compiler capacity
 
