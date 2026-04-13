@@ -1,0 +1,1 @@
+vm-practical complete: RETRY, arithmetic, CUT, .lam assembler, compile test. Dogfooding found 3 PL/SW compiler bugs (plsw#35 division, #36 ADDR in GEN, #37 GEN last line) -- all fixed and verified. COR24 ISA macro syntax corrected.
