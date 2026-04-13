@@ -1,0 +1,8 @@
+number = 2
+slug = "run-binary"
+status = "pending"
+description = "Blocked: waiting for sw-cor24-plsw#38 fix (cross-module PROC calls). Once fix..."
+role = "legacy"
+context_files = []
+created_at = "2026-04-12T18:40:52"
+commits = []

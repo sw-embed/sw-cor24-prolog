@@ -86,7 +86,7 @@ VM_RUN: PROC;
             WHEN (G_OP = OP_PUT_VAR) DO;
                 DCL PV_ADDR INT;
                 DCL PV_REF INT;
-                PV_ADDR = HEAP_ALLOC;
+                PV_ADDR = HEAP_ALLOC();
                 PV_REF = MAKE_CELL(TAG_REF, PV_ADDR);
                 MEM(PV_ADDR) = PV_REF;
                 CALL REG_SET(G_OP1, PV_REF);
@@ -139,7 +139,7 @@ VM_RUN: PROC;
                             G_RUNNING = 0;
                         END;
                         ELSE DO;
-                            CALL REG_SET(REG_PC, CP_RESTORE);
+                            CALL REG_SET(REG_PC, CP_RESTORE());
                         END;
                     END;
                 END;
@@ -176,7 +176,7 @@ VM_RUN: PROC;
             WHEN (G_OP = OP_RETRY) DO;
                 DCL RT_DUMMY INT;
                 DCL RT_FB INT;
-                RT_DUMMY = CP_RESTORE;
+                RT_DUMMY = CP_RESTORE();
                 /* Update next_alt in the current frame */
                 RT_FB = REG_GET(REG_BP) - CP_FRAME_SIZE;
                 IMM = MEM(PC + 1);
@@ -187,7 +187,7 @@ VM_RUN: PROC;
             /* TRUST -- 1-cell */
             WHEN (G_OP = OP_TRUST) DO;
                 DCL TR_DUMMY INT;
-                TR_DUMMY = CP_POP;
+                TR_DUMMY = CP_POP();
                 CALL REG_SET(REG_PC, PC + 1);
             END;
 
@@ -237,7 +237,7 @@ VM_RUN: PROC;
                 END;
                 ELSE DO;
                     DCL FAIL_ALT INT;
-                    FAIL_ALT = CP_RESTORE;
+                    FAIL_ALT = CP_RESTORE();
                     CALL REG_SET(REG_PC, FAIL_ALT);
                 END;
             END;
@@ -313,7 +313,7 @@ VM_RUN: PROC;
                         G_RUNNING = 0;
                     END;
                     ELSE DO;
-                        CALL REG_SET(REG_PC, CP_RESTORE);
+                        CALL REG_SET(REG_PC, CP_RESTORE());
                     END;
                 END;
             END;
@@ -334,7 +334,7 @@ VM_RUN: PROC;
                         G_RUNNING = 0;
                     END;
                     ELSE DO;
-                        CALL REG_SET(REG_PC, CP_RESTORE);
+                        CALL REG_SET(REG_PC, CP_RESTORE());
                     END;
                 END;
             END;
@@ -443,7 +443,7 @@ MAIN: PROC;
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
 
-    VAR_ADDR = HEAP_ALLOC;
+    VAR_ADDR = HEAP_ALLOC();
     VAR_REF = MAKE_CELL(TAG_REF, VAR_ADDR);
     MEM(VAR_ADDR) = VAR_REF;
 
@@ -481,11 +481,11 @@ MAIN: PROC;
 
     SAVED_TR = REG_GET(REG_TR);
 
-    V1_ADDR = HEAP_ALLOC;
+    V1_ADDR = HEAP_ALLOC();
     V1_REF = MAKE_CELL(TAG_REF, V1_ADDR);
     MEM(V1_ADDR) = V1_REF;
 
-    V2_ADDR = HEAP_ALLOC;
+    V2_ADDR = HEAP_ALLOC();
     V2_REF = MAKE_CELL(TAG_REF, V2_ADDR);
     MEM(V2_ADDR) = V2_REF;
 

@@ -1,0 +1,1 @@
+Attempted modular build. vm_regs and vm_io compile successfully. vm_heap/vm_choice fail with 'undefined variable' on cross-module PROC calls (PLSW-007). Also found PLSW-006: PROC defs fail without %INCLUDE. Both reported as plsw#38. Build script blocked until cross-module compilation is resolved. Studied snobol4 build-modular.sh pattern (7-phase pipeline with meta-gen/link24).

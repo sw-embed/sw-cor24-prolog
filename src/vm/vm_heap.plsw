@@ -54,7 +54,7 @@ END;
 
 HEAP_PUSH: PROC(VAL INT) RETURNS(INT);
     DCL A INT;
-    A = HEAP_ALLOC;
+    A = HEAP_ALLOC();
     MEM(A) = VAL;
     RETURN(A);
 END;

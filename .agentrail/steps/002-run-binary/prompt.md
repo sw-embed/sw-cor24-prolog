@@ -1,0 +1,1 @@
+Blocked: waiting for sw-cor24-plsw#38 fix (cross-module PROC calls). Once fixed, retry build-script step, then run linked binary on COR24 emulator. In the meantime, proceed to Prolog compiler steps (host-side Python, does not depend on COR24 build).
