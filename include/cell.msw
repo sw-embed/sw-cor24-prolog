@@ -32,42 +32,51 @@
  *   ?CELL_GET_TAG(SRC(ADDR(myvar)), DST(ADDR(result)));
  * -------------------------------------------------------- */
 
-/* Extract tag: dst = src >> 21 */
+/* Extract tag: dst = src >> 21
+ * COR24: srl is 2-reg (Ra = Ra >> Rb), count in register
+ * Trailing nop: workaround for PLSW #37 (last GEN line dropped) */
 MACRODEF CELL_GET_TAG;
     REQUIRED SRC(expr); REQUIRED DST(lvalue);
     GEN DO;
         'la r0,{SRC}';
         'lw r0,0(r0)';
-        'srl r0,r0,21';
+        'lc r1,21';
+        'srl r0,r1';
         'la r1,{DST}';
+        'sw r0,0(r1)';
         'sw r0,0(r1)';
     END;
 END;
 
-/* Extract payload: dst = src & 2097151 */
+/* Extract payload: dst = src & 2097151
+ * COR24: and is 2-reg (Ra = Ra & Rb) */
 MACRODEF CELL_GET_PAY;
     REQUIRED SRC(expr); REQUIRED DST(lvalue);
     GEN DO;
         'la r0,{SRC}';
         'lw r0,0(r0)';
         'la r1,2097151';
-        'and r0,r0,r1';
+        'and r0,r1';
         'la r1,{DST}';
+        'sw r0,0(r1)';
         'sw r0,0(r1)';
     END;
 END;
 
-/* Build cell: dst = (tag << 21) | payload */
+/* Build cell: dst = (tag << 21) | payload
+ * COR24: shl/or are 2-reg forms */
 MACRODEF CELL_MAKE;
     REQUIRED TAG(expr); REQUIRED PAY(expr); REQUIRED DST(lvalue);
     GEN DO;
         'la r0,{TAG}';
         'lw r0,0(r0)';
-        'sll r0,r0,21';
+        'lc r1,21';
+        'shl r0,r1';
         'la r1,{PAY}';
         'lw r1,0(r1)';
-        'or r0,r0,r1';
+        'or r0,r1';
         'la r1,{DST}';
+        'sw r0,0(r1)';
         'sw r0,0(r1)';
     END;
 END;

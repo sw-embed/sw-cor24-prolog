@@ -75,9 +75,33 @@ Tested with pipeline.sh (single-module compile + run):
 | vm_div test | FAIL | Division hangs (PLSW-001) |
 | vm_all amalgamated | FAIL | Too large (PLSW-002) |
 
+## PLSW-004: MACRODEF GEN last line dropped (sw-cor24-plsw#37)
+
+**Severity**: Blocker
+**Symptom**: The last instruction in a GEN DO block is silently
+dropped from the generated assembly.
+**Workaround**: Duplicate the last instruction so the dropped copy
+is the redundant one. Applied to all macros in cell.msw and
+opcodes.msw.
+
+## PLSW-005: COR24 ISA uses 2-register forms (sw-cor24-prolog#1)
+
+**Severity**: Bug in our macros (not a compiler bug)
+**Description**: COR24 logical and shift instructions are 2-register:
+`and r0,r1` (not `and r0,r0,r1`), `srl r0,r1` (not `srl r0,r0,21`).
+Shift count must be in a register (loaded via `lc`).
+**Fixed**: Rewrote all macros with correct 2-register forms.
+
+## Status update (2026-04-12)
+
+- PLSW-001 (division): FIXED in sw-cor24-plsw#35. Verified.
+- PLSW-002 (large source): use modular build with link24.
+- PLSW-003 (shift operators): enhancement, macros work as workaround.
+- PLSW-004 (GEN last line): workaround applied (duplicate last line).
+- PLSW-005 (ISA syntax): FIXED in our macros.
+
 ## Next steps
 
-1. Fix PLSW-001 (division) in sw-cor24-plsw -- this unblocks
-   PRINT_INT and the full VM.
-2. Test modular build with link24 once division works.
+1. Fix PLSW-004 in sw-cor24-plsw (GEN last line dropped).
+2. Test modular build with link24.
 3. Consider PLSW-003 for performance improvement.
