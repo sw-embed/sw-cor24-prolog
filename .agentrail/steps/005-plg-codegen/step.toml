@@ -1,0 +1,11 @@
+number = 5
+slug = "plg-codegen"
+status = "completed"
+description = """
+Implement the SNOBOL4 codegen: read parsed clause representation,
+emit .lam b..."""
+role = "legacy"
+context_files = []
+created_at = "2026-04-13T15:34:12"
+completed_at = "2026-04-13T17:19:51"
+commits = ["83a850006b7a6b40f03dde479333a3729c9c420e"]

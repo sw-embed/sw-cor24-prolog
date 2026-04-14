@@ -1,8 +1,9 @@
 number = 4
 slug = "plg-parser"
-status = "in-progress"
+status = "completed"
 description = "Blocked: SNOBOL4 interpreter needs (1) pattern-replacement or cursor-based sc..."
 role = "legacy"
 context_files = []
 created_at = "2026-04-12T20:32:06"
-commits = []
+completed_at = "2026-04-13T15:34:12"
+commits = ["ad1cd98d375bbdc74292f8faec6269a1c793f6e0"]

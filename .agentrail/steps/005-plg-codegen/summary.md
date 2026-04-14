@@ -1,0 +1,1 @@
+SNOBOL4 codegen (Phase 1) emits valid .lam bytecode from parsed intermediate form. Handles FACT and QUERY with all-atom args. Hardcoded atom table (10 atoms). Single-clause predicates only. Full pipeline verified: .pl -> parse.sno -> codegen.sno -> lam_asm.py -> hex bytecode. Fixed unanchored whitespace stripping bug.
