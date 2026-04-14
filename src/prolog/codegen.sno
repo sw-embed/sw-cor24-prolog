@@ -1,0 +1,124 @@
+* codegen.sno -- Generate .lam from parsed Prolog (Phase 1)
+*
+* Reads intermediate form (output of parse.sno):
+*   FACT parent 2 a:bob a:ann
+*   QUERY parent 2 a:bob a:ann
+*
+* Emits .lam assembler text:
+*   .atom 1 bob
+*   .atom 2 ann
+*   ...
+*   query:
+*       PUT_CONST A0, atom(bob)
+*       PUT_CONST A1, atom(ann)
+*       CALL parent_c1
+*       HALT
+*   parent_c1:
+*       GET_CONST A0, atom(bob)
+*       GET_CONST A1, atom(ann)
+*       PROCEED
+*
+* Phase 1 limitations:
+*   - Single-clause predicates only (no TRY/TRUST)
+*   - All-atom arguments (no variables, no integers, no compound)
+*   - Hardcoded atom IDs matching the LAM VM's atom table
+*   - Facts and queries only (no rules)
+*
+* ---- Emit fixed atom declarations ----
+*
+       OUTPUT = '.atom 0 nil'
+       OUTPUT = '.atom 1 bob'
+       OUTPUT = '.atom 2 ann'
+       OUTPUT = '.atom 3 joe'
+       OUTPUT = '.atom 4 liz'
+       OUTPUT = '.atom 5 parent'
+       OUTPUT = '.atom 6 ancestor'
+       OUTPUT = '.atom 7 red'
+       OUTPUT = '.atom 8 green'
+       OUTPUT = '.atom 9 blue'
+       OUTPUT = ''
+*
+*      Counter for clause numbering
+       CCNT = 0
+       QUERY = ''
+*
+* ---- Read intermediate form line by line ----
+*
+READ   LINE = RAWINPUT                  :F(EMIT)
+       IDENT(LINE,'')                   :S(READ)
+*
+*      Skip leading whitespace
+RS     LINE LEN(1) . CH                :F(READ)
+       IDENT(CH,' ')                    :F(RS2)
+       LINE ' ' = ''                   :(RS)
+*
+*      Get the form type (FACT, RULE, QUERY)
+RS2    LINE BREAK(' ') . FORM = ''    :F(READ)
+       LINE ' ' = ''
+*
+*      QUERY: save for later emission
+       IDENT(FORM,'QUERY')              :F(F1)
+       QUERY = LINE                    :(READ)
+*
+*      FACT: emit clause now
+F1     IDENT(FORM,'FACT')               :F(READ)
+*      LINE: parent 2 a:bob a:ann
+       LINE BREAK(' ') . FUN = ''     :F(READ)
+       LINE ' ' = ''
+       LINE BREAK(' ') . ARITY = ''   :F(READ)
+       LINE ' ' = ''
+*
+*      Generate clause label (use only 1st clause for now)
+       CCNT = CCNT + 1
+       OUTPUT = ''
+       OUTPUT = FUN '_c' CCNT ':'
+*
+*      Emit GET_CONST for each arg
+       REGN = 0
+GLOOP  IDENT(LINE,'')                   :S(GFIN)
+*      Strip leading space (anchored via LEN(1) peek)
+       LINE LEN(1) . CH                :F(GFIN)
+       IDENT(CH,' ')                    :F(GLOOP2)
+       LINE LEN(1) = ''                :(GLOOP)
+GLOOP2 IDENT(LINE,'')                   :S(GFIN)
+*      Each arg is "a:name" or "v:Name" or "i:N"
+       LINE BREAK(' ') . ARG = ''     :F(GLAST)
+       :(GEMIT)
+GLAST  LINE REM . ARG = ''
+*      Strip the "a:" prefix
+GEMIT  ARG 'a:' = ''                   :F(GSKIP)
+       OUTPUT = '    GET_CONST A' REGN ', atom(' ARG ')'
+       REGN = REGN + 1                :(GLOOP)
+GSKIP  OUTPUT = '    ; skipping ' ARG  :(GLOOP)
+GFIN   OUTPUT = '    PROCEED'
+       :(READ)
+*
+* ---- Emit query at the end ----
+*
+EMIT   IDENT(QUERY,'')                  :S(DONE)
+       OUTPUT = ''
+       OUTPUT = 'query:'
+*      QUERY has: parent 2 a:bob a:ann
+       Q = QUERY
+       Q BREAK(' ') . QFUN = ''      :F(DONE)
+       Q ' ' = ''
+       Q BREAK(' ') . QAR = ''       :F(DONE)
+       Q ' ' = ''
+       REGN = 0
+QLOOP  IDENT(Q,'')                      :S(QFIN)
+       Q LEN(1) . CH                   :F(QFIN)
+       IDENT(CH,' ')                    :F(QLOOP2)
+       Q LEN(1) = ''                   :(QLOOP)
+QLOOP2 IDENT(Q,'')                      :S(QFIN)
+       Q BREAK(' ') . ARG = ''        :F(QLAST)
+       :(QEMIT)
+QLAST  Q REM . ARG = ''
+QEMIT  ARG 'a:' = ''                   :F(QSKIP)
+       OUTPUT = '    PUT_CONST A' REGN ', atom(' ARG ')'
+       REGN = REGN + 1                :(QLOOP)
+QSKIP  OUTPUT = '    ; skipping ' ARG  :(QLOOP)
+QFIN   OUTPUT = '    CALL ' QFUN '_c1'
+       OUTPUT = '    HALT'
+*
+DONE
+END
