@@ -1,16 +1,12 @@
-REVISED: Prolog compiler in SNOBOL4 (not Python).
+Extend the SNOBOL4 Prolog compiler to handle rules, variables, multi-clause predicates, and compound terms. Goal: compile the full ancestor/2 example and run it on the LAM VM.
 
-Phase 1 (steps 1-2): DONE — modular build + COR24 execution.
+Builds on vm-to-prolog: codegen.sno handles facts+queries with atom args only. Need to add variable handling, multi-clause TRY/RETRY/TRUST, rule compilation (head match + body goals), integer args, and eventually structures/lists.
 
-Phase 2 (steps 3-7): Prolog-to-LAM compiler in SNOBOL4 on COR24.
-SNOBOL4 excels at pattern matching and text transformation —
-ideal for parsing Prolog source and emitting LAM bytecode.
-
-Revised steps:
-3. plg-tokenizer — SNOBOL4 program: tokenize .pl source into atoms (lowercase), variables (uppercase/underscore), integers, punctuation (. , ( ) :- ?-).
-4. plg-parser — SNOBOL4: parse token stream into clause representation (facts, rules, queries).
-5. plg-codegen — SNOBOL4: compile clauses to .lam bytecode text (labels, opcodes, register allocation).
-6. plg-ancestor — End-to-end: ancestor.pl -> SNOBOL4 compiler -> .lam output -> verify.
-7. plg-run — Load compiled bytecode into LAM VM and run on COR24. Full pipeline on-target.
-
-Language policy: PL/SW + SNOBOL4 + COR24 assembly only. No Python/Rust/C.
+Steps:
+1. codegen-vars — Handle v:X variables in facts and queries. First occurrence uses PUT_VAR/GET_VAR; subsequent uses PUT_VAL/GET_VAL.
+2. codegen-multi — Multi-clause predicates: first clause TRY, middle RETRY, last TRUST. Emit clause-dispatch wrapper.
+3. codegen-rules — RULE clauses: head unification (GET_CONST/GET_VAR), body goals (PUT_CONST/PUT_VAL, CALL/EXECUTE), tail call for last goal.
+4. codegen-ints — i:N integer args: PUT_CONST int(N), GET_CONST int(N).
+5. codegen-y-regs — Non-tail rules: ALLOCATE n, GET_Y_VAR/PUT_Y_VAL for variables surviving CALL.
+6. ancestor-compiled — Compile full ancestor.pl (parent facts + 2 ancestor rules + query) end-to-end. Verify runs on LAM VM with correct answer.
+7. replace-asm — Rewrite lam_asm.py in SNOBOL4 (or PL/SW) to remove Python dependency. Per CLAUDE.md language policy.

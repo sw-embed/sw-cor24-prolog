@@ -1,0 +1,1 @@
+Closed the loop: Prolog source -> SNOBOL4 compilation -> LAM VM execution. Fixed codegen.sno to emit EXECUTE query as first instruction (PC=0 entry point). Added LOAD_PARENT_COMPILED to vm_tests.plsw with the exact bytecode output of compile-pl.sh on parent.pl. Test 16 runs the compiled program via the existing VM dispatch. Bytecode encoding verified via lam_asm.py hex output.

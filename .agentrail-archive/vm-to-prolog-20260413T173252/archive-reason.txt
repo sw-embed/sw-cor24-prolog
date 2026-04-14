@@ -1,0 +1,1 @@
+vm-to-prolog complete: modular build, COR24 execution, SNOBOL4 Prolog compiler (tokenize/parse/codegen), end-to-end compilation of parent.pl. Dogfooded 3 SNOBOL4 issues (#8 RAWINPUT, #9 replacement, #10 literal match) and 2 PL/SW issues (#42 static init, #43 label mangling).
