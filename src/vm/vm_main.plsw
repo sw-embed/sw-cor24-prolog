@@ -378,6 +378,7 @@ DCL M_TESTC(20) CHAR INIT('--- ancestor X  ---');
 DCL M_TESTD(20) CHAR INIT('--- retry 3cls  ---');
 DCL M_TESTE(20) CHAR INIT('--- arithmetic  ---');
 DCL M_TESTF(20) CHAR INIT('--- cut         ---');
+DCL M_TESTG(24) CHAR INIT('--- compiled parent ---');
 DCL M_BP(5) CHAR    INIT(' BP=');
 DCL M_TR(5) CHAR    INIT(' TR=');
 DCL M_A0(5) CHAR    INIT(' A0=');
@@ -612,6 +613,17 @@ MAIN: PROC;
     CALL UART_PUTCHAR(10);
     CALL VM_INIT;
     CALL LOAD_CUT_TEST;
+    CALL VM_RUN;
+    CALL UART_PUTCHAR(10);
+
+    /* Test 16: Compiled Prolog program (parent.pl)
+     * Bytecode produced by src/prolog/codegen.sno.
+     * PC=0 is EXECUTE query, jumps to query setup.
+     */
+    CALL UART_PUTS(ADDR(M_TESTG));
+    CALL UART_PUTCHAR(10);
+    CALL VM_INIT;
+    CALL LOAD_PARENT_COMPILED;
     CALL VM_RUN;
     CALL UART_PUTCHAR(10);
 END;

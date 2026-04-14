@@ -1,10 +1,11 @@
 number = 6
 slug = "plg-ancestor"
-status = "in-progress"
+status = "completed"
 description = """
 End-to-end test: compile ancestor.pl through the full pipeline
 and verify the..."""
 role = "legacy"
 context_files = []
 created_at = "2026-04-13T17:19:51"
-commits = []
+completed_at = "2026-04-13T17:27:52"
+commits = ["d5a3760c36319beb4787d435574a4386ade878b1"]

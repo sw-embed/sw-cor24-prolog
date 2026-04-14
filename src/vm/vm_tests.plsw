@@ -568,5 +568,61 @@ LOAD_CUT_TEST: PROC;
     MEM(27) = OP_PROCEED * OP_MULT;
 END;
 
+/* --------------------------------------------------------
+ * Test 16: Prolog-compiled parent.pl
+ *
+ * This is the EXACT bytecode output of compile-pl.sh on
+ * examples/ancestor/parent.pl. Demonstrates end-to-end
+ * pipeline: Prolog source -> SNOBOL4 compiler -> LAM VM.
+ *
+ * Source:
+ *   parent(bob, ann).
+ *   parent(ann, liz).
+ *   ?- parent(bob, ann).
+ *
+ * Layout (matches compile-pl.sh output):
+ *   0-1: GET_CONST A0, atom(bob)    parent_c1
+ *   2-3: GET_CONST A1, atom(ann)
+ *   4:   PROCEED
+ *   5-6: GET_CONST A0, atom(ann)    parent_c2
+ *   7-8: GET_CONST A1, atom(liz)
+ *   9:   PROCEED
+ *   10-11: PUT_CONST A0, atom(bob)  query
+ *   12-13: PUT_CONST A1, atom(ann)
+ *   14-15: CALL 0                   (parent_c1)
+ *   16:  HALT
+ *
+ * Expected: query matches parent_c1 directly. HALT.
+ * -------------------------------------------------------- */
+
+LOAD_PARENT_COMPILED: PROC;
+    /* EXECUTE query at PC=0 (entry point) */
+    MEM(0)  = OP_EXECUTE * OP_MULT;                    /* 0x030000 */
+    MEM(1)  = 12;                                       /* target: query at 12 */
+
+    /* parent_c1: parent(bob, ann) */
+    MEM(2)  = OP_GET_CONST * OP_MULT;
+    MEM(3)  = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(4)  = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(5)  = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
+    MEM(6)  = OP_PROCEED * OP_MULT;
+
+    /* parent_c2: parent(ann, liz) */
+    MEM(7)  = OP_GET_CONST * OP_MULT;
+    MEM(8)  = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
+    MEM(9)  = OP_GET_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(10) = TAG_ATOM * TAG_MULT + 4;                 /* atom(liz) */
+    MEM(11) = OP_PROCEED * OP_MULT;
+
+    /* query at 12: parent(bob, ann) */
+    MEM(12) = OP_PUT_CONST * OP_MULT;
+    MEM(13) = TAG_ATOM * TAG_MULT + 1;                 /* atom(bob) */
+    MEM(14) = OP_PUT_CONST * OP_MULT + REG_A1 * OP1_MULT;
+    MEM(15) = TAG_ATOM * TAG_MULT + 2;                 /* atom(ann) */
+    MEM(16) = OP_CALL * OP_MULT;
+    MEM(17) = 2;                                        /* parent_c1 at 2 */
+    MEM(18) = OP_HALT * OP_MULT;
+END;
+
 MAIN: PROC;
 END;

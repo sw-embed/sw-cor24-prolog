@@ -1,0 +1,8 @@
+number = 7
+slug = "plg-query"
+status = "in-progress"
+description = "Run the compiled bytecode through the LAM VM on COR24. Options: (a) load hex ..."
+role = "legacy"
+context_files = []
+created_at = "2026-04-13T17:27:52"
+commits = []

@@ -1,0 +1,1 @@
+End-to-end Prolog->LAM compilation working via SNOBOL4 on COR24. compile-pl.sh orchestrates parse.sno + codegen.sno pipeline. Verified on parent.pl: 2 facts + 1 query compile to valid .lam text that lam_asm.py assembles to correct hex bytecode (GET_CONST/PUT_CONST/CALL/PROCEED/HALT). Committed parent.lam as the first compiled example.

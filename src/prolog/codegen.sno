@@ -38,6 +38,10 @@
        OUTPUT = '.atom 9 blue'
        OUTPUT = ''
 *
+*      Emit jump-to-query as first instruction so PC=0 works
+       OUTPUT = '    EXECUTE query'
+       OUTPUT = ''
+*
 *      Counter for clause numbering
        CCNT = 0
        QUERY = ''

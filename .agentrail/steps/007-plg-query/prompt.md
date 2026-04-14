@@ -1,0 +1,1 @@
+Run the compiled bytecode through the LAM VM on COR24. Options: (a) load hex bytecodes into VM's code area via cor24-run --patch, call VM_RUN and verify output; (b) extend LAM VM with a bytecode loader that reads from a known memory address. Goal: first real Prolog execution — a query compiled from .pl source runs on the VM and produces the expected answer.

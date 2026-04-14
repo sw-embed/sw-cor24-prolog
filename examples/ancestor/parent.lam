@@ -9,6 +9,8 @@
 .atom 8 green
 .atom 9 blue
 
+    EXECUTE query
+
 
 parent_c1:
     GET_CONST A0, atom(bob)
